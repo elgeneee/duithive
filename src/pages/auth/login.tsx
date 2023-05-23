@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email().min(5),
@@ -37,9 +40,25 @@ const Login: NextPage = () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     resolver: zodResolver(loginSchema),
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
-  const onSubmit = (data: LoginSchema) => {
-    console.log(data);
+  const onSubmit = async (data: LoginSchema) => {
+    setLoading(true);
+    const signInRes = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (signInRes?.ok) {
+      window.location.replace("/");
+    } else {
+      toast({
+        description: signInRes?.error || "An error occurred",
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -108,13 +127,25 @@ const Login: NextPage = () => {
               <div className="flex justify-end">
                 <Link
                   className="text-right text-xs text-violet-500"
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                 >
                   Forgot Password
                 </Link>
               </div>
 
-              <Button type="submit">Log In</Button>
+              <Button
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    color="#803FE8"
+                  />
+                ) : (
+                  <span>Log In</span>
+                )}
+              </Button>
             </form>
 
             <div className="my-4 flex items-center gap-4">
@@ -125,7 +156,7 @@ const Login: NextPage = () => {
             <Button
               variant={"google"}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={async() => await signIn("google", { callbackUrl: "/" })}
+              onClick={async () => await signIn("google", { callbackUrl: "/" })}
               className="text-xs font-medium text-athens-gray-900"
             >
               <Image
@@ -141,7 +172,7 @@ const Login: NextPage = () => {
               Don&rsquo;t have an account?
               <Link
                 className="whitespace-pre text-xs text-violet-500"
-                href="/signup"
+                href="/auth/signup"
               >
                 &nbsp;Create Now
               </Link>

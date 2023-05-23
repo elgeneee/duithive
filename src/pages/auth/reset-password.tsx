@@ -1,21 +1,20 @@
+
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/router";
+import { Loader2 } from "lucide-react";
 
-const signupSchema = z
+const resetPasswordSchema = z
   .object({
-    email: z.string().trim().email().min(5),
-    username: z
-      .string()
-      .trim()
-      .min(5, { message: "Username must be at least 5 characters" }),
     password: z
       .string()
       .trim()
@@ -52,45 +51,51 @@ const signupSchema = z
     message: "Passwords do not match",
   });
 
-type SignUpSchema = z.infer<typeof signupSchema>;
+type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 
-const SignUp: NextPage = () => {
+const ResetPassword: NextPage = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpSchema>({
+  } = useForm<ResetPasswordSchema>({
     // @typescript-eslint/no-unsafe-assignment
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    resolver: zodResolver(signupSchema),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    resolver: zodResolver(resetPasswordSchema),
   });
+  const router = useRouter();
+  const { token } = router.query;
+  const { toast } = useToast();
 
-  const onSubmit = (data: SignUpSchema) => {
-    registerUser(data);
+
+  const { mutate: resetPassword, isLoading: loading } =
+    api.auth.resetPassword.useMutation({
+      onSuccess: async() => {
+        await router.push('/auth/login');
+      },
+      onError: (e) => {
+        const errorMessage = e.data?.zodError?.fieldErrors.content;
+        if (errorMessage && errorMessage[0]) {
+          toast({
+            description: errorMessage[0],
+          })
+        } else {
+          toast({
+            description: e.data?.code as string || "An error occurred"
+          });
+        }
+      },
+    });
+
+  const onSubmit = (data: ResetPasswordSchema) => {
+    resetPassword({ token: token as string, ...data})
   };
 
-  const { mutate:registerUser, isLoading } = api.auth.register.useMutation({
-    onSuccess: () => {
-      // setInput("");
-      // void ctx.posts.getAll.invalidate();
-    },
-    onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
-
-      if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
-      } else {
-        // toast.error("Failed to create! Please try again later.");
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === " ") {
+        event.preventDefault();
       }
-    },
-  });
-
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === " ") {
-      event.preventDefault();
-    }
-  };
+    };
 
   return (
     <>
@@ -116,45 +121,13 @@ const SignUp: NextPage = () => {
               <span className="text-violet-600">Duit</span>Hive
             </div>
             <h2 className="my-4 font-display text-2xl font-semibold tracking-wide">
-              Sign Up
+              Reset Password
             </h2>
-            <p className="mb-4 font-satoshi text-lg font-semibold">
-              Create an account
-            </p>
             <form
               className="flex flex-col gap-4"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div>
-                <label htmlFor="email" className="text-sm">
-                  Email
-                </label>
-                <Input
-                  className="mt-2"
-                  {...register("email", { required: true })}
-                />
-                {errors.email && (
-                  <span className="text-xxs text-red-500">
-                    {errors.email.message}
-                  </span>
-                )}
-              </div>
-              <div>
-                <label htmlFor="username" className="text-sm">
-                  Username
-                </label>
-                <Input
-                  type="username"
-                  className="mt-2"
-                  {...register("username", { required: true })}
-                />
-                {errors.username && (
-                  <span className="text-xxs text-red-500">
-                    {errors.username.message}
-                  </span>
-                )}
-              </div>
               <div>
                 <label htmlFor="password" className="text-sm">
                   Password
@@ -171,6 +144,7 @@ const SignUp: NextPage = () => {
                   </span>
                 )}
               </div>
+
               <div>
                 <label htmlFor="password" className="text-sm">
                   Confirm Password
@@ -187,36 +161,24 @@ const SignUp: NextPage = () => {
                   </span>
                 )}
               </div>
-              <Button type="submit" className="mt-6">
-                {isLoading? "Loading" : "Create Account"}
+              <Button type="submit" disabled={loading} className="mt-10">
+                {loading ? (
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    color="#803FE8"
+                  />
+                ) : (
+                  <span>Reset Password</span>
+                )}
               </Button>
             </form>
-
-            <div className="my-4 flex items-center gap-4">
-              <hr className="flex-grow border-athens-gray-100" />
-              <span className="text-xs">sign up or</span>
-              <hr className="flex-grow border-athens-gray-100" />
-            </div>
-            <Button
-              variant={"google"}
-              className="text-xs font-medium text-athens-gray-900"
-            >
-              <Image
-                height={4}
-                width={4}
-                className="mr-3 h-4 w-4"
-                alt="Google Button"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"
-              />
-              Continue With Google
-            </Button>
             <p className="mt-8 whitespace-pre text-center text-xs font-medium">
               Have an account?
               <Link
                 className="whitespace-pre text-xs text-violet-500"
-                href="/login"
+                href="/auth/signup"
               >
-                &nbsp;Log in
+                &nbsp;Login
               </Link>
             </p>
           </div>
@@ -226,4 +188,4 @@ const SignUp: NextPage = () => {
   );
 };
 
-export default SignUp;
+export default ResetPassword;

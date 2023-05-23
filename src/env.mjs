@@ -21,8 +21,11 @@ export const env = createEnv({
       process.env.VERCEL ? z.string().min(1) : z.string().url()
     ),
     // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    NODEMAILER_EMAIL: z.string().email(),
+    NODEMAILER_PASSWORD: z.string(),
+    TEST: z.string().min(1),
   },
 
   /**
@@ -45,5 +48,8 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    NODEMAILER_EMAIL: process.env.NODEMAILER_EMAIL,
+    NODEMAILER_PASSWORD: process.env.NODEMAILER_PASSWORD,
+    TEST: process.env.TEST,
   },
 });

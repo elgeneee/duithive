@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { type NextPage } from "next";
 import Head from "next/head";
 import { getSession } from "next-auth/react";
 import SideNav from "@/components/SideNav";
 // import { api } from "@/utils/api";
 
-const Dashboard: NextPage = () => {
+const Home: NextPage = () => {
   // const { data: session, status } = useSession();
-
   return (
     <>
       <Head>
@@ -21,9 +21,48 @@ const Dashboard: NextPage = () => {
         {/* Main content */}
         <div className="flex-1">
           {/* Top bar navigation */}
-          <nav className="border-indigo-60 flex h-16 items-center justify-end border-b border-[#E9EBEF] px-4">
+          <nav className="flex h-16 items-center justify-between bg-gray-800 px-4">
+            {/* Logo */}
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="hidden h-8 w-auto lg:block"
+                src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg"
+                alt="Workflow"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="h-8 w-auto lg:hidden"
+                src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
+                alt="Workflow"
+              />
+            </div>
             {/* Links */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex space-x-4">
+              <a
+                href="#"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+              >
+                Dashboard
+              </a>
+              <a
+                href="#"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+              >
+                Orders
+              </a>
+              <a
+                href="#"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+              >
+                Customers
+              </a>
+              <a
+                href="#"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+              >
+                Reports
+              </a>
               <a
                 href="#"
                 className="rounded-md px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
@@ -44,7 +83,7 @@ const Dashboard: NextPage = () => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getServerSideProps(context: any){
+export async function getServerSideProps(context: any) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const session = await getSession(context);
   if (!session) {
@@ -61,7 +100,7 @@ export async function getServerSideProps(context: any){
   };
 }
 
-export default Dashboard;
+export default Home;
 
 // const AuthShowcase: React.FC = () => {
 //   const { data: sessionData } = useSession();
