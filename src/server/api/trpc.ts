@@ -16,7 +16,6 @@
  */
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
-
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 
@@ -111,6 +110,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  console.log(ctx.session)
   return next({
     ctx: {
       // infers the `session` as non-nullable

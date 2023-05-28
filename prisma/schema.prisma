@@ -58,6 +58,33 @@ model User {
     updatedAt     DateTime  @updatedAt
     otp           String    @db.Text
     verified      Boolean   @default(false)
+    currency      Currency? @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+    currencyId    Int       @default(1)
+    expense       Expense[]
+
+    @@index([currencyId])
+}
+
+model Expense {
+    id String @id @default(uuid())
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId Int
+
+    // category        String   @db.Text
+
+    description     String   @db.Text
+    amount          Decimal  @db.Decimal(20, 2)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+    imgUrl          String?
+    transactionDate DateTime
+
+    @@index([userId])
+    @@index([categoryId])
 }
 
 model VerificationToken {
@@ -66,4 +93,33 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Currency {
+    id     Int    @id @default(autoincrement())
+    name   String @unique @db.VarChar(5)
+    symbol String @db.VarChar(5)
+    users  User[]
+}
+
+enum CurrencyType {
+    MYR
+    USD
+    THAI
+    JPY
+    SGD
+    GBP
+    INR
+    RUB
+    KRW
+    BTC
+    THB
+    VND
+}
+
+model Category {
+    id      Int       @id @default(autoincrement())
+    name    String?
+    iconId  Int
+    expense Expense[]
 }

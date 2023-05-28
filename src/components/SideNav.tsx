@@ -98,16 +98,16 @@ function SideNav() {
   };
 
   return (
-    <aside className="w-52 border-r border-[#E9EBEF] px-8 pt-10">
+    <aside className="relative inset-y-0 left-0 flex w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] pt-10">
       <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" className="w-16 pr-4" alt="logo" />
         <span className="text-violet-600">Duit</span>Hive
       </div>
-      <div className="relative flex h-auto flex-col">
+      <div className="flex flex-1 flex-col p-4">
         {/* Sidebar content */}
         <nav className="mt-10">
-          <div className="space-y-4">
+          <div className="flex-1 space-y-4">
             {navigationOptions.map((option) => (
               <button
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises, @typescript-eslint/no-unsafe-return
@@ -126,9 +126,12 @@ function SideNav() {
             ))}
           </div>
         </nav>
+      </div>
+      {/* Sign out button */}
+      <div className="absolute bottom-0 z-10 mx-auto flex h-16 w-full flex-col items-center justify-center border-t border-athens-gray-100 bg-white px-4 py-2 text-center">
         <button
           onClick={() => void signOut()}
-          className="absolute bottom-0 flex w-full items-center justify-start rounded-sm bg-athens-gray-100 py-2 pl-2 font-satoshi font-medium text-[#A0A5AF]"
+          className="mx-auto my-2 flex w-full items-center justify-center rounded-sm bg-white py-2 text-center font-satoshi font-medium text-[#A0A5AF] hover:bg-athens-gray-100"
         >
           <LogOut color={"#A0A5AF"} size={20} />
           <p className="ml-4">Sign Out</p>

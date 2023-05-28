@@ -17,19 +17,15 @@ import bcrypt from "bcrypt";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+
+export type ISODateString = string;
+
 declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
+  interface Session {
+    user?: {
       id: string;
-      // ...other properties
-      // role: UserRole;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -47,6 +43,18 @@ export const authOptions: NextAuthOptions = {
   //     },
   //   }),
   // },
+  callbacks: {
+    session:  ({ session, user }) => {
+      // If a user is authenticated, add the user ID to the session
+      if (user) {
+        session.user = {
+          ...session.user,
+          id: user.id,
+        };
+      }
+      return session;
+    },
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -70,25 +78,24 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        if (!user || !user?.password) {
-          throw new Error("Invalid credentials");
-        }
+        if (!user || !user?.password) throw new Error("Invalid credentials");
+
+        if (!user.verified) throw new Error("Email not verified");
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
           user?.password
         );
 
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
-        }
+        if (!isCorrectPassword) throw new Error("Invalid credentials");
+
         return user;
       },
     }),
   ],
   pages: {
     signIn: "/auth/login",
-    error: "/auth/error",
+    // error: "/auth/error",
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true,
