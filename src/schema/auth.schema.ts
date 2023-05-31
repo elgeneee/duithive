@@ -47,7 +47,9 @@ export const userSchema = z
     message: "Passwords do not match",
   });
 
-export const forgotPasswordSchema = z.object({ email: z.string().email().min(5) });
+export const forgotPasswordSchema = z.object({
+  email: z.string().email().min(5),
+});
 
 export const resetPasswordSchema = z
   .object({
@@ -88,8 +90,7 @@ export const resetPasswordSchema = z
     message: "Passwords do not match",
   });
 
-
 export const verifyEmailSchema = z.object({
   email: z.string().trim().email().min(5),
-  otp: z.string().length(4)
+  otp: z.string().length(4),
 });

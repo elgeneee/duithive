@@ -57,22 +57,23 @@ const VerifyAccount: NextPage = () => {
     inputRef.current?.focus();
   }, [activeOTPIndex]);
 
-  const { mutate: verifyEmail, isLoading: loading } = api.auth.verifyEmail.useMutation({
-    onSuccess: async () => {
-      // setInput("");
-      // void ctx.posts.getAll.invalidate();
-      await router.push("/auth/login");
-    },
-    onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
+  const { mutate: verifyEmail, isLoading: loading } =
+    api.auth.verifyEmail.useMutation({
+      onSuccess: async () => {
+        // setInput("");
+        // void ctx.posts.getAll.invalidate();
+        await router.push("/auth/login");
+      },
+      onError: (e) => {
+        const errorMessage = e.data?.zodError?.fieldErrors.content;
 
-      if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
-      } else {
-        // toast.error("Failed to create! Please try again later.");
-      }
-    },
-  });
+        if (errorMessage && errorMessage[0]) {
+          // toast.error(errorMessage[0]);
+        } else {
+          // toast.error("Failed to create! Please try again later.");
+        }
+      },
+    });
 
   return (
     <>

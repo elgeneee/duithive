@@ -93,7 +93,7 @@ const ForgotPassword: NextPage = () => {
                   alt="Email Sent"
                   src="/auth/email-sent.png"
                 />
-                <p className="mt-3 font-satoshi text-sm text-center">
+                <p className="mt-3 text-center font-satoshi text-sm">
                   An email has been sent to{" "}
                   <span className="font-medium">{watch("email")}</span>
                 </p>

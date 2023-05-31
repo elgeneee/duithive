@@ -4,10 +4,7 @@ import {
   forgotPasswordSchema,
   verifyEmailSchema,
 } from "@/schema/auth.schema";
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
@@ -54,7 +51,7 @@ export const authRouter = createTRPCRouter({
 
       try {
         const info = await transporter.sendMail(options);
-        return {user, ...info};
+        return { user, ...info };
       } catch (err) {
         if (typeof err === "string") {
           throw new Error(err);

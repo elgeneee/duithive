@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
   //   }),
   // },
   callbacks: {
-    session:  ({ session, user }) => {
+    session: ({ session, user }) => {
       // If a user is authenticated, add the user ID to the session
       if (user) {
         session.user = {

@@ -6,8 +6,6 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-
-
 function AppLayout({ children }: AppLayoutProps) {
   return (
     <>
@@ -21,9 +19,7 @@ function AppLayout({ children }: AppLayoutProps) {
         {/* Main content */}
         <div className="flex-1">
           <Navbar />
-          <>
-          {children}
-          </>
+          <>{children}</>
         </div>
       </div>
     </>

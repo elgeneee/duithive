@@ -72,23 +72,27 @@ const SignUp: NextPage = () => {
     registerUser(data);
   };
 
-  const { mutate: registerUser, isLoading: loading } = api.auth.register.useMutation({
-    onSuccess: async (data) => {
-      await router.push(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        `/auth/verify-account?email=${data.user.email!.replaceAll("@", "%40")}`
-      );
-    },
-    onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
+  const { mutate: registerUser, isLoading: loading } =
+    api.auth.register.useMutation({
+      onSuccess: async (data) => {
+        await router.push(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          `/auth/verify-account?email=${data.user.email!.replaceAll(
+            "@",
+            "%40"
+          )}`
+        );
+      },
+      onError: (e) => {
+        const errorMessage = e.data?.zodError?.fieldErrors.content;
 
-      if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
-      } else {
-        // toast.error("Failed to create! Please try again later.");
-      }
-    },
-  });
+        if (errorMessage && errorMessage[0]) {
+          // toast.error(errorMessage[0]);
+        } else {
+          // toast.error("Failed to create! Please try again later.");
+        }
+      },
+    });
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === " ") {

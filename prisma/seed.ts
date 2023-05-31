@@ -69,7 +69,7 @@ async function main() {
       iconId: 4,
     },
   });
-  console.log(existingCategory)
+  console.log(existingCategory);
 
   // await prisma.expense.deleteMany({});
 }

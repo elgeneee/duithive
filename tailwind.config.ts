@@ -69,7 +69,7 @@ export default {
         },
       },
       fontSize: {
-        xxs: '0.625rem',
+        xxs: "0.625rem",
       },
       borderRadius: {
         lg: `var(--radius)`,

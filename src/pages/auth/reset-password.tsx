@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { type NextPage } from "next";
 import Head from "next/head";
@@ -67,35 +66,34 @@ const ResetPassword: NextPage = () => {
   const { token } = router.query;
   const { toast } = useToast();
 
-
   const { mutate: resetPassword, isLoading: loading } =
     api.auth.resetPassword.useMutation({
-      onSuccess: async() => {
-        await router.push('/auth/login');
+      onSuccess: async () => {
+        await router.push("/auth/login");
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
         if (errorMessage && errorMessage[0]) {
           toast({
             description: errorMessage[0],
-          })
+          });
         } else {
           toast({
-            description: e.data?.code as string || "An error occurred"
+            description: (e.data?.code as string) || "An error occurred",
           });
         }
       },
     });
 
   const onSubmit = (data: ResetPasswordSchema) => {
-    resetPassword({ token: token as string, ...data})
+    resetPassword({ token: token as string, ...data });
   };
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === " ") {
-        event.preventDefault();
-      }
-    };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === " ") {
+      event.preventDefault();
+    }
+  };
 
   return (
     <>
