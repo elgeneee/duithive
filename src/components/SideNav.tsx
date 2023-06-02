@@ -98,13 +98,13 @@ function SideNav() {
   };
 
   return (
-    <aside className="relative inset-y-0 left-0 flex w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] pt-10">
+    <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear lg:static lg:flex lg:translate-x-0">
       <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" className="w-16 pr-4" alt="logo" />
         <span className="text-violet-600">Duit</span>Hive
       </div>
-      <div className="flex flex-1 flex-col p-4">
+      <div className="no-scrollbar flex flex-col overflow-y-auto p-4 text-white duration-300 ease-linear">
         {/* Sidebar content */}
         <nav className="mt-10">
           <div className="flex-1 space-y-4">

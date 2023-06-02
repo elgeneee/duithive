@@ -61,6 +61,8 @@ model User {
     currency      Currency? @relation(fields: [currencyId], references: [id], onDelete: Cascade)
     currencyId    Int       @default(1)
     expense       Expense[]
+    income        Income[]
+    Budget        Budget[]
 
     @@index([currencyId])
 }
@@ -74,8 +76,6 @@ model Expense {
     category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     categoryId Int
 
-    // category        String   @db.Text
-
     description     String   @db.Text
     amount          Decimal  @db.Decimal(20, 2)
     createdAt       DateTime @default(now())
@@ -85,6 +85,33 @@ model Expense {
 
     @@index([userId])
     @@index([categoryId])
+}
+
+model Income {
+    id String @id @default(uuid())
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+
+    title           String   @db.Text
+    description     String   @db.Text
+    amount          Decimal  @db.Decimal(20, 2)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+    transactionDate DateTime
+
+    @@index([userId])
+}
+
+model Budget {
+    id        String   @id @default(uuid())
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    endDate   DateTime
+
+    @@index([userId])
 }
 
 model VerificationToken {

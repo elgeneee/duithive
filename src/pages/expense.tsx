@@ -1,5 +1,5 @@
 import { type NextPage } from "next";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import AppLayout from "@/components/AppLayout";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -83,6 +83,8 @@ const editExpenseSchema = z.object({
 });
 
 const Expense: NextPage = () => {
+  const { data: session } = useSession();
+
   const {
     register,
     reset,
@@ -145,7 +147,7 @@ const Expense: NextPage = () => {
   // const { data: expenses, isLoading } = api.expense.getAll.useQuery();
 
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
-    email: "s2031883@siswa.um.edu.my",
+    email: session?.user?.email as string,
   });
 
   const { mutate: deleteExpense } = api.expense.deleteExpense.useMutation({
