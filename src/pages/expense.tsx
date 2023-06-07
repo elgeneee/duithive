@@ -39,6 +39,7 @@ import {
   Loader2,
   Plus,
   CalendarIcon,
+  UploadCloud,
 } from "lucide-react";
 import { icons, categories } from "@/store/category";
 import { useForm } from "react-hook-form";
@@ -141,6 +142,16 @@ const Expense: NextPage = () => {
   const [editDispValue, setEditDispValue] = useState<string>("");
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
+  //drag-and-drop image
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const [data, setData] = useState<{
+    email: string | null;
+    file: null | File;
+  }>({ email: null, file: null });
+  const [imageName, setImageName] = useState<string>("");
+
+  const [fileSizeTooBig, setFileSizeTooBig] = useState<boolean>(false);
+  const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
   const ctx = api.useContext();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -208,6 +219,72 @@ const Expense: NextPage = () => {
       },
     });
 
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    setFileSizeTooBig(false);
+    setFileIsNotImage(false);
+    setData((prev) => ({ ...prev, file: null }));
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    const validImageType = ["image/jpeg", "image/png"];
+    if (file) {
+      if (file.size / 1024 / 1024 > 5) {
+        setFileSizeTooBig(true);
+      } else if (!validImageType.includes(file.type)) {
+        setFileIsNotImage(true);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setData((prev) => ({ ...prev, file: file }));
+          setImageName(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const deleteImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setData((prev) => ({ ...prev, file: null }));
+    // setImageName(null);
+  };
+
+  const onChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileSizeTooBig(false);
+    setFileIsNotImage(false);
+    setData((prev) => ({ ...prev, file: null }));
+    const validImageType = ["image/jpeg", "image/png"];
+    const file = e.currentTarget.files && e.currentTarget.files[0];
+    if (file) {
+      if (file.size / 1024 / 1024 > 5) {
+        setFileSizeTooBig(true);
+      } else if (!validImageType.includes(file.type)) {
+        setFileIsNotImage(true);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setData((prev) => ({ ...prev, file: file }));
+          setImageName(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDispValue(e.target.value);
   };
@@ -248,6 +325,88 @@ const Expense: NextPage = () => {
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onSubmit={handleSubmit(onSubmit)}
               >
+                {/* drag-and-drop */}
+                <label className="text-sm">Receipt / Bill</label>
+
+                <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+                  <label
+                    htmlFor="image-upload"
+                    className={cn(
+                      "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed  transition duration-100 hover:border-athens-gray-300",
+                      dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
+                    )}
+                  >
+                    {data.file && (
+                      <button
+                        type="button"
+                        onClick={deleteImage}
+                        // disabled={loading || processingStatus === "succeeded"}
+                        className={cn(
+                          // loading || processingStatus === "succeeded"
+                          //   ? "cursor-not-allowed bg-opacity-30"
+                          //   : "bg-opacity-60 hover:bg-opacity-70",
+                          "absolute right-3 top-3 z-50 rounded-md bg-black p-1 transition"
+                        )}
+                      >
+                        <Trash2 color={"#ffffff"} size={18} />
+                      </button>
+                    )}
+                    {fileSizeTooBig && (
+                      <p className="text-sm text-red-500">
+                        File size too big (less than 5MB)
+                      </p>
+                    )}
+                    {fileIsNotImage && (
+                      <p className="text-sm text-red-500">
+                        File is not an image
+                      </p>
+                    )}
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className="absolute z-40 aspect-video h-full w-full rounded-md border object-cover"
+                    ></div>
+                    <div
+                      className={cn(
+                        "flex flex-col items-center justify-center text-center text-xs transition-all duration-100 group-hover:text-gray-500/70",
+                        dragActive ? "text-gray-500/70" : "text-gray-400",
+                        (data.file || fileSizeTooBig || fileIsNotImage) &&
+                          "hidden"
+                      )}
+                    >
+                      <UploadCloud className="transition duration-100 group-hover:scale-110" />
+                      <p>Drag & drop or click to upload</p>
+                      <p>Accept image files only (Max at 5MB)</p>
+                    </div>
+                    {data.file && (
+                      //eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imageName ? imageName : undefined}
+                        alt="Preview"
+                        className="aspect-video h-full rounded-lg object-contain"
+                      />
+                    )}
+                  </label>
+                  <div className="z-30 mt-1 flex rounded-md shadow-lg">
+                    <input
+                      id="image-upload"
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={onChangeImage}
+                    />
+                  </div>
+                  {/* {prediction?.error && (
+                    <p className="h-4 overflow-hidden text-xs font-medium text-red-500 animate-in fade-in duration-700">
+                      {prediction.error}
+                    </p>
+                  )} */}
+                </div>
+                {/* drag-and-drop */}
+
                 <div>
                   <label className="text-sm">Description</label>
                   <Input

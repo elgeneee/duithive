@@ -7,7 +7,7 @@ function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="z-999 sticky top-0 flex h-16 w-full items-center justify-end border-b border-[#E9EBEF] px-4">
+    <nav className="z-999 sticky top-0 flex h-16 w-full items-center justify-end border-b border-[#E9EBEF] bg-white px-4">
       {/* Links */}
       <div className="flex items-center justify-end space-x-4">
         <Inbox size={25} />
