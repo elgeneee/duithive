@@ -15,7 +15,7 @@ export const expenseSchema = z.object({
     label: z.string(),
     iconId: z.number(),
   }),
-  imgUrl: z.string().optional(),
+  imgUrl: z.string().optional().nullable(),
 });
 
 export const editExpenseSchema = z.object({

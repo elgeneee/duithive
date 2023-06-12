@@ -6,6 +6,7 @@ export default {
     fontFamily: {
       display: ["Clash Display"],
       satoshi: ["Satoshi", "sans-serif"],
+      consola: ["Consola", "monospace"],
     },
     extend: {
       colors: {

@@ -8,7 +8,6 @@ export const incomeRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         //getUserId
-        console.log(input);
         const userId = await ctx.prisma.user.findUnique({
           where: {
             email: ctx.session.user.email as string,
@@ -59,6 +58,9 @@ export const incomeRouter = createTRPCRouter({
             description: true,
             amount: true,
             transactionDate: true,
+          },
+          orderBy: {
+            transactionDate: "desc",
           },
         });
 

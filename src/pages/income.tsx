@@ -303,7 +303,7 @@ const Income: NextPage = () => {
           {incomes?.map((income) => (
             <div
               key={income.id}
-              className="flex items-center justify-between space-x-3 rounded-md bg-athens-gray-50 p-3"
+              className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
             >
               <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
                 <DollarSign size={20} />

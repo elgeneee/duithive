@@ -58,6 +58,7 @@ model User {
     updatedAt     DateTime  @updatedAt
     otp           String    @db.Text
     verified      Boolean   @default(false)
+    notification  Boolean   @default(true)
     currency      Currency? @relation(fields: [currencyId], references: [id], onDelete: Cascade)
     currencyId    Int       @default(1)
     expense       Expense[]

@@ -4,20 +4,19 @@ import {
   LayoutDashboard,
   Banknote,
   FileBarChart2,
-  User,
   Settings,
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useNavStore } from "@/store/navStore";
+import { useSideNavStore } from "@/store/navStore";
 import { clsx } from "clsx";
 import { signOut } from "next-auth/react";
 
 function SideNav() {
   const router = useRouter();
 
-  const currNav = useNavStore((state) => state.currNav);
-  const setCurrNav = useNavStore((state) => state.setCurrNav);
+  const currNav = useSideNavStore((state) => state.currNav);
+  const setCurrNav = useSideNavStore((state) => state.setCurrNav);
   const navigationOptions = [
     {
       name: "Dashboard",
@@ -65,16 +64,6 @@ function SideNav() {
       icon: (
         <FileBarChart2
           color={clsx(currNav == "Report" ? "#FFFFFF" : "#A0A5AF")}
-          size={20}
-        />
-      ),
-    },
-    {
-      name: "Profile",
-      link: "/profile",
-      icon: (
-        <User
-          color={clsx(currNav == "Profile" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),

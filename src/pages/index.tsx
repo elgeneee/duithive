@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type NextPage } from "next";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import AppLayout from "@/components/AppLayout";
 import {
   AreaChart,
@@ -44,7 +44,7 @@ const colors = [
 ];
 
 const Dashboard: NextPage = () => {
-  // const { data: session, status } = useSession();
+  const { data: session } = useSession();
   // const ctx = api.useContext();
 
   //area
@@ -69,7 +69,9 @@ const Dashboard: NextPage = () => {
   });
 
   const { data: dashboardData } = api.dashboard.getAll.useQuery();
-
+  const { data: userCurrency } = api.user.getUserCurrency.useQuery({
+    email: session?.user?.email as string,
+  });
   useEffect(() => {
     if (dashboardData) {
       barChartProcess("week");
@@ -294,7 +296,11 @@ const Dashboard: NextPage = () => {
             <div>
               <p className="font-semibold text-[#A0A5AF]">Income</p>
               <p className="text-lg font-semibold">
-                +$ {incomeTotal.toFixed(2)}
+                +{userCurrency?.symbol}{" "}
+                {incomeTotal.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2,
+                })}
               </p>
             </div>
           </div>
@@ -323,7 +329,11 @@ const Dashboard: NextPage = () => {
             <div>
               <p className="font-semibold text-[#A0A5AF]">Expense</p>
               <p className="text-lg font-semibold">
-                +$ {expenseTotal.toFixed(2)}
+                -${userCurrency?.symbol}{" "}
+                {expenseTotal.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2,
+                })}
               </p>
             </div>
           </div>
@@ -422,7 +432,10 @@ const Dashboard: NextPage = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-xl font-bold">${pieTotal.toFixed(2)}</p>
+                <p className="text-xl font-bold">
+                  {userCurrency?.symbol}
+                  {pieTotal.toFixed(2)}
+                </p>
                 <Select onValueChange={(value) => pieChartProcess(value)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="This week" />

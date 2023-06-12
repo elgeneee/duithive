@@ -87,6 +87,9 @@ export const expenseRouter = createTRPCRouter({
             amount: true,
             transactionDate: true,
           },
+          orderBy: {
+            transactionDate: "desc",
+          },
         });
 
         return expenses;

@@ -46,8 +46,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
+// import groupBy from "lodash/groupBy";
+// import map from "lodash/map";
+// import moment from "moment";
+// import dayjs from "dayjs";
+// import relativeTime from "dayjs/plugin/relativeTime";
+// import { set } from "lodash";
+// dayjs.extend(relativeTime);
 
-const expenseSchema = z.object({
+const createExpenseSchema = z.object({
   description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
@@ -90,12 +97,12 @@ const Expense: NextPage = () => {
     register,
     reset,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting: isCreatingExpense },
     setValue,
-  } = useForm<z.infer<typeof expenseSchema>>({
+  } = useForm<z.infer<typeof createExpenseSchema>>({
     // @typescript-eslint/no-unsafe-assignment
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    resolver: zodResolver(expenseSchema),
+    resolver: zodResolver(createExpenseSchema),
     defaultValues: {
       date: new Date(),
     },
@@ -127,6 +134,8 @@ const Expense: NextPage = () => {
     month: "long",
     day: "2-digit",
   });
+
+  // const [groupedExpenses, setGroupedExpenses] = useState<unknown[]>([]);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -142,16 +151,15 @@ const Expense: NextPage = () => {
   const [editDispValue, setEditDispValue] = useState<string>("");
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
+
   //drag-and-drop image
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const [data, setData] = useState<{
-    email: string | null;
-    file: null | File;
-  }>({ email: null, file: null });
+  const [receiptImage, setReceiptImage] = useState<File | null>(null);
   const [imageName, setImageName] = useState<string>("");
 
   const [fileSizeTooBig, setFileSizeTooBig] = useState<boolean>(false);
   const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
+
   const ctx = api.useContext();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -160,6 +168,17 @@ const Expense: NextPage = () => {
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
+
+  // moment.updateLocale("en", {
+  //   calendar: {
+  //     lastDay: "[Yesterday]",
+  //     sameDay: "[Today]",
+  //     nextDay: "[Tomorrow]",
+  //     lastWeek: "[Last] dddd",
+  //     nextWeek: "[Next] dddd",
+  //     sameElse: "L",
+  //   },
+  // });
 
   const { mutate: deleteExpense } = api.expense.deleteExpense.useMutation({
     onSuccess: () => {
@@ -177,26 +196,54 @@ const Expense: NextPage = () => {
   });
   const { data: expenses } = api.expense.getAll.useQuery();
 
-  const { mutate: createExpense, isLoading: loading } =
-    api.expense.create.useMutation({
-      onSuccess: () => {
-        reset();
-        setCategoryValue("");
-        setDispValue("");
-        setIconId(1);
-        setDialogOpen(false);
-        void ctx.expense.getAll.invalidate();
-      },
-      onError: (e) => {
-        const errorMessage = e.data?.zodError?.fieldErrors.content;
+  // const testSeparate = () => {
+  //   const expenseGroupedData = map(
+  //     groupBy(expenses, (expense) =>
+  //       expense.transactionDate?.toLocaleDateString()
+  //     ),
+  //     (expenses, date) => ({ date, expenses })
+  //   );
 
-        if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
-        } else {
-          // toast.error("Failed to create! Please try again later.");
-        }
-      },
-    });
+  //   const currDate = new Date("2023-02-01");
+  //   const yesterday = moment(currDate);
+  //   const currentDate = moment(new Date("2023-03-01")); // Reference date
+
+  // };
+
+  // useEffect(() => {
+  //   const expenseGroupedData = map(
+  //     groupBy(expenses, (expense) =>
+  //       expense.transactionDate?.toLocaleDateString()
+  //     ),
+  //     (expenses, date) => ({ date, expenses })
+  //   );
+  //     console.log(expenseGroupedData);
+  //   setGroupedExpenses(expenseGroupedData);
+
+  //   console.log('I am triggered')
+  // },[expenses]);
+
+  const { mutate: createExpense } = api.expense.create.useMutation({
+    onSuccess: () => {
+      reset();
+      setCategoryValue("");
+      setDispValue("");
+      setIconId(1);
+      setDialogOpen(false);
+      setReceiptImage(null);
+      setImageName("");
+      void ctx.expense.getAll.invalidate();
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+
+      if (errorMessage && errorMessage[0]) {
+        // toast.error(errorMessage[0]);
+      } else {
+        // toast.error("Failed to create! Please try again later.");
+      }
+    },
+  });
 
   const { mutate: editExpense, isLoading: isEditLoading } =
     api.expense.editExpense.useMutation({
@@ -237,18 +284,22 @@ const Expense: NextPage = () => {
     setDragActive(false);
     setFileSizeTooBig(false);
     setFileIsNotImage(false);
-    setData((prev) => ({ ...prev, file: null }));
+    setReceiptImage(null);
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
     const validImageType = ["image/jpeg", "image/png"];
     if (file) {
       if (file.size / 1024 / 1024 > 5) {
         setFileSizeTooBig(true);
+        setReceiptImage(null);
+        setImageName("");
       } else if (!validImageType.includes(file.type)) {
         setFileIsNotImage(true);
+        setReceiptImage(null);
+        setImageName("");
       } else {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setData((prev) => ({ ...prev, file: file }));
+          setReceiptImage(file);
           setImageName(e.target?.result as string);
         };
         reader.readAsDataURL(file);
@@ -259,25 +310,29 @@ const Expense: NextPage = () => {
   const deleteImage = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setData((prev) => ({ ...prev, file: null }));
-    // setImageName(null);
+    setReceiptImage(null);
+    setImageName("");
   };
 
   const onChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileSizeTooBig(false);
     setFileIsNotImage(false);
-    setData((prev) => ({ ...prev, file: null }));
+    setReceiptImage(null);
     const validImageType = ["image/jpeg", "image/png"];
     const file = e.currentTarget.files && e.currentTarget.files[0];
     if (file) {
       if (file.size / 1024 / 1024 > 5) {
         setFileSizeTooBig(true);
+        setReceiptImage(null);
+        setImageName("");
       } else if (!validImageType.includes(file.type)) {
         setFileIsNotImage(true);
+        setReceiptImage(null);
+        setImageName("");
       } else {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setData((prev) => ({ ...prev, file: file }));
+          setReceiptImage(file);
           setImageName(e.target?.result as string);
         };
         reader.readAsDataURL(file);
@@ -293,8 +348,35 @@ const Expense: NextPage = () => {
     setEditDispValue(e.target.value);
   };
 
-  const onSubmit = (data: z.infer<typeof expenseSchema>) => {
-    createExpense(data);
+  const onSubmit = async (data: z.infer<typeof createExpenseSchema>) => {
+    let imageUrl: string | null = null;
+    if (receiptImage) {
+      try {
+        const formData = new FormData();
+        formData.append("file", receiptImage);
+        formData.append("upload_preset", "oxd8flh9");
+        formData.append(
+          "folder",
+          `duithive/users/${session?.user?.email as string}/expense`
+        );
+        const cloudinaryUpload = await fetch(
+          "https://api.cloudinary.com/v1_1/dlidl2li4/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const cloudinaryResponse = await cloudinaryUpload.json();
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        imageUrl = cloudinaryResponse.secure_url;
+      } catch (err) {
+        console.log(err);
+      } finally {
+        createExpense({ ...data, imgUrl: imageUrl });
+      }
+    }
   };
 
   const onEditSubmit = (data: z.infer<typeof editExpenseSchema>) => {
@@ -328,7 +410,7 @@ const Expense: NextPage = () => {
                 {/* drag-and-drop */}
                 <label className="text-sm">Receipt / Bill</label>
 
-                <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+                <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
                   <label
                     htmlFor="image-upload"
                     className={cn(
@@ -336,28 +418,28 @@ const Expense: NextPage = () => {
                       dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
                     )}
                   >
-                    {data.file && (
+                    {receiptImage && (
                       <button
                         type="button"
                         onClick={deleteImage}
-                        // disabled={loading || processingStatus === "succeeded"}
+                        disabled={isCreatingExpense}
                         className={cn(
-                          // loading || processingStatus === "succeeded"
-                          //   ? "cursor-not-allowed bg-opacity-30"
-                          //   : "bg-opacity-60 hover:bg-opacity-70",
-                          "absolute right-3 top-3 z-50 rounded-md bg-black p-1 transition"
+                          "absolute right-3 top-3 z-[110] rounded-md bg-black p-1 transition",
+                          isCreatingExpense
+                            ? " bg-black/50"
+                            : "bg-black/50 hover:bg-black/60"
                         )}
                       >
                         <Trash2 color={"#ffffff"} size={18} />
                       </button>
                     )}
                     {fileSizeTooBig && (
-                      <p className="text-sm text-red-500">
+                      <p className="z-[500] text-xs text-red-500">
                         File size too big (less than 5MB)
                       </p>
                     )}
                     {fileIsNotImage && (
-                      <p className="text-sm text-red-500">
+                      <p className="z-[500] text-xs text-red-500">
                         File is not an image
                       </p>
                     )}
@@ -366,26 +448,37 @@ const Expense: NextPage = () => {
                       onDragEnter={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      className="absolute z-40 aspect-video h-full w-full rounded-md border object-cover"
+                      className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"
                     ></div>
                     <div
                       className={cn(
-                        "flex flex-col items-center justify-center text-center text-xs transition-all duration-100 group-hover:text-gray-500/70",
+                        "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
                         dragActive ? "text-gray-500/70" : "text-gray-400",
-                        (data.file || fileSizeTooBig || fileIsNotImage) &&
+                        (fileSizeTooBig || fileIsNotImage || receiptImage) &&
                           "hidden"
                       )}
                     >
-                      <UploadCloud className="transition duration-100 group-hover:scale-110" />
-                      <p>Drag & drop or click to upload</p>
+                      <UploadCloud
+                        className={cn(
+                          "mb-2 text-athens-gray-900 transition duration-100 group-hover:scale-110",
+                          dragActive && "scale-110"
+                        )}
+                      />
+                      <p className="font-semibold">
+                        <span className="font-semibold text-athens-gray-900">
+                          Click to upload
+                        </span>{" "}
+                        or drag & drop
+                      </p>
+                      <p>SVG, PNG or JPG</p>
                       <p>Accept image files only (Max at 5MB)</p>
                     </div>
-                    {data.file && (
+                    {receiptImage && (
                       //eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={imageName ? imageName : undefined}
+                        src={imageName}
                         alt="Preview"
-                        className="aspect-video h-full rounded-lg object-contain"
+                        className="z-[200] aspect-video h-full rounded-lg object-contain"
                       />
                     )}
                   </label>
@@ -399,11 +492,6 @@ const Expense: NextPage = () => {
                       onChange={onChangeImage}
                     />
                   </div>
-                  {/* {prediction?.error && (
-                    <p className="h-4 overflow-hidden text-xs font-medium text-red-500 animate-in fade-in duration-700">
-                      {prediction.error}
-                    </p>
-                  )} */}
                 </div>
                 {/* drag-and-drop */}
 
@@ -449,7 +537,7 @@ const Expense: NextPage = () => {
                           variant="outline"
                           role="combobox"
                           aria-expanded={open}
-                          className="w-full justify-between"
+                          className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
                         >
                           {categoryValue
                             ? categories.find(
@@ -586,7 +674,7 @@ const Expense: NextPage = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-[240px] justify-start text-left font-normal",
+                            "w-[240px] justify-start text-left font-normal focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1",
                             !date && "text-muted-foreground"
                           )}
                         >
@@ -606,6 +694,9 @@ const Expense: NextPage = () => {
                             setDate(data);
                             setValue("date", data as Date);
                           }}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -619,8 +710,12 @@ const Expense: NextPage = () => {
                     </div>
                   </div>
                 </div>
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? (
+                <Button
+                  type="submit"
+                  disabled={isCreatingExpense}
+                  className="w-full"
+                >
+                  {isCreatingExpense ? (
                     <Loader2
                       className="mr-2 h-4 w-4 animate-spin"
                       color="#803FE8"
@@ -637,7 +732,7 @@ const Expense: NextPage = () => {
           {expenses?.map((expense) => (
             <div
               key={expense.id}
-              className="flex items-center justify-between space-x-3 rounded-md bg-athens-gray-50 p-3"
+              className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
             >
               <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
                 {
@@ -660,7 +755,6 @@ const Expense: NextPage = () => {
                     {parseFloat(expense.amount.toString()).toFixed(2)}
                   </p>
                   <p className="text-sm font-normal text-[#A0A5AF]">
-                    {/* {expense.transactionDate.toString()} */}
                     {expense.transactionDate.getDate() < 10
                       ? `0${expense.transactionDate.getDate()}`
                       : expense.transactionDate.getDate()}
@@ -687,7 +781,6 @@ const Expense: NextPage = () => {
                     Edit/Delete
                   </p>
                   <Separator className="my-2" />
-                  {/* edit dialog */}
                   <Dialog
                     open={editDialogOpen}
                     onOpenChange={setEditDialogOpen}
@@ -881,8 +974,6 @@ const Expense: NextPage = () => {
                                       </button>
                                     </div>
                                   </CommandEmpty>
-
-                                  {/* default categories */}
                                   <CommandGroup>
                                     {categories.map((category) => (
                                       <CommandItem
