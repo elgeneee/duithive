@@ -63,7 +63,7 @@ model User {
     currencyId    Int       @default(1)
     expense       Expense[]
     income        Income[]
-    Budget        Budget[]
+    budget        Budget[]
 
     @@index([currencyId])
 }
@@ -84,8 +84,12 @@ model Expense {
     imgUrl          String?
     transactionDate DateTime
 
+    budget   Budget? @relation(fields: [budgetId], references: [id])
+    budgetId String?
+
     @@index([userId])
     @@index([categoryId])
+    @@index([budgetId])
 }
 
 model Income {
@@ -105,14 +109,22 @@ model Income {
 }
 
 model Budget {
-    id        String   @id @default(uuid())
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId    String
+    id     String @id @default(uuid())
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    endDate   DateTime
+
+    endDate DateTime
+
+    expense Expense[]
+
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId Int
 
     @@index([userId])
+    @@index([categoryId])
 }
 
 model VerificationToken {
@@ -150,4 +162,5 @@ model Category {
     name    String?
     iconId  Int
     expense Expense[]
+    Budget  Budget[]
 }

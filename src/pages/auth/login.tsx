@@ -52,7 +52,7 @@ const Login: NextPage = () => {
     });
 
     if (signInRes?.ok) {
-      window.location.replace("/");
+      window.location.replace("/dashboard");
     } else {
       toast({
         description: signInRes?.error || "An error occurred",
@@ -153,7 +153,7 @@ const Login: NextPage = () => {
             <Button
               variant={"google"}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={async () => await signIn("google", { callbackUrl: "/" })}
+              onClick={async () => await signIn("google", { callbackUrl: "/dashboard" })}
               className="text-xs font-medium text-athens-gray-900"
             >
               <Image

@@ -8,22 +8,17 @@ import {
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useSideNavStore } from "@/store/navStore";
 import { clsx } from "clsx";
 import { signOut } from "next-auth/react";
 
 function SideNav() {
   const router = useRouter();
-
-  const currNav = useSideNavStore((state) => state.currNav);
-  const setCurrNav = useSideNavStore((state) => state.setCurrNav);
   const navigationOptions = [
     {
       name: "Dashboard",
-      link: "/",
+      link: "/dashboard",
       icon: (
         <LayoutDashboard
-          color={clsx(currNav == "Dashboard" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
@@ -33,7 +28,6 @@ function SideNav() {
       link: "/expense",
       icon: (
         <ArrowUpRight
-          color={clsx(currNav == "Expense" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
@@ -43,7 +37,6 @@ function SideNav() {
       link: "/income",
       icon: (
         <ArrowDownLeft
-          color={clsx(currNav == "Income" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
@@ -53,7 +46,6 @@ function SideNav() {
       link: "/budget",
       icon: (
         <Banknote
-          color={clsx(currNav == "Budget" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
@@ -63,7 +55,6 @@ function SideNav() {
       link: "/report",
       icon: (
         <FileBarChart2
-          color={clsx(currNav == "Report" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
@@ -73,18 +64,17 @@ function SideNav() {
       link: "/settings",
       icon: (
         <Settings
-          color={clsx(currNav == "Settings" ? "#FFFFFF" : "#A0A5AF")}
           size={20}
         />
       ),
     },
   ];
 
-  const handleNavigation = (name: string, link: string): void => {
-    setCurrNav(name);
+  const handleNavigation = (link: string): void => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     router.push(link);
   };
+
 
   return (
     <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear lg:static lg:flex lg:translate-x-0">
@@ -100,13 +90,13 @@ function SideNav() {
             {navigationOptions.map((option) => (
               <button
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises, @typescript-eslint/no-unsafe-return
-                onClick={() => handleNavigation(option.name, option.link)}
+                onClick={() => handleNavigation(option.link)}
                 key={option.name}
                 className={clsx(
-                  "flex w-full items-center justify-start rounded-sm py-2 pl-2 font-satoshi font-medium hover:bg-athens-gray-100",
-                  option.name === currNav
-                    ? "bg-violet-500 text-white"
-                    : "text-[#A0A5AF]"
+                  "flex w-full items-center justify-start rounded-sm py-2 pl-2 font-satoshi font-medium transition-colors",
+                  router.pathname.includes(option.link)
+                    ? "bg-violet-500 text-white hover:bg-violet-500/90"
+                    : "text-[#A0A5AF] hover:bg-athens-gray-100"
                 )}
               >
                 {option.icon}

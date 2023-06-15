@@ -78,7 +78,7 @@ export const authRouter = createTRPCRouter({
 
       const token = jwt.sign(
         { user_id: userId.id },
-        process.env.TEST as string,
+        process.env.JWT_SECRET as string,
         {
           expiresIn: "2h",
         }
@@ -110,7 +110,7 @@ export const authRouter = createTRPCRouter({
       try {
         const decoded = jwt.verify(
           input.token,
-          process.env.TEST as string
+          process.env.JWT_SECRET as string
         ) as DecodedToken;
         const userId = decoded.user_id;
         const hashPassword = await bcrypt.hash(input.password, 10);

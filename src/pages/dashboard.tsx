@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 // import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import Link from "next/link";
 
 const colors = [
   "#9D74F3",
@@ -46,7 +47,6 @@ const colors = [
 const Dashboard: NextPage = () => {
   const { data: session } = useSession();
   // const ctx = api.useContext();
-
   //area
   const [expenseAreaData, setExpenseAreaData] = useState<unknown[]>([]);
   const [expenseTotal, setExpenseTotal] = useState<number>(0);
@@ -80,7 +80,7 @@ const Dashboard: NextPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardData]);
-
+  console.log(dashboardData?.expenses);
   //area chart
   const areaChartProcess = () => {
     const currDate = new Date();
@@ -205,7 +205,7 @@ const Dashboard: NextPage = () => {
         const transactionMonthYear = `${transactionDate.toLocaleString(
           "default",
           { month: "short" }
-        )} ${transactionDate.getFullYear().toString().substr(-2)}`;
+        )} ${transactionDate.getFullYear().toString()}`;
 
         const totalAmount = groupedData[transactionMonthYear]
           ? sumBy(groupedData[transactionMonthYear], (item) =>
@@ -428,7 +428,10 @@ const Dashboard: NextPage = () => {
                       <Cell key={`cell-${index}`} fill={colors[index]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    isAnimationActive={false}
+                    contentStyle={{ zIndex: 9999 }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center">
@@ -450,6 +453,46 @@ const Dashboard: NextPage = () => {
                 </Select>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* third layer */}
+        <div className="mt-10 flex w-2/3 flex-col rounded-lg border border-athens-gray-100 bg-white p-3">
+          <div className="flex items-center justify-between">
+            <p className="font-satoshi text-xl font-bold">Latest Spendings</p>
+            <Link href="/expense">
+              <p className="text-sm text-[#A0A5AF] hover:underline">View All</p>
+            </Link>
+          </div>
+          <hr className="my-2" />
+          <div className="min-h-[10rem] space-y-4">
+            {dashboardData?.expenses?.length ? (
+              dashboardData.expenses.slice(0, 5).map((expense) => (
+                <div
+                  key={expense.id}
+                  className="flex items-center justify-between"
+                >
+                  <div>
+                    <p className="font-semibold">{expense.description}</p>
+                    <p className="text-xs text-[#A0A5AF]">
+                      {expense.transactionDate.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold ">
+                    -{userCurrency?.symbol}
+                    {parseFloat(expense.amount.toString()).toFixed(2)}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="translate-y-16 text-center italic text-[#A0A5AF]">
+                No expenses yet
+              </p>
+            )}
           </div>
         </div>
       </main>
