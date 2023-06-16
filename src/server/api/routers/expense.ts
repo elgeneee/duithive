@@ -86,6 +86,7 @@ export const expenseRouter = createTRPCRouter({
             },
             amount: true,
             transactionDate: true,
+            imgUrl: true,
           },
           orderBy: {
             transactionDate: "desc",

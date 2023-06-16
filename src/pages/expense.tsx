@@ -195,7 +195,6 @@ const Expense: NextPage = () => {
     },
   });
   const { data: expenses } = api.expense.getAll.useQuery();
-
   // const testSeparate = () => {
   //   const expenseGroupedData = map(
   //     groupBy(expenses, (expense) =>
@@ -244,6 +243,9 @@ const Expense: NextPage = () => {
       }
     },
   });
+
+  const delay = (ms: number | undefined) =>
+    new Promise((res) => setTimeout(res, ms));
 
   const { mutate: editExpense, isLoading: isEditLoading } =
     api.expense.editExpense.useMutation({
@@ -373,10 +375,11 @@ const Expense: NextPage = () => {
         imageUrl = cloudinaryResponse.secure_url;
       } catch (err) {
         console.log(err);
-      } finally {
-        createExpense({ ...data, imgUrl: imageUrl });
       }
+    } else {
+      await delay(500);
     }
+    createExpense({ ...data, imgUrl: imageUrl });
   };
 
   const onEditSubmit = (data: z.infer<typeof editExpenseSchema>) => {
@@ -742,11 +745,9 @@ const Expense: NextPage = () => {
               </div>
               <div className="flex flex-1 justify-between">
                 <div>
-                  <p className="text-sm font-semibold">
-                    {expense.category?.name}
-                  </p>
+                  <p className="text-sm font-semibold">{expense.description}</p>
                   <p className="text-sm font-normal text-[#A0A5AF]">
-                    {expense.description}
+                    {expense.category?.name}
                   </p>
                 </div>
                 <div>
@@ -828,6 +829,34 @@ const Expense: NextPage = () => {
                         // eslint-disable-next-line @typescript-eslint/no-misused-promises
                         onSubmit={editHandleSubmit(onEditSubmit)}
                       >
+                        <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
+                          <label
+                            htmlFor="image-upload"
+                            className={cn(
+                              "group relative mx-auto flex h-32 w-full flex-col items-center justify-center rounded-lg border border-[#e2e8f0]  transition duration-100"
+                            )}
+                          >
+                            <div className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"></div>
+                            <div
+                              className={cn(
+                                "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
+                                expense.imgUrl && "hidden"
+                              )}
+                            >
+                              <p className="font-light italic text-[#A0A5AF]">
+                                No image available
+                              </p>
+                            </div>
+                            {expense.imgUrl && (
+                              //eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={expense.imgUrl}
+                                alt="Preview"
+                                className="z-[200] aspect-video h-full rounded-lg object-contain"
+                              />
+                            )}
+                          </label>
+                        </div>
                         <div>
                           <label className="text-sm">Description</label>
                           <Input
@@ -1049,6 +1078,10 @@ const Expense: NextPage = () => {
                                     editSetValue("date", data as Date);
                                   }}
                                   initialFocus
+                                  disabled={(date) =>
+                                    date > new Date() ||
+                                    date < new Date("1900-01-01")
+                                  }
                                 />
                               </PopoverContent>
                             </Popover>
@@ -1072,7 +1105,7 @@ const Expense: NextPage = () => {
                               color="#803FE8"
                             />
                           ) : (
-                            <span>Create</span>
+                            <span>Save</span>
                           )}
                         </Button>
                       </form>

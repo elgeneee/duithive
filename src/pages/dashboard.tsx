@@ -46,7 +46,7 @@ const colors = [
 
 const Dashboard: NextPage = () => {
   const { data: session } = useSession();
-  // const ctx = api.useContext();
+
   //area
   const [expenseAreaData, setExpenseAreaData] = useState<unknown[]>([]);
   const [expenseTotal, setExpenseTotal] = useState<number>(0);
@@ -72,6 +72,7 @@ const Dashboard: NextPage = () => {
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
+
   useEffect(() => {
     if (dashboardData) {
       barChartProcess("week");
@@ -337,7 +338,9 @@ const Dashboard: NextPage = () => {
               </p>
             </div>
           </div>
-          <div className="h-36 w-3/5 rounded-lg border border-athens-gray-100 bg-white"></div>
+          <div className="flex h-36 w-3/5 items-center justify-center rounded-lg border border-athens-gray-100 bg-white">
+            <p className="font-light italic text-[#A0A5AF]">No budget yet</p>
+          </div>
         </div>
 
         {/* secondlayer */}

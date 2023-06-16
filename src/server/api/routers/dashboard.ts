@@ -45,7 +45,7 @@ export const dashboardRouter = createTRPCRouter({
             transactionDate: true,
           },
           orderBy: {
-            transactionDate: "asc",
+            transactionDate: "desc",
           },
         });
 

@@ -1,9 +1,9 @@
 import create from "zustand";
 
-interface INav {
-  currNav: string;
-  setCurrNav: (newNav: string) => void;
-}
+// interface INav {
+//   currNav: string;
+//   setCurrNav: (newNav: string) => void;
+// }
 type NavStore = {
   imgUrl: string;
   setImgUrl: (newImgUrl: string) => void;
@@ -11,10 +11,10 @@ type NavStore = {
   setUsername: (newUsername: string) => void;
 };
 
-export const useSideNavStore = create<INav>((set) => ({
-  currNav: "Dashboard",
-  setCurrNav: (newNav: string) => set({ currNav: newNav }),
-}));
+// export const useSideNavStore = create<INav>((set) => ({
+//   currNav: "Dashboard",
+//   setCurrNav: (newNav: string) => set({ currNav: newNav }),
+// }));
 
 export const useNavStore = create<NavStore>((set) => ({
   imgUrl: "",
