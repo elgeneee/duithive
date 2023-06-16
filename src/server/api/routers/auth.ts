@@ -8,7 +8,8 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
-
+import { resetPasswordTemplate } from "@/store/reset-password";
+import { otpTemplate } from "@/store/otp";
 const transporter = nodemailer.createTransport({
   secure: false,
   service: "gmail",
@@ -46,7 +47,7 @@ export const authRouter = createTRPCRouter({
         from: process.env.NODEMAILER_EMAIL,
         to: input.email,
         subject: "Verify Email",
-        html: `Your OTP Number is : ${otp}`,
+        html: otpTemplate(otp),
       };
 
       try {
@@ -89,7 +90,7 @@ export const authRouter = createTRPCRouter({
         from: process.env.NODEMAILER_EMAIL,
         to: input.email,
         subject: "Reset your password here",
-        html: `<a href="http://localhost:3000/auth/reset-password?token=${token}">Click here to reset your password</a>`,
+        html: resetPasswordTemplate(token),
       };
 
       try {

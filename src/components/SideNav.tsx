@@ -17,56 +17,32 @@ function SideNav() {
     {
       name: "Dashboard",
       link: "/dashboard",
-      icon: (
-        <LayoutDashboard
-          size={20}
-        />
-      ),
+      icon: <LayoutDashboard size={20} />,
     },
     {
       name: "Expense",
       link: "/expense",
-      icon: (
-        <ArrowUpRight
-          size={20}
-        />
-      ),
+      icon: <ArrowUpRight size={20} />,
     },
     {
       name: "Income",
       link: "/income",
-      icon: (
-        <ArrowDownLeft
-          size={20}
-        />
-      ),
+      icon: <ArrowDownLeft size={20} />,
     },
     {
       name: "Budget",
       link: "/budget",
-      icon: (
-        <Banknote
-          size={20}
-        />
-      ),
+      icon: <Banknote size={20} />,
     },
     {
       name: "Report",
       link: "/report",
-      icon: (
-        <FileBarChart2
-          size={20}
-        />
-      ),
+      icon: <FileBarChart2 size={20} />,
     },
     {
       name: "Settings",
       link: "/settings",
-      icon: (
-        <Settings
-          size={20}
-        />
-      ),
+      icon: <Settings size={20} />,
     },
   ];
 
@@ -74,7 +50,6 @@ function SideNav() {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     router.push(link);
   };
-
 
   return (
     <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear lg:static lg:flex lg:translate-x-0">
