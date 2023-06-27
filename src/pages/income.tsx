@@ -106,7 +106,7 @@ const Income: NextPage = () => {
     email: session?.user?.email as string,
   });
 
-  const { mutate: deleteIncome } = api.expense.deleteExpense.useMutation({
+  const { mutate: deleteIncome } = api.income.deleteIncome.useMutation({
     onSuccess: () => {
       void ctx.income.getAll.invalidate();
     },

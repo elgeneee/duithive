@@ -330,7 +330,7 @@ const Dashboard: NextPage = () => {
             <div>
               <p className="font-semibold text-[#A0A5AF]">Expense</p>
               <p className="text-lg font-semibold">
-                -${userCurrency?.symbol}{" "}
+                -{userCurrency?.symbol}{" "}
                 {expenseTotal.toLocaleString(undefined, {
                   maximumFractionDigits: 2,
                   minimumFractionDigits: 2,
