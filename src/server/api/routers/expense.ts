@@ -29,6 +29,19 @@ export const expenseRouter = createTRPCRouter({
         });
 
         const createExpense = async (categoryId: number) => {
+          const relevantBudgets = await ctx.prisma.budget.findMany({
+            where: {
+              userId: userId.id,
+              categoryId: categoryId,
+              startDate: {
+                lte: input.date,
+              },
+              endDate: {
+                gte: input.date,
+              },
+            },
+          });
+
           const expense = await ctx.prisma.expense.create({
             data: {
               description: input.description,
@@ -37,6 +50,11 @@ export const expenseRouter = createTRPCRouter({
               imgUrl: input.imgUrl,
               userId: userId.id,
               categoryId: categoryId,
+              budgets: {
+                connect: relevantBudgets.map((budget) => ({
+                  id: budget.id,
+                })),
+              },
             },
           });
 
@@ -107,6 +125,17 @@ export const expenseRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        await ctx.prisma.expense.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            budgets: {
+              set: [],
+            },
+          },
+        });
+
         await ctx.prisma.expense.delete({
           where: {
             id: input.id,
@@ -120,6 +149,19 @@ export const expenseRouter = createTRPCRouter({
     .input(editExpenseSchema)
     .mutation(async ({ ctx, input }) => {
       try {
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!userId) {
+          throw new Error("User not found");
+        }
+
         const existingCategory = await ctx.prisma.category.findFirst({
           where: {
             name: input.category.value,
@@ -128,6 +170,19 @@ export const expenseRouter = createTRPCRouter({
         });
 
         const createExpense = async (categoryId: number) => {
+          const relevantBudgets = await ctx.prisma.budget.findMany({
+            where: {
+              userId: userId.id,
+              categoryId: categoryId,
+              startDate: {
+                lte: input.date,
+              },
+              endDate: {
+                gte: input.date,
+              },
+            },
+          });
+
           const updateExpense = await ctx.prisma.expense.update({
             where: {
               id: input.id,
@@ -137,6 +192,11 @@ export const expenseRouter = createTRPCRouter({
               amount: input.amount,
               transactionDate: input.date,
               categoryId: categoryId,
+              budgets: {
+                set: relevantBudgets.map((budget) => ({
+                  id: budget.id,
+                })),
+              },
             },
           });
 

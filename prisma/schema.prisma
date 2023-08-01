@@ -84,12 +84,12 @@ model Expense {
     imgUrl          String?
     transactionDate DateTime
 
-    budget   Budget? @relation(fields: [budgetId], references: [id])
-    budgetId String?
+    budgets Budget[]
+    // budget   Budget? @relation(fields: [budgetId], references: [id])
+    // budgetId String?
 
     @@index([userId])
     @@index([categoryId])
-    @@index([budgetId])
 }
 
 model Income {
@@ -113,19 +113,35 @@ model Budget {
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
 
+    title  String  @db.Text
+    amount Decimal @db.Decimal(20, 2)
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    endDate DateTime
+    startDate DateTime
+    endDate   DateTime
 
-    expense Expense[]
-
-    category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    category   Category?           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     categoryId Int
+    expenses   Expense[]
 
     @@index([userId])
     @@index([categoryId])
 }
+
+// model BudgetsOnExpenses {
+//     expense    Expense  @relation(fields: [expenseId], references: [id])
+//     expenseId  String // relation scalar field (used in the `@relation` attribute above)
+//     budget     Budget   @relation(fields: [budgetId], references: [id])
+//     budgetId   String // relation scalar field (used in the `@relation` attribute above)
+//     // assignedAt DateTime @default(now())
+//     // assignedBy String?
+
+//     @@id([expenseId, budgetId])
+//     @@index([expenseId])
+//     @@index([budgetId])
+// }
 
 model VerificationToken {
     identifier String

@@ -22,6 +22,7 @@ const buttonVariants = cva(
         link: "underline-offset-4 hover:underline text-primary",
         google:
           "bg-white border w-full border-athens-gray-100 hover:bg-athens-gray-50/90",
+        disabled: "border border-input bg-accent text-athens-gray-400",
       },
       size: {
         default: "h-10 py-2 px-4",

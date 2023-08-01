@@ -81,7 +81,7 @@ const Dashboard: NextPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardData]);
-  console.log(dashboardData?.expenses);
+
   //area chart
   const areaChartProcess = () => {
     const currDate = new Date();
