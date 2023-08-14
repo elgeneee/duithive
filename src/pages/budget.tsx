@@ -527,7 +527,7 @@ const Budget: NextPage = () => {
             <div
               key={budget.id}
               className={cn(
-                budget.endDate < new Date() &&
+                budget.endDate.getDay() < new Date().getDay() &&
                   "bg-opacity-60 text-black text-opacity-30",
                 "flex items-center justify-between space-x-3 rounded-md bg-white p-3"
               )}
@@ -535,7 +535,7 @@ const Budget: NextPage = () => {
               <div className="flex w-full items-center justify-between">
                 <div
                   className={cn(
-                    budget.endDate < new Date() &&
+                    budget.endDate.getDay() < new Date().getDay() &&
                       "bg-opacity-10 text-opacity-30",
                     "mr-8 flex h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600"
                   )}
@@ -573,7 +573,8 @@ const Budget: NextPage = () => {
                       <span className="flex items-center space-x-2">
                         <p
                           className={cn(
-                            budget.endDate < new Date() && "text-opacity-30",
+                            budget.endDate.getDay() < new Date().getDay() &&
+                              "text-opacity-30",
                             "font-base text-xs text-[#9e9e9e]"
                           )}
                         >
@@ -587,7 +588,7 @@ const Budget: NextPage = () => {
                             : budget.endDate.getMonth()}
                           /{budget.endDate.getFullYear()}
                         </p>
-                        {budget.endDate < new Date() && (
+                        {budget.endDate.getDay() < new Date().getDay() && (
                           <ExpiredBadge>Expired</ExpiredBadge>
                         )}
                       </span>
@@ -607,7 +608,9 @@ const Budget: NextPage = () => {
                     }
                     className="my-2"
                     customProp={
-                      budget.endDate < new Date() ? "bg-opacity-30" : ""
+                      budget.endDate.getDay() < new Date().getDay()
+                        ? "bg-opacity-30"
+                        : ""
                     }
                   />
                   <div className="flex items-center justify-between">
@@ -635,7 +638,7 @@ const Budget: NextPage = () => {
                           <AccordionTrigger>
                             <span
                               className={cn(
-                                budget.endDate < new Date() &&
+                                budget.endDate.getDay() < new Date().getDay() &&
                                   "text-opacity-40",
                                 "flex items-center space-x-2 text-athens-gray-400"
                               )}

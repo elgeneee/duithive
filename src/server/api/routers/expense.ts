@@ -117,6 +117,54 @@ export const expenseRouter = createTRPCRouter({
       throw new Error(err as string);
     }
   }),
+  getExpenseReport: protectedProcedure
+    .input(
+      z.object({ startDate: z.date().optional(), endDate: z.date().optional() })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          if (input.startDate && input.endDate) {
+            const expenses = await ctx.prisma.expense.findMany({
+              where: {
+                userId: userId.id,
+                transactionDate: {
+                  gte: input.startDate,
+                  lte: input.endDate,
+                },
+              },
+              select: {
+                id: true,
+                description: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+                transactionDate: true,
+                amount: true,
+              },
+              orderBy: {
+                transactionDate: "asc",
+              },
+            });
+
+            return expenses;
+          }
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
   deleteExpense: protectedProcedure
     .input(
       z.object({
