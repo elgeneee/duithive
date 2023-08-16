@@ -28,5 +28,8 @@ const config = {
       },
     ],
   },
+  experimental: {
+    appDir: false,
+  },
 };
 export default config;
