@@ -32,8 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-// import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
+import { icons } from "@/store/category";
+import { Progress } from "@/components/ui/progress";
 
 const colors = [
   "#9D74F3",
@@ -277,6 +278,7 @@ const Dashboard: NextPage = () => {
               <AreaChart
                 data={incomeAreaData}
                 margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                style={{ position: "static" }}
               >
                 <defs>
                   <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
@@ -306,10 +308,11 @@ const Dashboard: NextPage = () => {
             </div>
           </div>
           <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
-            <ResponsiveContainer width="100%" height="50%">
+            <ResponsiveContainer width="100%" height="50%" className={""}>
               <AreaChart
                 data={expenseAreaData}
                 margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                style={{ position: "static" }}
               >
                 <defs>
                   <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
@@ -338,8 +341,65 @@ const Dashboard: NextPage = () => {
               </p>
             </div>
           </div>
-          <div className="flex h-36 w-3/5 items-center justify-center rounded-lg border border-athens-gray-100 bg-white">
-            <p className="font-light italic text-[#A0A5AF]">No budget yet</p>
+          <div
+            className={cn(
+              !dashboardData?.budgets?.length && "justify-center",
+              "flex h-36 w-3/5 items-center rounded-lg border border-athens-gray-100 bg-white p-2"
+            )}
+          >
+            {dashboardData?.budgets?.length ? (
+              <div className="w-full space-y-3 font-satoshi">
+                {dashboardData.budgets.map((budget) => (
+                  <div
+                    key={budget.id}
+                    className="flex w-full items-center justify-between space-x-2"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-violet-400/30 text-violet-600">
+                      {
+                        icons.find(
+                          (icon) => icon.id === budget.category?.iconId
+                        )?.icon
+                      }
+                    </div>
+                    <div className="w-full">
+                      <div className="flex justify-between font-semibold">
+                        <p>{budget.category?.name}</p>
+                        <p>
+                          {sumBy(budget.expenses, (item) =>
+                            parseFloat(item.amount.toString())
+                          ).toFixed(2)}
+                          <span className="text-[#D5DAE2]">
+                            /{parseFloat(budget.amount.toString()).toFixed(2)}
+                          </span>
+                        </p>
+                      </div>
+                      <div>
+                        <Progress
+                          value={
+                            (sumBy(budget.expenses, (item) =>
+                              parseFloat(item.amount.toString())
+                            ) /
+                              parseFloat(budget.amount.toString())) *
+                            100
+                          }
+                          className="my-1"
+                          customProp={
+                            parseFloat(budget.amount.toString()) <
+                            sumBy(budget.expenses, (item) =>
+                              parseFloat(item.amount.toString())
+                            )
+                              ? "bg-[#FEA8A8]"
+                              : "bg-[#94DBB1]"
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="font-light italic text-[#A0A5AF]">No budget yet</p>
+            )}
           </div>
         </div>
 

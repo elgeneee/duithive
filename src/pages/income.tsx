@@ -35,6 +35,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
+
+type Incomes = RouterOutputs["income"]["getAll"];
 
 const createIncomeSchema = z.object({
   title: z.string().min(1, { message: "Title must be at least 1 character" }),
@@ -60,6 +63,21 @@ const editIncomeSchema = z.object({
   }),
   date: z.date(),
 });
+
+const getFilteredIncomes = (query: string, incomes: Incomes) => {
+  if (!query) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return incomes;
+  }
+
+  if (incomes) {
+    return incomes.filter(
+      (income: { description: string; title: string }) =>
+        income.description.toLowerCase().includes(query.toLowerCase()) ||
+        income.title.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+};
 
 const Income: NextPage = () => {
   const { data: session } = useSession();
@@ -101,6 +119,7 @@ const Income: NextPage = () => {
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
   const ctx = api.useContext();
+  const [query, setQuery] = useState<string>("");
 
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
@@ -170,137 +189,146 @@ const Income: NextPage = () => {
     deleteIncome({ id: id });
   };
 
+  const filteredIncomes = getFilteredIncomes(query, incomes);
+
   return (
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Income</h1>
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus size={15} />
-              <span className="ml-3">Add Income</span>
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Income</DialogTitle>
-              </DialogHeader>
-              <form
-                className="mt-5 space-y-3"
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSubmit={handleSubmit(onSubmit)}
-              >
-                <div>
-                  <label className="text-sm">Title</label>
-                  <Input
-                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                    {...register("title", { required: true })}
-                  />
-                  <div className="h-3">
-                    {errors.title && (
-                      <span className="text-xxs text-red-500">
-                        {errors.title.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm">Description</label>
-                  <Input
-                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                    {...register("description", { required: true })}
-                  />
-                  <div className="h-3">
-                    {errors.description && (
-                      <span className="text-xxs text-red-500">
-                        {errors.description.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-1/3">
-                    <label className="text-sm">Amount</label>
+          <div className="flex items-center space-x-2">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Button className="w-64" onClick={() => setDialogOpen(true)}>
+                <Plus size={15} />
+                <span className="ml-3">Add Income</span>
+              </Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Income</DialogTitle>
+                </DialogHeader>
+                <form
+                  className="mt-5 space-y-3"
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                  onSubmit={handleSubmit(onSubmit)}
+                >
+                  <div>
+                    <label className="text-sm">Title</label>
                     <Input
                       className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                      {...register("amount", {
-                        required: true,
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      step="0.01"
+                      {...register("title", { required: true })}
                     />
                     <div className="h-3">
-                      {errors.amount && (
+                      {errors.title && (
                         <span className="text-xxs text-red-500">
-                          {errors.amount.message}
+                          {errors.title.message}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="w-2/3">
-                    <div className="flex flex-col">
-                      <p className="mb-2 text-sm">Date</p>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !date && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {date ? (
-                              format(date, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(data) => {
-                              setDate(data);
-                              setValue("date", data as Date);
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                  <div>
+                    <label className="text-sm">Description</label>
+                    <Input
+                      className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                      {...register("description", { required: true })}
+                    />
+                    <div className="h-3">
+                      {errors.description && (
+                        <span className="text-xxs text-red-500">
+                          {errors.description.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-1/3">
+                      <label className="text-sm">Amount</label>
+                      <Input
+                        className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                        {...register("amount", {
+                          required: true,
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        step="0.01"
+                      />
                       <div className="h-3">
-                        {errors.date && (
+                        {errors.amount && (
                           <span className="text-xxs text-red-500">
-                            {errors.date.message}
+                            {errors.amount.message}
                           </span>
                         )}
                       </div>
                     </div>
+                    <div className="w-2/3">
+                      <div className="flex flex-col">
+                        <p className="mb-2 text-sm">Date</p>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !date && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {date ? (
+                                format(date, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(data) => {
+                                setDate(data);
+                                setValue("date", data as Date);
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="h-3">
+                          {errors.date && (
+                            <span className="text-xxs text-red-500">
+                              {errors.date.message}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <Button
-                  type="submit"
-                  disabled={isCreatingIncome}
-                  className="w-full"
-                >
-                  {isCreatingIncome ? (
-                    <Loader2
-                      className="mr-2 h-4 w-4 animate-spin"
-                      color="#803FE8"
-                    />
-                  ) : (
-                    <span>Create</span>
-                  )}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <Button
+                    type="submit"
+                    disabled={isCreatingIncome}
+                    className="w-full"
+                  >
+                    {isCreatingIncome ? (
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        color="#803FE8"
+                      />
+                    ) : (
+                      <span>Create</span>
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Input
+              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search..."
+            />
+          </div>
         </div>
         <div className="mt-10 space-y-5">
-          {incomes?.map((income) => (
+          {filteredIncomes?.map((income) => (
             <div
               key={income.id}
               className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"

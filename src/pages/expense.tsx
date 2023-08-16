@@ -46,6 +46,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
+
 // import groupBy from "lodash/groupBy";
 // import map from "lodash/map";
 // import moment from "moment";
@@ -53,6 +55,7 @@ import { api } from "@/utils/api";
 // import relativeTime from "dayjs/plugin/relativeTime";
 // import { set } from "lodash";
 // dayjs.extend(relativeTime);
+type Expense = RouterOutputs["expense"]["getAll"];
 
 const createExpenseSchema = z.object({
   description: z
@@ -90,6 +93,19 @@ const editExpenseSchema = z.object({
   }),
 });
 
+const getFilteredExpense = (query: string, expenses: Expense) => {
+  if (!query) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return expenses;
+  }
+
+  if (expenses) {
+    return expenses.filter((expense: { description: string }) =>
+      expense.description.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+};
+
 const Expense: NextPage = () => {
   const { data: session } = useSession();
 
@@ -107,17 +123,6 @@ const Expense: NextPage = () => {
       date: new Date(),
     },
   });
-
-  // interface Expense {
-  //   id: string;
-  //   description: string;
-  //   category: {
-  //     iconId: number;
-  //     name: string | null;
-  //   } | null;
-  //   amount: Decimal;
-  //   transactionDate: Date;
-  // }
 
   const {
     handleSubmit: editHandleSubmit,
@@ -151,6 +156,7 @@ const Expense: NextPage = () => {
   const [editDispValue, setEditDispValue] = useState<string>("");
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState<string>("");
 
   //drag-and-drop image
   const [dragActive, setDragActive] = useState<boolean>(false);
@@ -195,6 +201,7 @@ const Expense: NextPage = () => {
     },
   });
   const { data: expenses } = api.expense.getAll.useQuery();
+
   // const testSeparate = () => {
   //   const expenseGroupedData = map(
   //     groupBy(expenses, (expense) =>
@@ -390,349 +397,358 @@ const Expense: NextPage = () => {
     deleteExpense({ id: id });
   };
 
+  const filteredExpenses = getFilteredExpense(query, expenses);
+
   return (
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Expense</h1>
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus size={15} />
-              <span className="ml-3">Add Expense</span>
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Expense</DialogTitle>
-              </DialogHeader>
-              <form
-                className="mt-10 space-y-3"
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSubmit={handleSubmit(onSubmit)}
-              >
-                {/* drag-and-drop */}
-                <label className="text-sm">Receipt / Bill</label>
+          <div className="flex items-center space-x-2">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Button className="w-64" onClick={() => setDialogOpen(true)}>
+                <Plus size={15} />
+                <span className="ml-3">Add Expense</span>
+              </Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Expense</DialogTitle>
+                </DialogHeader>
+                <form
+                  className="mt-10 space-y-3"
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                  onSubmit={handleSubmit(onSubmit)}
+                >
+                  {/* drag-and-drop */}
+                  <label className="text-sm">Receipt / Bill</label>
 
-                <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
-                  <label
-                    htmlFor="image-upload"
-                    className={cn(
-                      "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed  transition duration-100 hover:border-athens-gray-300",
-                      dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
-                    )}
-                  >
-                    {receiptImage && (
-                      <button
-                        type="button"
-                        onClick={deleteImage}
-                        disabled={isCreatingExpense}
-                        className={cn(
-                          "absolute right-3 top-3 z-[110] rounded-md bg-black p-1 transition",
-                          isCreatingExpense
-                            ? " bg-black/50"
-                            : "bg-black/50 hover:bg-black/60"
-                        )}
-                      >
-                        <Trash2 color={"#ffffff"} size={18} />
-                      </button>
-                    )}
-                    {fileSizeTooBig && (
-                      <p className="z-[500] text-xs text-red-500">
-                        File size too big (less than 5MB)
-                      </p>
-                    )}
-                    {fileIsNotImage && (
-                      <p className="z-[500] text-xs text-red-500">
-                        File is not an image
-                      </p>
-                    )}
-                    <div
-                      onDragOver={handleDragOver}
-                      onDragEnter={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"
-                    ></div>
-                    <div
+                  <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
+                    <label
+                      htmlFor="image-upload"
                       className={cn(
-                        "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
-                        dragActive ? "text-gray-500/70" : "text-gray-400",
-                        (fileSizeTooBig || fileIsNotImage || receiptImage) &&
-                          "hidden"
+                        "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed  transition duration-100 hover:border-athens-gray-300",
+                        dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
                       )}
                     >
-                      <UploadCloud
+                      {receiptImage && (
+                        <button
+                          type="button"
+                          onClick={deleteImage}
+                          disabled={isCreatingExpense}
+                          className={cn(
+                            "absolute right-3 top-3 z-[110] rounded-md bg-black p-1 transition",
+                            isCreatingExpense
+                              ? " bg-black/50"
+                              : "bg-black/50 hover:bg-black/60"
+                          )}
+                        >
+                          <Trash2 color={"#ffffff"} size={18} />
+                        </button>
+                      )}
+                      {fileSizeTooBig && (
+                        <p className="z-[500] text-xs text-red-500">
+                          File size too big (less than 5MB)
+                        </p>
+                      )}
+                      {fileIsNotImage && (
+                        <p className="z-[500] text-xs text-red-500">
+                          File is not an image
+                        </p>
+                      )}
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"
+                      ></div>
+                      <div
                         className={cn(
-                          "mb-2 text-athens-gray-900 transition duration-100 group-hover:scale-110",
-                          dragActive && "scale-110"
+                          "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
+                          dragActive ? "text-gray-500/70" : "text-gray-400",
+                          (fileSizeTooBig || fileIsNotImage || receiptImage) &&
+                            "hidden"
                         )}
+                      >
+                        <UploadCloud
+                          className={cn(
+                            "mb-2 text-athens-gray-900 transition duration-100 group-hover:scale-110",
+                            dragActive && "scale-110"
+                          )}
+                        />
+                        <p className="font-semibold">
+                          <span className="font-semibold text-athens-gray-900">
+                            Click to upload
+                          </span>{" "}
+                          or drag & drop
+                        </p>
+                        <p>SVG, PNG or JPG</p>
+                        <p>Accept image files only (Max at 5MB)</p>
+                      </div>
+                      {receiptImage && (
+                        //eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={imageName}
+                          alt="Preview"
+                          className="z-[200] aspect-video h-full rounded-lg object-contain"
+                        />
+                      )}
+                    </label>
+                    <div className="z-30 mt-1 flex rounded-md shadow-lg">
+                      <input
+                        id="image-upload"
+                        name="image"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={onChangeImage}
                       />
-                      <p className="font-semibold">
-                        <span className="font-semibold text-athens-gray-900">
-                          Click to upload
-                        </span>{" "}
-                        or drag & drop
-                      </p>
-                      <p>SVG, PNG or JPG</p>
-                      <p>Accept image files only (Max at 5MB)</p>
                     </div>
-                    {receiptImage && (
-                      //eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={imageName}
-                        alt="Preview"
-                        className="z-[200] aspect-video h-full rounded-lg object-contain"
-                      />
-                    )}
-                  </label>
-                  <div className="z-30 mt-1 flex rounded-md shadow-lg">
-                    <input
-                      id="image-upload"
-                      name="image"
-                      type="file"
-                      accept="image/*"
-                      className="sr-only"
-                      onChange={onChangeImage}
-                    />
                   </div>
-                </div>
-                {/* drag-and-drop */}
+                  {/* drag-and-drop */}
 
-                <div>
-                  <label className="text-sm">Description</label>
-                  <Input
-                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                    {...register("description", { required: true })}
-                  />
-                  <div className="h-3">
-                    {errors.description && (
-                      <span className="text-xxs text-red-500">
-                        {errors.description.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-1/3">
-                    <label className="text-sm">Amount</label>
+                  <div>
+                    <label className="text-sm">Description</label>
                     <Input
                       className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                      {...register("amount", {
-                        required: true,
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      step="0.01"
+                      {...register("description", { required: true })}
                     />
                     <div className="h-3">
-                      {errors.amount && (
+                      {errors.description && (
                         <span className="text-xxs text-red-500">
-                          {errors.amount.message}
+                          {errors.description.message}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="w-2/3">
-                    <p className="mb-2 text-sm">Category</p>
-                    <Popover open={open} onOpenChange={setOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={open}
-                          className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
-                        >
-                          {categoryValue
-                            ? categories.find(
-                                (category) => category.label === categoryValue
-                              )?.value || categoryValue
-                            : "Select category"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Search category..."
-                            onChangeCapture={handleInputChange}
-                          />
-                          <CommandEmpty>
-                            <div className="flex flex-col">
-                              <Tabs
-                                defaultValue="text"
-                                className="w-full text-center"
-                              >
-                                <TabsList>
-                                  <TabsTrigger value="text">Text</TabsTrigger>
-                                  <TabsTrigger value="icon">Icon</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="text">
-                                  <Input
-                                    className="h-7 text-xs "
-                                    value={dispValue}
-                                    disabled
-                                  />
-                                </TabsContent>
-                                <TabsContent value="icon">
-                                  <div className="flex justify-center">
-                                    <div className="grid grid-cols-5 gap-2">
-                                      {icons.map(
-                                        (icon, index) =>
-                                          index > 6 && (
-                                            <div
-                                              key={icon.id}
-                                              className={cn(
-                                                "rounded-sm p-2 hover:cursor-pointer",
-                                                icon.id === iconId
-                                                  ? "bg-violet-500 text-primary-foreground"
-                                                  : "hover:bg-muted "
-                                              )}
-                                              onClick={() => {
-                                                setIconId(icon.id);
-                                              }}
-                                            >
-                                              {icon.icon}
-                                            </div>
-                                          )
-                                      )}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-1/3">
+                      <label className="text-sm">Amount</label>
+                      <Input
+                        className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                        {...register("amount", {
+                          required: true,
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        step="0.01"
+                      />
+                      <div className="h-3">
+                        {errors.amount && (
+                          <span className="text-xxs text-red-500">
+                            {errors.amount.message}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-2/3">
+                      <p className="mb-2 text-sm">Category</p>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
+                          >
+                            {categoryValue
+                              ? categories.find(
+                                  (category) => category.label === categoryValue
+                                )?.value || categoryValue
+                              : "Select category"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="Search category..."
+                              onChangeCapture={handleInputChange}
+                            />
+                            <CommandEmpty>
+                              <div className="flex flex-col">
+                                <Tabs
+                                  defaultValue="text"
+                                  className="w-full text-center"
+                                >
+                                  <TabsList>
+                                    <TabsTrigger value="text">Text</TabsTrigger>
+                                    <TabsTrigger value="icon">Icon</TabsTrigger>
+                                  </TabsList>
+                                  <TabsContent value="text">
+                                    <Input
+                                      className="h-7 text-xs "
+                                      value={dispValue}
+                                      disabled
+                                    />
+                                  </TabsContent>
+                                  <TabsContent value="icon">
+                                    <div className="flex justify-center">
+                                      <div className="grid grid-cols-5 gap-2">
+                                        {icons.map(
+                                          (icon, index) =>
+                                            index > 6 && (
+                                              <div
+                                                key={icon.id}
+                                                className={cn(
+                                                  "rounded-sm p-2 hover:cursor-pointer",
+                                                  icon.id === iconId
+                                                    ? "bg-violet-500 text-primary-foreground"
+                                                    : "hover:bg-muted "
+                                                )}
+                                                onClick={() => {
+                                                  setIconId(icon.id);
+                                                }}
+                                              >
+                                                {icon.icon}
+                                              </div>
+                                            )
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </TabsContent>
-                              </Tabs>
+                                  </TabsContent>
+                                </Tabs>
 
-                              <button
-                                onClick={() => {
-                                  setCategoryValue(dispValue);
-                                  setValue("category", {
-                                    id: categories.length + 1,
-                                    value: dispValue,
-                                    label: dispValue,
-                                    iconId: iconId,
-                                  });
-                                  categories.push({
-                                    id: categories.length + 1,
-                                    value: dispValue,
-                                    label: dispValue,
-                                    iconId: iconId,
-                                  });
-                                  setOpen(false);
-                                }}
-                                className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
-                              >
-                                Create &quot;{dispValue}&quot;
-                              </button>
-                            </div>
-                          </CommandEmpty>
+                                <button
+                                  onClick={() => {
+                                    setCategoryValue(dispValue);
+                                    setValue("category", {
+                                      id: categories.length + 1,
+                                      value: dispValue,
+                                      label: dispValue,
+                                      iconId: iconId,
+                                    });
+                                    categories.push({
+                                      id: categories.length + 1,
+                                      value: dispValue,
+                                      label: dispValue,
+                                      iconId: iconId,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                  className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                >
+                                  Create &quot;{dispValue}&quot;
+                                </button>
+                              </div>
+                            </CommandEmpty>
 
-                          {/* default cats */}
-                          <CommandGroup>
-                            {categories.map((category) => (
-                              <CommandItem
-                                key={category.id}
-                                onSelect={(selectedCategory) => {
-                                  setCategoryValue(
-                                    selectedCategory === categoryValue
-                                      ? ""
-                                      : selectedCategory
-                                  );
-                                  setValue("category", {
-                                    id: category.id,
-                                    value: category.value,
-                                    label: selectedCategory,
-                                    iconId: category.iconId,
-                                  });
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    categoryValue === category.label
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {icons[category?.iconId - 1]?.icon}
-                                <span className="ml-3">{category.value}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <div className="h-3">
-                      {errors.category && (
-                        <span className="text-xxs text-red-500">
-                          {errors.category.message}
-                        </span>
-                      )}
+                            {/* default cats */}
+                            <CommandGroup>
+                              {categories.map((category) => (
+                                <CommandItem
+                                  key={category.id}
+                                  onSelect={(selectedCategory) => {
+                                    setCategoryValue(
+                                      selectedCategory === categoryValue
+                                        ? ""
+                                        : selectedCategory
+                                    );
+                                    setValue("category", {
+                                      id: category.id,
+                                      value: category.value,
+                                      label: selectedCategory,
+                                      iconId: category.iconId,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      categoryValue === category.label
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {icons[category?.iconId - 1]?.icon}
+                                  <span className="ml-3">{category.value}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <div className="h-3">
+                        {errors.category && (
+                          <span className="text-xxs text-red-500">
+                            {errors.category.message}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <div className="flex flex-col">
-                    <p className="mb-2 text-sm">Date</p>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-[240px] justify-start text-left font-normal focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1",
-                            !date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? (
-                            format(date, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={(data) => {
-                            setDate(data);
-                            setValue("date", data as Date);
-                          }}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <div className="h-3">
-                      {errors.date && (
-                        <span className="text-xxs text-red-500">
-                          {errors.date.message}
-                        </span>
-                      )}
+                  <div>
+                    <div className="flex flex-col">
+                      <p className="mb-2 text-sm">Date</p>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] justify-start text-left font-normal focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? (
+                              format(date, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(data) => {
+                              setDate(data);
+                              setValue("date", data as Date);
+                            }}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <div className="h-3">
+                        {errors.date && (
+                          <span className="text-xxs text-red-500">
+                            {errors.date.message}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={isCreatingExpense}
-                  className="w-full"
-                >
-                  {isCreatingExpense ? (
-                    <Loader2
-                      className="mr-2 h-4 w-4 animate-spin"
-                      color="#803FE8"
-                    />
-                  ) : (
-                    <span>Create</span>
-                  )}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <Button
+                    type="submit"
+                    disabled={isCreatingExpense}
+                    className="w-full"
+                  >
+                    {isCreatingExpense ? (
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        color="#803FE8"
+                      />
+                    ) : (
+                      <span>Create</span>
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Input
+              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search..."
+            />
+          </div>
         </div>
         <div className="mt-10 space-y-5">
-          {expenses?.map((expense) => (
+          {filteredExpenses?.map((expense) => (
             <div
               key={expense.id}
               className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
@@ -768,7 +784,7 @@ const Expense: NextPage = () => {
                 </div>
               </div>
               <Popover>
-                <PopoverTrigger>
+                <PopoverTrigger asChild>
                   <Button
                     variant="ghostSecondary"
                     className="h-8 w-8 rounded-md p-0"

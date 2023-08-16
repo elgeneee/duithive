@@ -67,7 +67,31 @@ export const dashboardRouter = createTRPCRouter({
           },
         });
 
-        return { incomes: incomes, expenses: expenses };
+        const budgets = await ctx.prisma.budget.findMany({
+          where: {
+            userId: userId.id,
+          },
+          select: {
+            id: true,
+            title: true,
+            category: {
+              select: {
+                name: true,
+                iconId: true,
+              },
+            },
+            amount: true,
+            startDate: true,
+            endDate: true,
+            expenses: true,
+          },
+          orderBy: {
+            endDate: "desc",
+          },
+          take: 2,
+        });
+
+        return { incomes: incomes, expenses: expenses, budgets: budgets };
       }
     } catch (err) {
       throw new Error(err as string);

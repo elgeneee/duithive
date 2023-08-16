@@ -55,8 +55,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { icons, categories } from "@/store/category";
+import { type RouterOutputs } from "@/utils/api";
 
 import { api } from "@/utils/api";
+type Budgets = RouterOutputs["budget"]["getAll"];
 
 const createBudgetSchema = z
   .object({
@@ -87,6 +89,19 @@ const editBudgetSchema = z.object({
     invalid_type_error: "Amount must be a number",
   }),
 });
+
+const getFilteredBudgets = (query: string, budgets: Budgets) => {
+  if (!query) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return budgets;
+  }
+
+  if (budgets) {
+    return budgets.filter((budget: { title: string }) =>
+      budget.title.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+};
 
 const Budget: NextPage = () => {
   const { data: session } = useSession();
@@ -129,6 +144,8 @@ const Budget: NextPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const inputTitleRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState<string>("");
+
   const ctx = api.useContext();
 
   const today = new Date();
@@ -215,319 +232,329 @@ const Budget: NextPage = () => {
     deleteBudget({ id: id });
   };
 
+  const filteredBudgets = getFilteredBudgets(query, budgets);
+
   return (
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Budget</h1>
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <Button
-              onClick={() => {
-                setDate(new Date());
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                setDeadline(tomorrow);
-                setDialogOpen(true);
-              }}
-            >
-              <Plus size={15} />
-              <span className="ml-3">Add Budget</span>
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Budget</DialogTitle>
-              </DialogHeader>
-              <form
-                className="mt-5 space-y-3"
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSubmit={handleSubmit(onSubmit)}
+          <div className="flex items-center space-x-2">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Button
+                className="w-64"
+                onClick={() => {
+                  setDate(new Date());
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  setDeadline(tomorrow);
+                  setDialogOpen(true);
+                }}
               >
-                <div>
-                  <label className="text-sm">Title</label>
-                  <Input
-                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                    {...register("title", { required: true })}
-                  />
-                  <div className="h-3">
-                    {errors.title && (
-                      <span className="text-xxs text-red-500">
-                        {errors.title.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-1/3">
-                    <label className="text-sm">Budget</label>
+                <Plus size={15} />
+                <span className="ml-3">Add Budget</span>
+              </Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Budget</DialogTitle>
+                </DialogHeader>
+                <form
+                  className="mt-5 space-y-3"
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                  onSubmit={handleSubmit(onSubmit)}
+                >
+                  <div>
+                    <label className="text-sm">Title</label>
                     <Input
                       className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                      {...register("amount", {
-                        required: true,
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      step="0.01"
+                      {...register("title", { required: true })}
                     />
                     <div className="h-3">
-                      {errors.amount && (
+                      {errors.title && (
                         <span className="text-xxs text-red-500">
-                          {errors.amount.message}
+                          {errors.title.message}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="w-2/3">
-                    <p className="mb-2 text-sm">Category</p>
-                    <Popover open={open} onOpenChange={setOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={open}
-                          className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
-                        >
-                          {categoryValue
-                            ? categories.find(
-                                (category) => category.label === categoryValue
-                              )?.value || categoryValue
-                            : "Select category"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Search category..."
-                            onChangeCapture={handleInputChange}
-                          />
-                          <CommandEmpty>
-                            <div className="flex flex-col">
-                              <Tabs
-                                defaultValue="text"
-                                className="w-full text-center"
-                              >
-                                <TabsList>
-                                  <TabsTrigger value="text">Text</TabsTrigger>
-                                  <TabsTrigger value="icon">Icon</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="text">
-                                  <Input
-                                    className="h-7 text-xs "
-                                    value={dispValue}
-                                    disabled
-                                  />
-                                </TabsContent>
-                                <TabsContent value="icon">
-                                  <div className="flex justify-center">
-                                    <div className="grid grid-cols-5 gap-2">
-                                      {icons.map(
-                                        (icon, index) =>
-                                          index > 6 && (
-                                            <div
-                                              key={icon.id}
-                                              className={cn(
-                                                "rounded-sm p-2 hover:cursor-pointer",
-                                                icon.id === iconId
-                                                  ? "bg-violet-500 text-primary-foreground"
-                                                  : "hover:bg-muted "
-                                              )}
-                                              onClick={() => {
-                                                setIconId(icon.id);
-                                              }}
-                                            >
-                                              {icon.icon}
-                                            </div>
-                                          )
-                                      )}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-1/3">
+                      <label className="text-sm">Budget</label>
+                      <Input
+                        className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                        {...register("amount", {
+                          required: true,
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        step="0.01"
+                      />
+                      <div className="h-3">
+                        {errors.amount && (
+                          <span className="text-xxs text-red-500">
+                            {errors.amount.message}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-2/3">
+                      <p className="mb-2 text-sm">Category</p>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
+                          >
+                            {categoryValue
+                              ? categories.find(
+                                  (category) => category.label === categoryValue
+                                )?.value || categoryValue
+                              : "Select category"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="Search category..."
+                              onChangeCapture={handleInputChange}
+                            />
+                            <CommandEmpty>
+                              <div className="flex flex-col">
+                                <Tabs
+                                  defaultValue="text"
+                                  className="w-full text-center"
+                                >
+                                  <TabsList>
+                                    <TabsTrigger value="text">Text</TabsTrigger>
+                                    <TabsTrigger value="icon">Icon</TabsTrigger>
+                                  </TabsList>
+                                  <TabsContent value="text">
+                                    <Input
+                                      className="h-7 text-xs "
+                                      value={dispValue}
+                                      disabled
+                                    />
+                                  </TabsContent>
+                                  <TabsContent value="icon">
+                                    <div className="flex justify-center">
+                                      <div className="grid grid-cols-5 gap-2">
+                                        {icons.map(
+                                          (icon, index) =>
+                                            index > 6 && (
+                                              <div
+                                                key={icon.id}
+                                                className={cn(
+                                                  "rounded-sm p-2 hover:cursor-pointer",
+                                                  icon.id === iconId
+                                                    ? "bg-violet-500 text-primary-foreground"
+                                                    : "hover:bg-muted "
+                                                )}
+                                                onClick={() => {
+                                                  setIconId(icon.id);
+                                                }}
+                                              >
+                                                {icon.icon}
+                                              </div>
+                                            )
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </TabsContent>
-                              </Tabs>
+                                  </TabsContent>
+                                </Tabs>
 
-                              <button
-                                onClick={() => {
-                                  setCategoryValue(dispValue);
-                                  setValue("category", {
-                                    id: categories.length + 1,
-                                    value: dispValue,
-                                    label: dispValue,
-                                    iconId: iconId,
-                                  });
-                                  categories.push({
-                                    id: categories.length + 1,
-                                    value: dispValue,
-                                    label: dispValue,
-                                    iconId: iconId,
-                                  });
-                                  setOpen(false);
-                                }}
-                                className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
-                              >
-                                Create &quot;{dispValue}&quot;
-                              </button>
-                            </div>
-                          </CommandEmpty>
+                                <button
+                                  onClick={() => {
+                                    setCategoryValue(dispValue);
+                                    setValue("category", {
+                                      id: categories.length + 1,
+                                      value: dispValue,
+                                      label: dispValue,
+                                      iconId: iconId,
+                                    });
+                                    categories.push({
+                                      id: categories.length + 1,
+                                      value: dispValue,
+                                      label: dispValue,
+                                      iconId: iconId,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                  className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                >
+                                  Create &quot;{dispValue}&quot;
+                                </button>
+                              </div>
+                            </CommandEmpty>
 
-                          {/* default cats */}
-                          <CommandGroup>
-                            {categories.map((category) => (
-                              <CommandItem
-                                key={category.id}
-                                onSelect={(selectedCategory) => {
-                                  setCategoryValue(
-                                    selectedCategory === categoryValue
-                                      ? ""
-                                      : selectedCategory
-                                  );
-                                  setValue("category", {
-                                    id: category.id,
-                                    value: category.value,
-                                    label: selectedCategory,
-                                    iconId: category.iconId,
-                                  });
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    categoryValue === category.label
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {icons[category?.iconId - 1]?.icon}
-                                <span className="ml-3">{category.value}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <div className="h-3">
-                      {errors.category && (
-                        <span className="text-xxs text-red-500">
-                          {errors.category.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-1/2">
-                    <div className="flex flex-col">
-                      <p className="mb-2 text-sm">StartDate</p>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {date ? (
-                              format(date, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(data) => {
-                              setDate(data);
-                              setValue("startDate", data as Date);
-                            }}
-                            initialFocus
-                            disabled={(date) => date < new Date("1900-01-01")}
-                          />
+                            {/* default cats */}
+                            <CommandGroup>
+                              {categories.map((category) => (
+                                <CommandItem
+                                  key={category.id}
+                                  onSelect={(selectedCategory) => {
+                                    setCategoryValue(
+                                      selectedCategory === categoryValue
+                                        ? ""
+                                        : selectedCategory
+                                    );
+                                    setValue("category", {
+                                      id: category.id,
+                                      value: category.value,
+                                      label: selectedCategory,
+                                      iconId: category.iconId,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      categoryValue === category.label
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {icons[category?.iconId - 1]?.icon}
+                                  <span className="ml-3">{category.value}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
                         </PopoverContent>
                       </Popover>
                       <div className="h-3">
-                        {errors.startDate && (
+                        {errors.category && (
                           <span className="text-xxs text-red-500">
-                            {errors.startDate.message}
+                            {errors.category.message}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2">
-                    <div className="flex flex-col">
-                      <p className="mb-2 text-sm">Deadline</p>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !date && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {deadline ? (
-                              format(deadline, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={deadline}
-                            onSelect={(data) => {
-                              setDeadline(data);
-                              setValue("endDate", data as Date);
-                            }}
-                            initialFocus
-                            disabled={(date) => date < new Date()}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <div className="h-3">
-                        {errors.endDate && (
-                          <span className="text-xxs text-red-500">
-                            {errors.endDate.message}
-                          </span>
-                        )}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-1/2">
+                      <div className="flex flex-col">
+                        <p className="mb-2 text-sm">StartDate</p>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {date ? (
+                                format(date, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(data) => {
+                                setDate(data);
+                                setValue("startDate", data as Date);
+                              }}
+                              initialFocus
+                              disabled={(date) => date < new Date("1900-01-01")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="h-3">
+                          {errors.startDate && (
+                            <span className="text-xxs text-red-500">
+                              {errors.startDate.message}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="flex flex-col">
+                        <p className="mb-2 text-sm">Deadline</p>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !date && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {deadline ? (
+                                format(deadline, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={deadline}
+                              onSelect={(data) => {
+                                setDeadline(data);
+                                setValue("endDate", data as Date);
+                              }}
+                              initialFocus
+                              disabled={(date) => date < new Date()}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="h-3">
+                          {errors.endDate && (
+                            <span className="text-xxs text-red-500">
+                              {errors.endDate.message}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <p className="text-xs text-[#A0A5AF]">
-                  Note: Category, StartDate, and Deadline are not editable after
-                  creation
-                </p>
+                  <p className="text-xs text-[#A0A5AF]">
+                    Note: Category, StartDate, and Deadline are not editable
+                    after creation
+                  </p>
 
-                <Button
-                  type="submit"
-                  disabled={isCreatingBudget}
-                  className="w-full"
-                >
-                  {isCreatingBudget ? (
-                    <Loader2
-                      className="mr-2 h-4 w-4 animate-spin"
-                      color="#803FE8"
-                    />
-                  ) : (
-                    <span>Create</span>
-                  )}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <Button
+                    type="submit"
+                    disabled={isCreatingBudget}
+                    className="w-full"
+                  >
+                    {isCreatingBudget ? (
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        color="#803FE8"
+                      />
+                    ) : (
+                      <span>Create</span>
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Input
+              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search..."
+            />
+          </div>
         </div>
         <div className="mt-10 space-y-5">
-          {budgets?.map((budget) => (
+          {filteredBudgets?.map((budget) => (
             <div
               key={budget.id}
               className={cn(
-                budget.endDate.getDay() < new Date().getDay() &&
+                budget.endDate < new Date() &&
                   "bg-opacity-60 text-black text-opacity-30",
                 "flex items-center justify-between space-x-3 rounded-md bg-white p-3"
               )}
@@ -535,7 +562,7 @@ const Budget: NextPage = () => {
               <div className="flex w-full items-center justify-between">
                 <div
                   className={cn(
-                    budget.endDate.getDay() < new Date().getDay() &&
+                    budget.endDate < new Date() &&
                       "bg-opacity-10 text-opacity-30",
                     "mr-8 flex h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600"
                   )}
@@ -573,8 +600,7 @@ const Budget: NextPage = () => {
                       <span className="flex items-center space-x-2">
                         <p
                           className={cn(
-                            budget.endDate.getDay() < new Date().getDay() &&
-                              "text-opacity-30",
+                            budget.endDate < new Date() && "text-opacity-30",
                             "font-base text-xs text-[#9e9e9e]"
                           )}
                         >
@@ -588,7 +614,7 @@ const Budget: NextPage = () => {
                             : budget.endDate.getMonth()}
                           /{budget.endDate.getFullYear()}
                         </p>
-                        {budget.endDate.getDay() < new Date().getDay() && (
+                        {budget.endDate < new Date() && (
                           <ExpiredBadge>Expired</ExpiredBadge>
                         )}
                       </span>
@@ -608,9 +634,7 @@ const Budget: NextPage = () => {
                     }
                     className="my-2"
                     customProp={
-                      budget.endDate.getDay() < new Date().getDay()
-                        ? "bg-opacity-30"
-                        : ""
+                      budget.endDate < new Date() ? "bg-opacity-30" : ""
                     }
                   />
                   <div className="flex items-center justify-between">
@@ -638,7 +662,7 @@ const Budget: NextPage = () => {
                           <AccordionTrigger>
                             <span
                               className={cn(
-                                budget.endDate.getDay() < new Date().getDay() &&
+                                budget.endDate < new Date() &&
                                   "text-opacity-40",
                                 "flex items-center space-x-2 text-athens-gray-400"
                               )}
@@ -689,7 +713,7 @@ const Budget: NextPage = () => {
                 </div>
               </div>
               <Popover>
-                <PopoverTrigger>
+                <PopoverTrigger asChild>
                   <Button
                     variant="ghostSecondary"
                     className="h-8 w-8 rounded-md p-0"
