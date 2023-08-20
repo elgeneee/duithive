@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { SkeletonList } from "@/components/ui/skeletonList";
 import { useState, useRef } from "react";
 import {
   MoreVertical,
@@ -139,7 +140,8 @@ const Income: NextPage = () => {
       }
     },
   });
-  const { data: incomes } = api.income.getAll.useQuery();
+  const { data: incomes, isLoading: isLoadingIncome } =
+    api.income.getAll.useQuery();
 
   const { mutate: createIncome, isLoading: isCreatingIncome } =
     api.income.create.useMutation({
@@ -328,261 +330,268 @@ const Income: NextPage = () => {
           </div>
         </div>
         <div className="mt-10 space-y-5">
-          {filteredIncomes?.map((income) => (
-            <div
-              key={income.id}
-              className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
-            >
-              <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
-                <DollarSign size={20} />
-              </div>
-              <div className="flex flex-1 justify-between">
-                <div>
-                  <p className="text-sm font-semibold">{income.title}</p>
-                  <p className="text-sm font-normal text-[#A0A5AF]">
-                    {income.description}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">
-                    {userCurrency?.symbol}
-                    {parseFloat(income.amount.toString()).toFixed(2)}
-                  </p>
-                  <p className="text-sm font-normal text-[#A0A5AF]">
-                    {income.transactionDate.getDate() < 10
-                      ? `0${income.transactionDate.getDate()}`
-                      : income.transactionDate.getDate()}
-                    /
-                    {income.transactionDate.getMonth() < 10
-                      ? `0${income.transactionDate.getMonth() + 1}`
-                      : income.transactionDate.getMonth()}
-                    /{income.transactionDate.getFullYear()}
-                  </p>
-                </div>
-              </div>
-              <Popover>
-                <PopoverTrigger>
-                  <Button
-                    variant="ghostSecondary"
-                    className="h-8 w-8 rounded-md p-0"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Open popover</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="flex w-36 flex-col p-2">
-                  <p className="px-2 text-sm font-medium text-foreground">
-                    Edit/Delete
-                  </p>
-                  <Separator className="my-2" />
-                  {/* edit dialog */}
-                  <Dialog
-                    open={editDialogOpen}
-                    onOpenChange={setEditDialogOpen}
-                  >
-                    <button
-                      onClick={() => {
-                        setEditDate(income.transactionDate);
-                        if (inputTitleRef.current) {
-                          inputTitleRef.current.defaultValue = income.title;
-                        }
-                        if (inputDescriptionRef.current) {
-                          inputDescriptionRef.current.defaultValue =
-                            income.description;
-                        }
-                        if (inputAmountRef.current) {
-                          inputAmountRef.current.defaultValue =
-                            income.amount.toString();
-                        }
-                        editSetValue("id", income.id);
-                        editSetValue("description", income.description);
-                        editSetValue(
-                          "amount",
-                          parseFloat(income.amount.toString())
-                        );
-                        editSetValue("date", income.transactionDate);
-                        setEditDialogOpen(true);
-                      }}
-                      className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <Edit className="h-4 w-4" />
-                      <p className="text-sm">Edit</p>
-                    </button>
-
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Income</DialogTitle>
-                      </DialogHeader>
-                      <form
-                        className="mt-10 space-y-3"
-                        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                        onSubmit={editHandleSubmit(onEditSubmit)}
+          {isLoadingIncome ? (
+            <SkeletonList className="h-[60px]" />
+          ) : (
+            <>
+              {filteredIncomes?.map((income) => (
+                <div
+                  key={income.id}
+                  className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
+                >
+                  <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
+                    <DollarSign size={20} />
+                  </div>
+                  <div className="flex flex-1 justify-between">
+                    <div>
+                      <p className="text-sm font-semibold">{income.title}</p>
+                      <p className="text-sm font-normal text-[#A0A5AF]">
+                        {income.description}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {userCurrency?.symbol}
+                        {parseFloat(income.amount.toString()).toFixed(2)}
+                      </p>
+                      <p className="text-sm font-normal text-[#A0A5AF]">
+                        {income.transactionDate.getDate() < 10
+                          ? `0${income.transactionDate.getDate()}`
+                          : income.transactionDate.getDate()}
+                        /
+                        {income.transactionDate.getMonth() < 10
+                          ? `0${income.transactionDate.getMonth() + 1}`
+                          : income.transactionDate.getMonth()}
+                        /{income.transactionDate.getFullYear()}
+                      </p>
+                    </div>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger>
+                      <Button
+                        variant="ghostSecondary"
+                        className="h-8 w-8 rounded-md p-0"
                       >
-                        <div>
-                          <label className="text-sm">Title</label>
-                          <Input
-                            className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                            placeholder="Enter description"
-                            defaultValue={income.title}
-                            onChange={(e) => {
-                              editSetValue("title", e.target.value);
-                            }}
-                            ref={inputTitleRef}
-                          />
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Open popover</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="flex w-36 flex-col p-2">
+                      <p className="px-2 text-sm font-medium text-foreground">
+                        Edit/Delete
+                      </p>
+                      <Separator className="my-2" />
+                      {/* edit dialog */}
+                      <Dialog
+                        open={editDialogOpen}
+                        onOpenChange={setEditDialogOpen}
+                      >
+                        <button
+                          onClick={() => {
+                            setEditDate(income.transactionDate);
+                            if (inputTitleRef.current) {
+                              inputTitleRef.current.defaultValue = income.title;
+                            }
+                            if (inputDescriptionRef.current) {
+                              inputDescriptionRef.current.defaultValue =
+                                income.description;
+                            }
+                            if (inputAmountRef.current) {
+                              inputAmountRef.current.defaultValue =
+                                income.amount.toString();
+                            }
+                            editSetValue("id", income.id);
+                            editSetValue("description", income.description);
+                            editSetValue(
+                              "amount",
+                              parseFloat(income.amount.toString())
+                            );
+                            editSetValue("date", income.transactionDate);
+                            setEditDialogOpen(true);
+                          }}
+                          className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <Edit className="h-4 w-4" />
+                          <p className="text-sm">Edit</p>
+                        </button>
 
-                          <div className="h-3">
-                            {editErrors.description && (
-                              <span className="text-xxs text-red-500">
-                                {editErrors.description.message}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-sm">Description</label>
-                          <Input
-                            className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                            placeholder="Enter description"
-                            defaultValue={income.description}
-                            onChange={(e) => {
-                              editSetValue("description", e.target.value);
-                            }}
-                            ref={inputDescriptionRef}
-                          />
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Income</DialogTitle>
+                          </DialogHeader>
+                          <form
+                            className="mt-10 space-y-3"
+                            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                            onSubmit={editHandleSubmit(onEditSubmit)}
+                          >
+                            <div>
+                              <label className="text-sm">Title</label>
+                              <Input
+                                className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                placeholder="Enter description"
+                                defaultValue={income.title}
+                                onChange={(e) => {
+                                  editSetValue("title", e.target.value);
+                                }}
+                                ref={inputTitleRef}
+                              />
 
-                          <div className="h-3">
-                            {editErrors.description && (
-                              <span className="text-xxs text-red-500">
-                                {editErrors.description.message}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <div className="w-1/3">
-                            <label className="text-sm">Amount</label>
-                            <Input
-                              className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                              placeholder="Enter amount"
-                              defaultValue={parseFloat(
-                                income.amount.toString()
-                              )}
-                              onChange={(e) => {
-                                editSetValue(
-                                  "amount",
-                                  parseFloat(e.target.value)
-                                );
-                              }}
-                              type="number"
-                              step="0.01"
-                              ref={inputAmountRef}
-                            />
-                            <div className="h-3">
-                              {editErrors.amount && (
-                                <span className="text-xxs text-red-500">
-                                  {editErrors.amount.message}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="w-2/3">
-                            <div className="flex flex-col">
-                              <p className="mb-2 text-sm">Date</p>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full justify-start text-left font-normal",
-                                      !editDate && "text-muted-foreground"
-                                    )}
-                                  >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {editDate ? (
-                                      format(editDate, "PPP")
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                  <Calendar
-                                    mode="single"
-                                    selected={editDate}
-                                    onSelect={(data) => {
-                                      setEditDate(data);
-                                      editSetValue("date", data as Date);
-                                    }}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
                               <div className="h-3">
-                                {editErrors.date && (
+                                {editErrors.description && (
                                   <span className="text-xxs text-red-500">
-                                    {editErrors.date.message}
+                                    {editErrors.description.message}
                                   </span>
                                 )}
                               </div>
                             </div>
-                          </div>
-                        </div>
+                            <div>
+                              <label className="text-sm">Description</label>
+                              <Input
+                                className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                placeholder="Enter description"
+                                defaultValue={income.description}
+                                onChange={(e) => {
+                                  editSetValue("description", e.target.value);
+                                }}
+                                ref={inputDescriptionRef}
+                              />
 
-                        <Button
-                          type="submit"
-                          disabled={isEditLoading}
-                          className="w-full"
-                        >
-                          {isEditLoading ? (
-                            <Loader2
-                              className="mr-2 h-4 w-4 animate-spin"
-                              color="#803FE8"
-                            />
-                          ) : (
-                            <span>Create</span>
-                          )}
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                  <Dialog
-                    open={deleteDialogOpen}
-                    onOpenChange={setDeleteDialogOpen}
-                  >
-                    <DialogTrigger>
-                      <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
-                        <Trash2 className="h-4 w-4" />
-                        <p className="text-sm">Delete</p>
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Are you absolutely sure?</DialogTitle>
-                        <DialogDescription>
-                          This action cannot be undone. This will permanently
-                          remove your income record from the system.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter className="flex justify-center">
-                        <Button
-                          variant={"secondary"}
-                          onClick={() => setDeleteDialogOpen(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          variant={"destructive"}
-                          onClick={() => handleDelete(income.id)}
-                        >
-                          Delete
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </PopoverContent>
-              </Popover>
-            </div>
-          ))}
+                              <div className="h-3">
+                                {editErrors.description && (
+                                  <span className="text-xxs text-red-500">
+                                    {editErrors.description.message}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="w-1/3">
+                                <label className="text-sm">Amount</label>
+                                <Input
+                                  className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                  placeholder="Enter amount"
+                                  defaultValue={parseFloat(
+                                    income.amount.toString()
+                                  )}
+                                  onChange={(e) => {
+                                    editSetValue(
+                                      "amount",
+                                      parseFloat(e.target.value)
+                                    );
+                                  }}
+                                  type="number"
+                                  step="0.01"
+                                  ref={inputAmountRef}
+                                />
+                                <div className="h-3">
+                                  {editErrors.amount && (
+                                    <span className="text-xxs text-red-500">
+                                      {editErrors.amount.message}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="w-2/3">
+                                <div className="flex flex-col">
+                                  <p className="mb-2 text-sm">Date</p>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                          "w-full justify-start text-left font-normal",
+                                          !editDate && "text-muted-foreground"
+                                        )}
+                                      >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {editDate ? (
+                                          format(editDate, "PPP")
+                                        ) : (
+                                          <span>Pick a date</span>
+                                        )}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                      <Calendar
+                                        mode="single"
+                                        selected={editDate}
+                                        onSelect={(data) => {
+                                          setEditDate(data);
+                                          editSetValue("date", data as Date);
+                                        }}
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <div className="h-3">
+                                    {editErrors.date && (
+                                      <span className="text-xxs text-red-500">
+                                        {editErrors.date.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <Button
+                              type="submit"
+                              disabled={isEditLoading}
+                              className="w-full"
+                            >
+                              {isEditLoading ? (
+                                <Loader2
+                                  className="mr-2 h-4 w-4 animate-spin"
+                                  color="#803FE8"
+                                />
+                              ) : (
+                                <span>Create</span>
+                              )}
+                            </Button>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                      <Dialog
+                        open={deleteDialogOpen}
+                        onOpenChange={setDeleteDialogOpen}
+                      >
+                        <DialogTrigger>
+                          <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
+                            <Trash2 className="h-4 w-4" />
+                            <p className="text-sm">Delete</p>
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <DialogDescription>
+                              This action cannot be undone. This will
+                              permanently remove your income record from the
+                              system.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter className="flex justify-center">
+                            <Button
+                              variant={"secondary"}
+                              onClick={() => setDeleteDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant={"destructive"}
+                              onClick={() => handleDelete(income.id)}
+                            >
+                              Delete
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </main>
     </AppLayout>
