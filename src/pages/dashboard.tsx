@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { icons } from "@/store/category";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const colors = [
   "#9D74F3",
@@ -69,7 +70,8 @@ const Dashboard: NextPage = () => {
     day: "2-digit",
   });
 
-  const { data: dashboardData } = api.dashboard.getAll.useQuery();
+  const { data: dashboardData, isLoading: isLoadingDashboard } =
+    api.dashboard.getAll.useQuery();
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
@@ -271,293 +273,351 @@ const Dashboard: NextPage = () => {
       <main className="p-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-athens-gray-300">{formattedDate}</p>
-        {/* first layer */}
-        <div className="mt-10 flex space-x-3">
-          <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
-            <ResponsiveContainer width="100%" height="50%">
-              <AreaChart
-                data={incomeAreaData}
-                margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-                style={{ position: "static" }}
-              >
-                <defs>
-                  <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6FCF97" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#6FCF97" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="totalAmount"
-                  stroke="#27AE60"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorExpense)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div>
-              <p className="font-semibold text-[#A0A5AF]">Income</p>
-              <p className="text-lg font-semibold">
-                +{userCurrency?.symbol}{" "}
-                {incomeTotal.toLocaleString(undefined, {
-                  maximumFractionDigits: 2,
-                  minimumFractionDigits: 2,
-                })}
-              </p>
+        {isLoadingDashboard ? (
+          <>
+            <div className="mt-10 flex space-x-3">
+              <Skeleton className="h-36 w-1/5 rounded-lg border border-athens-gray-200/40" />
+              <Skeleton className="h-36 w-1/5 rounded-lg border border-athens-gray-200/40" />
+              <Skeleton className="h-36 w-3/5 rounded-lg border border-athens-gray-200/40" />
             </div>
-          </div>
-          <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
-            <ResponsiveContainer width="100%" height="50%" className={""}>
-              <AreaChart
-                data={expenseAreaData}
-                margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-                style={{ position: "static" }}
-              >
-                <defs>
-                  <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#EB5757" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#EB5757" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="totalAmount"
-                  stroke="#EB5757"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorIncome)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div>
-              <p className="font-semibold text-[#A0A5AF]">Expense</p>
-              <p className="text-lg font-semibold">
-                -{userCurrency?.symbol}{" "}
-                {expenseTotal.toLocaleString(undefined, {
-                  maximumFractionDigits: 2,
-                  minimumFractionDigits: 2,
-                })}
-              </p>
+            <div className="mt-10 flex space-x-3">
+              <Skeleton className="h-96 w-2/3 rounded-lg border border-athens-gray-200/40" />
+              <Skeleton className="h-96 w-1/3 rounded-lg border border-athens-gray-200/40" />
             </div>
-          </div>
-          <div
-            className={cn(
-              !dashboardData?.budgets?.length && "justify-center",
-              "flex h-36 w-3/5 items-center rounded-lg border border-athens-gray-100 bg-white p-2"
-            )}
-          >
-            {dashboardData?.budgets?.length ? (
-              <div className="w-full space-y-3 font-satoshi">
-                {dashboardData.budgets.map((budget) => (
-                  <div
-                    key={budget.id}
-                    className="flex w-full items-center justify-between space-x-2"
+            <div className="mt-10">
+              <Skeleton className="h-96 w-2/3 rounded-lg border border-athens-gray-200/40" />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* first layer */}
+            <div className="mt-10 flex space-x-3">
+              <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+                <ResponsiveContainer width="100%" height="50%">
+                  <AreaChart
+                    data={incomeAreaData}
+                    margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                    style={{ position: "static" }}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-violet-400/30 text-violet-600">
-                      {
-                        icons.find(
-                          (icon) => icon.id === budget.category?.iconId
-                        )?.icon
-                      }
-                    </div>
-                    <div className="w-full">
-                      <div className="flex justify-between font-semibold">
-                        <p>{budget.category?.name}</p>
-                        <p>
-                          {sumBy(budget.expenses, (item) =>
-                            parseFloat(item.amount.toString())
-                          ).toFixed(2)}
-                          <span className="text-[#D5DAE2]">
-                            /{parseFloat(budget.amount.toString()).toFixed(2)}
-                          </span>
-                        </p>
-                      </div>
-                      <div>
-                        <Progress
-                          value={
-                            (sumBy(budget.expenses, (item) =>
-                              parseFloat(item.amount.toString())
-                            ) /
-                              parseFloat(budget.amount.toString())) *
-                            100
-                          }
-                          className="my-1"
-                          customProp={
-                            parseFloat(budget.amount.toString()) <
-                            sumBy(budget.expenses, (item) =>
-                              parseFloat(item.amount.toString())
-                            )
-                              ? "bg-[#FEA8A8]"
-                              : "bg-[#94DBB1]"
-                          }
+                    <defs>
+                      <linearGradient
+                        id="colorExpense"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#6FCF97"
+                          stopOpacity={0.8}
                         />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="font-light italic text-[#A0A5AF]">No budget yet</p>
-            )}
-          </div>
-        </div>
-
-        {/* secondlayer */}
-        <div className="mt-10 flex space-x-3">
-          <div className="flex h-96 w-2/3 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
-            <div className="803FE8 flex justify-end space-x-3 font-bold">
-              <button
-                className={cn(
-                  barChartValue == "week"
-                    ? "border-b-4 border-violet-600 text-violet-600"
-                    : "text-[#A0A5AF]"
-                )}
-                onClick={() => {
-                  setBarChartValue("week");
-                  barChartProcess("week");
-                }}
-              >
-                7D
-              </button>
-              <button
-                className={cn(
-                  barChartValue == "month"
-                    ? "border-b-4 border-violet-600 text-violet-600"
-                    : "text-[#A0A5AF]"
-                )}
-                onClick={() => {
-                  setBarChartValue("month");
-                  barChartProcess("month");
-                }}
-              >
-                1M
-              </button>
-              <button
-                className={cn(
-                  barChartValue == "year"
-                    ? "border-b-4 border-violet-600 text-violet-600"
-                    : "text-[#A0A5AF]"
-                )}
-                onClick={() => {
-                  setBarChartValue("year");
-                  barChartProcess("year");
-                }}
-              >
-                1Y
-              </button>
-            </div>
-            <ResponsiveContainer width="100%" height="80%">
-              <BarChart data={barData}>
-                <CartesianGrid
-                  strokeDasharray="3"
-                  stroke="#EAEEF4"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="transactionDate"
-                  stroke="#EAEEF4"
-                  tickLine={false}
-                  tick={{ fill: "#667991", fontWeight: 300, fontSize: 12 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#667991", fontWeight: 300, fontSize: 12 }}
-                />
-                <Bar
-                  dataKey="totalAmount"
-                  fill="#803FE8"
-                  radius={100}
-                  barSize={15}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex h-96 w-1/3 flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
-            <p className="pl-4 font-satoshi text-xl font-bold">Categories</p>
-            <div className="relative flex h-full w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="totalAmount"
-                    nameKey="category"
-                    innerRadius={80}
-                    outerRadius={100}
-                    fill="#82ca9d"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={colors[index]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    isAnimationActive={false}
-                    contentStyle={{ zIndex: 9999 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-xl font-bold">
-                  {userCurrency?.symbol}
-                  {pieTotal.toFixed(2)}
-                </p>
-                <Select onValueChange={(value) => pieChartProcess(value)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="This week" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="week">This Week</SelectItem>
-                      <SelectItem value="month">This Month</SelectItem>
-                      <SelectItem value="year">This Year</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* third layer */}
-        <div className="mt-10 flex w-2/3 flex-col rounded-lg border border-athens-gray-100 bg-white p-3">
-          <div className="flex items-center justify-between">
-            <p className="font-satoshi text-xl font-bold">Latest Spendings</p>
-            <Link href="/expense">
-              <p className="text-sm text-[#A0A5AF] hover:underline">View All</p>
-            </Link>
-          </div>
-          <hr className="my-2" />
-          <div className="min-h-[10rem] space-y-4">
-            {dashboardData?.expenses?.length ? (
-              dashboardData.expenses.slice(0, 5).map((expense) => (
-                <div
-                  key={expense.id}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-semibold">{expense.description}</p>
-                    <p className="text-xs text-[#A0A5AF]">
-                      {expense.transactionDate.toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <p className="text-sm font-semibold ">
-                    -{userCurrency?.symbol}
-                    {parseFloat(expense.amount.toString()).toFixed(2)}
+                        <stop
+                          offset="95%"
+                          stopColor="#6FCF97"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="totalAmount"
+                      stroke="#27AE60"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorExpense)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <div>
+                  <p className="font-semibold text-[#A0A5AF]">Income</p>
+                  <p className="text-lg font-semibold">
+                    +{userCurrency?.symbol}{" "}
+                    {incomeTotal.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
-              ))
-            ) : (
-              <p className="translate-y-16 text-center italic text-[#A0A5AF]">
-                No expenses yet
-              </p>
-            )}
-          </div>
-        </div>
+              </div>
+              <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+                <ResponsiveContainer width="100%" height="50%" className={""}>
+                  <AreaChart
+                    data={expenseAreaData}
+                    margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                    style={{ position: "static" }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id="colorIncome"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#EB5757"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#EB5757"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="totalAmount"
+                      stroke="#EB5757"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorIncome)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <div>
+                  <p className="font-semibold text-[#A0A5AF]">Expense</p>
+                  <p className="text-lg font-semibold">
+                    -{userCurrency?.symbol}{" "}
+                    {expenseTotal.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div
+                className={cn(
+                  !dashboardData?.budgets?.length && "justify-center",
+                  "flex h-36 w-3/5 items-center rounded-lg border border-athens-gray-100 bg-white p-2"
+                )}
+              >
+                {dashboardData?.budgets?.length ? (
+                  <div className="w-full space-y-3 font-satoshi">
+                    {dashboardData.budgets.map((budget) => (
+                      <div
+                        key={budget.id}
+                        className="flex w-full items-center justify-between space-x-2"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-violet-400/30 text-violet-600">
+                          {
+                            icons.find(
+                              (icon) => icon.id === budget.category?.iconId
+                            )?.icon
+                          }
+                        </div>
+                        <div className="w-full">
+                          <div className="flex justify-between font-semibold">
+                            <p>{budget.category?.name}</p>
+                            <p>
+                              {sumBy(budget.expenses, (item) =>
+                                parseFloat(item.amount.toString())
+                              ).toFixed(2)}
+                              <span className="text-[#D5DAE2]">
+                                /
+                                {parseFloat(budget.amount.toString()).toFixed(
+                                  2
+                                )}
+                              </span>
+                            </p>
+                          </div>
+                          <div>
+                            <Progress
+                              value={
+                                (sumBy(budget.expenses, (item) =>
+                                  parseFloat(item.amount.toString())
+                                ) /
+                                  parseFloat(budget.amount.toString())) *
+                                100
+                              }
+                              className="my-1"
+                              customProp={
+                                parseFloat(budget.amount.toString()) <
+                                sumBy(budget.expenses, (item) =>
+                                  parseFloat(item.amount.toString())
+                                )
+                                  ? "bg-[#FEA8A8]"
+                                  : "bg-[#94DBB1]"
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="font-light italic text-[#A0A5AF]">
+                    No budget yet
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* secondlayer */}
+            <div className="mt-10 flex space-x-3">
+              <div className="flex h-96 w-2/3 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+                <div className="803FE8 flex justify-end space-x-3 font-bold">
+                  <button
+                    className={cn(
+                      barChartValue == "week"
+                        ? "border-b-4 border-violet-600 text-violet-600"
+                        : "text-[#A0A5AF]"
+                    )}
+                    onClick={() => {
+                      setBarChartValue("week");
+                      barChartProcess("week");
+                    }}
+                  >
+                    7D
+                  </button>
+                  <button
+                    className={cn(
+                      barChartValue == "month"
+                        ? "border-b-4 border-violet-600 text-violet-600"
+                        : "text-[#A0A5AF]"
+                    )}
+                    onClick={() => {
+                      setBarChartValue("month");
+                      barChartProcess("month");
+                    }}
+                  >
+                    1M
+                  </button>
+                  <button
+                    className={cn(
+                      barChartValue == "year"
+                        ? "border-b-4 border-violet-600 text-violet-600"
+                        : "text-[#A0A5AF]"
+                    )}
+                    onClick={() => {
+                      setBarChartValue("year");
+                      barChartProcess("year");
+                    }}
+                  >
+                    1Y
+                  </button>
+                </div>
+                <ResponsiveContainer width="100%" height="80%">
+                  <BarChart data={barData}>
+                    <CartesianGrid
+                      strokeDasharray="3"
+                      stroke="#EAEEF4"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="transactionDate"
+                      stroke="#EAEEF4"
+                      tickLine={false}
+                      tick={{ fill: "#667991", fontWeight: 300, fontSize: 12 }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "#667991", fontWeight: 300, fontSize: 12 }}
+                    />
+                    <Bar
+                      dataKey="totalAmount"
+                      fill="#803FE8"
+                      radius={100}
+                      barSize={15}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex h-96 w-1/3 flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+                <p className="pl-4 font-satoshi text-xl font-bold">
+                  Categories
+                </p>
+                <div className="relative flex h-full w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="totalAmount"
+                        nameKey="category"
+                        innerRadius={80}
+                        outerRadius={100}
+                        fill="#82ca9d"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={colors[index]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        isAnimationActive={false}
+                        contentStyle={{ zIndex: 9999 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center">
+                    <p className="text-xl font-bold">
+                      {userCurrency?.symbol}
+                      {pieTotal.toFixed(2)}
+                    </p>
+                    <Select onValueChange={(value) => pieChartProcess(value)}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="This week" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="week">This Week</SelectItem>
+                          <SelectItem value="month">This Month</SelectItem>
+                          <SelectItem value="year">This Year</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* third layer */}
+            <div className="mt-10 flex w-2/3 flex-col rounded-lg border border-athens-gray-100 bg-white p-3">
+              <div className="flex items-center justify-between">
+                <p className="font-satoshi text-xl font-bold">
+                  Latest Spendings
+                </p>
+                <Link href="/expense">
+                  <p className="text-sm text-[#A0A5AF] hover:underline">
+                    View All
+                  </p>
+                </Link>
+              </div>
+              <hr className="my-2" />
+              <div className="min-h-[10rem] space-y-4">
+                {dashboardData?.expenses?.length ? (
+                  dashboardData.expenses.slice(0, 5).map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-semibold">{expense.description}</p>
+                        <p className="text-xs text-[#A0A5AF]">
+                          {expense.transactionDate.toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold ">
+                        -{userCurrency?.symbol}
+                        {parseFloat(expense.amount.toString()).toFixed(2)}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="translate-y-16 text-center italic text-[#A0A5AF]">
+                    No expenses yet
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </main>
     </AppLayout>
   );
