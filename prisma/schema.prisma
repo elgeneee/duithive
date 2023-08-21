@@ -56,7 +56,7 @@ model User {
     password      String?   @db.Text
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
-    otp           String    @db.Text
+    otp           String?   @db.Text
     verified      Boolean   @default(false)
     notification  Boolean   @default(true)
     currency      Currency? @relation(fields: [currencyId], references: [id], onDelete: Cascade)

@@ -45,6 +45,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavStore } from "@/store/navStore";
 import { useToast } from "@/components/ui/use-toast";
+import { signOut } from "next-auth/react";
 
 const userSettingsSchema = z.object({
   username: z
@@ -325,6 +326,7 @@ const Settings: NextPage = () => {
       });
     } else {
       deleteAccount(data);
+      void signOut();
     }
   };
 
