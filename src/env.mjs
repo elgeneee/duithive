@@ -29,6 +29,9 @@ export const env = createEnv({
     CLOUDINARY_API_KEY: z.string(),
     CLOUDINARY_API_SECRET: z.string(),
     JWT_SECRET: z.string().min(1),
+    QSTASH_TOKEN: z.string(),
+    QSTASH_NEXT_SIGNING_KEY: z.string(),
+    QSTASH_CURRENT_SIGNING_KEY: z.string(),
   },
 
   /**
@@ -57,5 +60,8 @@ export const env = createEnv({
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
     JWT_SECRET: process.env.JWT_SECRET,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
   },
 });
