@@ -46,25 +46,26 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String         @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?        @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
-    password      String?   @db.Text
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
-    otp           String?   @db.Text
-    verified      Boolean   @default(false)
-    notification  Boolean   @default(true)
-    currency      Currency? @relation(fields: [currencyId], references: [id], onDelete: Cascade)
-    currencyId    Int       @default(1)
+    password      String?        @db.Text
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    otp           String?        @db.Text
+    verified      Boolean        @default(false)
+    notification  Boolean        @default(true)
+    currency      Currency?      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+    currencyId    Int            @default(1)
     expense       Expense[]
     income        Income[]
     budget        Budget[]
     report        Report[]
+    Notification  Notification[]
 
     @@index([currencyId])
 }
@@ -126,6 +127,7 @@ model Budget {
     category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     categoryId Int
     expenses   Expense[]
+    notifications Notification[]
 
     @@index([userId])
     @@index([categoryId])
@@ -155,6 +157,20 @@ model Currency {
     name   String @unique @db.VarChar(5)
     symbol String @db.VarChar(5)
     users  User[]
+}
+
+model Notification {
+    id      String  @id @default(uuid())
+    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId  String
+    message String  @db.Text
+    read    Boolean @default(false)
+
+    budget Budget? @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+    budgetId String? 
+
+    @@index([userId])
+    @@index([budgetId])
 }
 
 enum CurrencyType {

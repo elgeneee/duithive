@@ -1,5 +1,9 @@
 import { budgetSchema, editBudgetSchema } from "@/schema/budget.schema";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { z } from "zod";
 
 export const budgetRouter = createTRPCRouter({
@@ -162,4 +166,62 @@ export const budgetRouter = createTRPCRouter({
         throw new Error(err as string);
       }
     }),
+  checkBudgetExpiry: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const currentDate = new Date();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const budgets = await ctx.prisma.budget.findMany({
+        where: {
+          endDate: {
+            gte: currentDate,
+            lt: new Date(currentDate.getTime() + oneDay),
+          },
+        },
+      });
+
+      // const notifications = await ctx.prisma.notification.createMany({
+      //   data: budgets.map((budget) => (
+      //     {
+      //       message: "Budget is expring soon",
+      //       budgetId: budget.id,
+      //       userId: budget.userId
+      //     }
+      //   )),
+
+      // })
+
+      return budgets;
+    } catch (err) {
+      throw new Error(err as string);
+    }
+  }),
+  checkBudgetExceed: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const currentDate = new Date();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const budgets = await ctx.prisma.budget.findMany({
+        where: {
+          endDate: {
+            gte: currentDate,
+            lt: new Date(currentDate.getTime() + oneDay),
+          },
+        },
+      });
+
+      // const notifications = await ctx.prisma.notification.createMany({
+      //   data: budgets.map((budget) => (
+      //     {
+      //       message: "Budget is expring soon",
+      //       budgetId: budget.id,
+      //       userId: budget.userId
+      //     }
+      //   )),
+
+      // })
+
+      return budgets;
+    } catch (err) {
+      throw new Error(err as string);
+    }
+  }),
 });
