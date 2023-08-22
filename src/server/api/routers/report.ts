@@ -71,37 +71,37 @@ export const reportRouter = createTRPCRouter({
       throw new Error(err as string);
     }
   }),
-  createMonthlyReport: publicProcedure.query(async ({ ctx }) => {
-    try {
-      const userId = await ctx.prisma.user.findUnique({
-        where: {
-          email: ctx.session.user.email as string,
-        },
-        select: {
-          id: true,
-        },
-      });
+  // createMonthlyReport: publicProcedure.query(async ({ ctx }) => {
+  //   try {
+  //     const userId = await ctx.prisma.user.findUnique({
+  //       where: {
+  //         email: ctx.session.user.email as string,
+  //       },
+  //       select: {
+  //         id: true,
+  //       },
+  //     });
 
-      if (userId) {
-        const reports = await ctx.prisma.report.findMany({
-          where: {
-            userId: userId.id,
-          },
-          select: {
-            id: true,
-            fileName: true,
-            url: true,
-            createdAt: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
+  //     if (userId) {
+  //       const reports = await ctx.prisma.report.findMany({
+  //         where: {
+  //           userId: userId.id,
+  //         },
+  //         select: {
+  //           id: true,
+  //           fileName: true,
+  //           url: true,
+  //           createdAt: true,
+  //         },
+  //         orderBy: {
+  //           createdAt: "desc",
+  //         },
+  //       });
 
-        return reports;
-      }
-    } catch (err) {
-      throw new Error(err as string);
-    }
-  }),
+  //       return reports;
+  //     }
+  //   } catch (err) {
+  //     throw new Error(err as string);
+  //   }
+  // }),
 });
