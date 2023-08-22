@@ -10,6 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 const signupSchema = z
   .object({
@@ -214,6 +215,12 @@ const SignUp: NextPage = () => {
             </div>
             <Button
               variant={"google"}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={async () =>
+                await signIn("google", {
+                  callbackUrl: "/dashboard",
+                })
+              }
               className="text-xs font-medium text-athens-gray-900"
             >
               <Image

@@ -154,7 +154,9 @@ const Login: NextPage = () => {
               variant={"google"}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={async () =>
-                await signIn("google", { callbackUrl: "/dashboard" })
+                await signIn("google", {
+                  callbackUrl: "/dashboard",
+                })
               }
               className="text-xs font-medium text-athens-gray-900"
             >
