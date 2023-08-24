@@ -166,6 +166,9 @@ model Notification {
     message String  @db.Text
     read    Boolean @default(false)
 
+    createdAt DateTime @default(now())
+    // updatedAt DateTime @updatedAt
+
     budget Budget? @relation(fields: [budgetId], references: [id], onDelete: Cascade)
     budgetId String? 
 

@@ -410,7 +410,7 @@ const Dashboard: NextPage = () => {
                         </div>
                         <div className="w-full">
                           <div className="flex justify-between font-semibold">
-                            <p>{budget.category?.name}</p>
+                            <p>{budget.title}</p>
                             <p>
                               {sumBy(budget.expenses, (item) =>
                                 parseFloat(item.amount.toString())
