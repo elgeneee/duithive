@@ -108,19 +108,6 @@ const Budget: NextPage = () => {
   const { data: session } = useSession();
 
   const {
-    register,
-    reset,
-    handleSubmit,
-    formState: { errors, isSubmitting: isCreatingBudget },
-    setValue,
-  } = useForm<z.infer<typeof createBudgetSchema>>({
-    resolver: zodResolver(createBudgetSchema),
-    defaultValues: {
-      endDate: new Date(),
-    },
-  });
-
-  const {
     handleSubmit: editHandleSubmit,
     formState: { errors: editErrors },
     setValue: editSetValue,
@@ -146,6 +133,20 @@ const Budget: NextPage = () => {
   const inputTitleRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState<string>("");
+
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors, isSubmitting: isCreatingBudget },
+    setValue,
+  } = useForm<z.infer<typeof createBudgetSchema>>({
+    resolver: zodResolver(createBudgetSchema),
+    defaultValues: {
+      startDate: date,
+      endDate: deadline,
+    },
+  });
 
   const ctx = api.useContext();
 
@@ -526,7 +527,6 @@ const Budget: NextPage = () => {
                     Note: Category, StartDate, and Deadline are not editable
                     after creation
                   </p>
-
                   <Button
                     type="submit"
                     disabled={isCreatingBudget}
