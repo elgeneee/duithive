@@ -1,5 +1,6 @@
 import { editExpenseSchema, expenseSchema } from "@/schema/expense.schema";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import type { Budget } from "@prisma/client";
 import { z } from "zod";
 
 export const expenseRouter = createTRPCRouter({
@@ -42,6 +43,13 @@ export const expenseRouter = createTRPCRouter({
             },
           });
 
+          for (const budget of relevantBudgets) {
+            await ctx.prisma.budget.update({
+              where: { id: budget.id },
+              data: { updatedAt: new Date() },
+            });
+          }
+
           const expense = await ctx.prisma.expense.create({
             data: {
               description: input.description,
@@ -51,7 +59,7 @@ export const expenseRouter = createTRPCRouter({
               userId: userId.id,
               categoryId: categoryId,
               budgets: {
-                connect: relevantBudgets.map((budget) => ({
+                connect: relevantBudgets.map((budget: Budget) => ({
                   id: budget.id,
                 })),
               },
@@ -230,6 +238,13 @@ export const expenseRouter = createTRPCRouter({
               },
             },
           });
+
+          for (const budget of relevantBudgets) {
+            await ctx.prisma.budget.update({
+              where: { id: budget.id },
+              data: { updatedAt: new Date() },
+            });
+          }
 
           const updateExpense = await ctx.prisma.expense.update({
             where: {
