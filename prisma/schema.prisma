@@ -65,7 +65,7 @@ model User {
     income        Income[]
     budget        Budget[]
     report        Report[]
-    Notification  Notification[]
+    notifications  Notification[]
 
     @@index([currencyId])
 }

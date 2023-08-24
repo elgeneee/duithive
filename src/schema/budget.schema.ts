@@ -24,3 +24,7 @@ export const editBudgetSchema = z.object({
     invalid_type_error: "Amount must be a number",
   }),
 });
+
+export const checkBudgetExceedSchema = z.object({
+  budgetId: z.string(),
+});

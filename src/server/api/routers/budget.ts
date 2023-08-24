@@ -1,4 +1,8 @@
-import { budgetSchema, editBudgetSchema } from "@/schema/budget.schema";
+import {
+  budgetSchema,
+  editBudgetSchema,
+  checkBudgetExceedSchema,
+} from "@/schema/budget.schema";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -179,49 +183,65 @@ export const budgetRouter = createTRPCRouter({
         },
       });
 
-      // const notifications = await ctx.prisma.notification.createMany({
-      //   data: budgets.map((budget) => (
-      //     {
-      //       message: "Budget is expring soon",
-      //       budgetId: budget.id,
-      //       userId: budget.userId
-      //     }
-      //   )),
-
-      // })
-
-      return budgets;
-    } catch (err) {
-      throw new Error(err as string);
-    }
-  }),
-  checkBudgetExceed: publicProcedure.query(async ({ ctx }) => {
-    try {
-      const currentDate = new Date();
-      const oneDay = 24 * 60 * 60 * 1000;
-      const budgets = await ctx.prisma.budget.findMany({
-        where: {
-          endDate: {
-            gte: currentDate,
-            lt: new Date(currentDate.getTime() + oneDay),
-          },
-        },
+      const notifications = await ctx.prisma.notification.createMany({
+        data: budgets.map((budget) => ({
+          message: "Budget is expring soon",
+          budgetId: budget.id,
+          userId: budget.userId,
+        })),
       });
 
-      // const notifications = await ctx.prisma.notification.createMany({
-      //   data: budgets.map((budget) => (
-      //     {
-      //       message: "Budget is expring soon",
-      //       budgetId: budget.id,
-      //       userId: budget.userId
-      //     }
-      //   )),
-
-      // })
-
-      return budgets;
+      return notifications;
     } catch (err) {
       throw new Error(err as string);
     }
   }),
+  checkBudgetExceed: publicProcedure
+    .input(checkBudgetExceedSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const budget = await ctx.prisma.budget.findUnique({
+          where: {
+            id: input.budgetId,
+          },
+          select: {
+            id: true,
+            expenses: true,
+            amount: true,
+            userId: true,
+          },
+        });
+
+        const totalAmount = budget?.expenses.reduce(
+          (sum, entry) => sum + Number(entry.amount),
+          0
+        );
+
+        if (
+          typeof totalAmount === "number" &&
+          totalAmount > Number(budget?.amount)
+        ) {
+          const findNotification = await ctx.prisma.notification.findFirst({
+            where: {
+              message: "Budget is exceeded",
+              budgetId: budget?.id,
+              userId: budget?.userId as string,
+            },
+          });
+
+          if (!findNotification) {
+            await ctx.prisma.notification.create({
+              data: {
+                message: "Budget is exceeded",
+                budgetId: budget?.id,
+                userId: budget?.userId as string,
+              },
+            });
+          }
+        }
+        return budget;
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
 });
