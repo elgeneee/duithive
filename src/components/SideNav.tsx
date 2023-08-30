@@ -5,6 +5,7 @@ import {
   Banknote,
   FileBarChart2,
   Settings,
+  Bell,
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/router";
@@ -38,6 +39,11 @@ function SideNav() {
       name: "Report",
       link: "/report",
       icon: <FileBarChart2 size={20} />,
+    },
+    {
+      name: "Notification",
+      link: "/notification",
+      icon: <Bell size={20} />,
     },
     {
       name: "Settings",

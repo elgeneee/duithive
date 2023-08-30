@@ -18,6 +18,7 @@ import {
 import { AlertTriangle, Loader } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Link from "next/link";
 // import type { RouterOutputs } from "@/utils/api";
 // type Notifications = RouterOutputs["notification"]["getAll"];
 
@@ -108,7 +109,7 @@ function Navbar() {
                       <div className="flex space-x-3">
                         <div>
                           <AlertTriangle
-                            className="aspect-square rounded-md bg-orange-200 p-1 text-orange-500"
+                            className=" aspect-square rounded-md bg-orange-200 p-1 text-orange-500"
                             size={28}
                           />
                         </div>
@@ -144,9 +145,11 @@ function Navbar() {
                 </div>
                 <div className="justify-end">
                   <DropdownMenuSeparator />
-                  <p className="py-1 text-center text-sm font-semibold text-blue-500">
-                    View All
-                  </p>
+                  <Link href="/notification">
+                    <p className="py-1 text-center text-sm font-semibold text-blue-500 hover:underline">
+                      View All
+                    </p>
+                  </Link>
                 </div>
               </>
             )}
