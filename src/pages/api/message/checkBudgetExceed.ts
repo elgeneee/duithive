@@ -8,8 +8,6 @@ import { verifySignature } from "@upstash/qstash/nextjs";
 const checkBudgetExceed = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === "POST") {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      console.log('post requested')
       const ctx = await createTRPCContext({ req, res });
       const caller = appRouter.createCaller(ctx);
 

@@ -2,7 +2,6 @@ import { reportSchema } from "@/schema/report.schema";
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "@/server/api/trpc";
 // import createTemplate from "@/pages/test";
 

@@ -65,7 +65,7 @@ model User {
     income        Income[]
     budget        Budget[]
     report        Report[]
-    notifications  Notification[]
+    notifications Notification[]
 
     @@index([currencyId])
 }
@@ -124,9 +124,9 @@ model Budget {
     startDate DateTime
     endDate   DateTime
 
-    category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-    categoryId Int
-    expenses   Expense[]
+    category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId    Int
+    expenses      Expense[]
     notifications Notification[]
 
     @@index([userId])
@@ -169,8 +169,9 @@ model Notification {
     createdAt DateTime @default(now())
     // updatedAt DateTime @updatedAt
 
-    budget Budget? @relation(fields: [budgetId], references: [id], onDelete: Cascade)
-    budgetId String? 
+    notificationType NotificationType?
+    budget           Budget?           @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+    budgetId         String?
 
     @@index([userId])
     @@index([budgetId])
@@ -189,6 +190,14 @@ enum CurrencyType {
     BTC
     THB
     VND
+}
+
+enum NotificationType {
+    BUDGETEXCEED
+    BUDGETEXPIRED
+    ANNOUNCEMENT
+    MONTHLYREPORT
+    OTHERS
 }
 
 model Category {

@@ -188,6 +188,7 @@ export const budgetRouter = createTRPCRouter({
           message: "Budget is expring soon",
           budgetId: budget.id,
           userId: budget.userId,
+          notificationType: "BUDGETEXPIRED",
         })),
       });
 
@@ -235,6 +236,7 @@ export const budgetRouter = createTRPCRouter({
                 message: "Budget is exceeded",
                 budgetId: budget?.id,
                 userId: budget?.userId as string,
+                notificationType: "BUDGETEXCEED",
               },
             });
           }
