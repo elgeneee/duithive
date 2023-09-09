@@ -58,6 +58,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.43.9",
     "react-pdf-charts": "^0.0.5",
+    "react-spinners": "^0.13.8",
     "recharts": "^2.6.2",
     "superjson": "1.12.2",
     "tailwind-merge": "^1.12.0",

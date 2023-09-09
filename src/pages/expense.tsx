@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type NextPage } from "next";
 import { getSession, useSession } from "next-auth/react";
 import AppLayout from "@/components/AppLayout";
@@ -48,7 +50,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
-
+import ScaleLoader from "react-spinners/ScaleLoader";
+import { env } from "@/env.mjs";
 // import groupBy from "lodash/groupBy";
 // import map from "lodash/map";
 // import moment from "moment";
@@ -163,6 +166,7 @@ const Expense: NextPage = () => {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [receiptImage, setReceiptImage] = useState<File | null>(null);
   const [imageName, setImageName] = useState<string>("");
+  const [isMindeeLoading, setMindeeLoading] = useState<boolean>(false);
 
   const [fileSizeTooBig, setFileSizeTooBig] = useState<boolean>(false);
   const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
@@ -235,6 +239,7 @@ const Expense: NextPage = () => {
     onSuccess: () => {
       reset();
       setCategoryValue("");
+      setDate(new Date());
       setDispValue("");
       setIconId(1);
       setDialogOpen(false);
@@ -261,6 +266,7 @@ const Expense: NextPage = () => {
       onSuccess: () => {
         editReset;
         setEditDialogOpen(false);
+        setEditDate(new Date());
         setEditIconId(8);
         setEditCategoryValue("");
         setEditDispValue("");
@@ -309,9 +315,46 @@ const Expense: NextPage = () => {
         setImageName("");
       } else {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           setReceiptImage(file);
           setImageName(e.target?.result as string);
+
+          //start Mindee
+          setMindeeLoading(true);
+          const descriptionElement = document.getElementById(
+            "input-description"
+          ) as HTMLInputElement;
+          const amountElement = document.getElementById(
+            "input-amount"
+          ) as HTMLInputElement;
+
+          const resp = await handleMindee(file);
+          if (resp.api_request.status === "success") {
+            descriptionElement.value =
+              resp.document.inference.prediction.supplier_name.value || "";
+            amountElement.value =
+              resp.document.inference.prediction.total_amount.value || "";
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            setDate(new Date(resp.document.inference.prediction.date.value));
+
+            setValue(
+              "description",
+              (resp.document.inference.prediction.supplier_name
+                .value as string) || ""
+            );
+            setValue(
+              "amount",
+              resp.document.inference.prediction.total_amount.value as number
+            );
+            setValue(
+              "date",
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              new Date(resp.document.inference.prediction.date.value)
+            );
+
+            setMindeeLoading(false);
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -342,10 +385,48 @@ const Expense: NextPage = () => {
         setImageName("");
       } else {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           setReceiptImage(file);
           setImageName(e.target?.result as string);
+
+          //start Mindee
+          setMindeeLoading(true);
+          const descriptionElement = document.getElementById(
+            "input-description"
+          ) as HTMLInputElement;
+          const amountElement = document.getElementById(
+            "input-amount"
+          ) as HTMLInputElement;
+
+          const resp = await handleMindee(file);
+          if (resp.api_request.status === "success") {
+            descriptionElement.value =
+              resp.document.inference.prediction.supplier_name.value || "";
+            amountElement.value =
+              resp.document.inference.prediction.total_amount.value || "";
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            setDate(new Date(resp.document.inference.prediction.date.value));
+
+            setValue(
+              "description",
+              (resp.document.inference.prediction.supplier_name
+                .value as string) || ""
+            );
+            setValue(
+              "amount",
+              resp.document.inference.prediction.total_amount.value as number
+            );
+            setValue(
+              "date",
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              new Date(resp.document.inference.prediction.date.value)
+            );
+
+            setMindeeLoading(false);
+          }
         };
+
         reader.readAsDataURL(file);
       }
     }
@@ -401,12 +482,44 @@ const Expense: NextPage = () => {
 
   const filteredExpenses = getFilteredExpense(query, expenses);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleMindee = (file: File): Promise<any> => {
+    return new Promise((resolve) => {
+      const data = new FormData();
+      data.append("document", file, file.name);
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const responseData = JSON.parse(this.responseText);
+          resolve(responseData); // Resolve the Promise with the response data
+          // JSON parsing error
+        }
+      });
+
+      xhr.open(
+        "POST",
+        "https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict"
+      );
+      xhr.setRequestHeader(
+        "Authorization",
+        // "Token dba52da65c3aaecae71bb1495aa9b486"
+        `Token ${env.NEXT_PUBLIC_MINDEE}`
+      );
+      xhr.send(data);
+    });
+  };
+
   return (
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Expense</h1>
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+          {/* <button onClick={handleMindee}>Mindee</button> */}
           <div className="flex items-center space-x-2">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <Button className="w-64" onClick={() => setDialogOpen(true)}>
@@ -429,7 +542,7 @@ const Expense: NextPage = () => {
                     <label
                       htmlFor="image-upload"
                       className={cn(
-                        "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed  transition duration-100 hover:border-athens-gray-300",
+                        "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition duration-100 hover:border-athens-gray-300",
                         dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
                       )}
                     >
@@ -448,6 +561,18 @@ const Expense: NextPage = () => {
                           <Trash2 color={"#ffffff"} size={18} />
                         </button>
                       )}
+                      {isMindeeLoading && (
+                        <div className="absolute right-1/2 top-1/2 z-[500] translate-x-1/2 text-xs text-white">
+                          <span>Analyzing</span>
+                          <div className="text-center">
+                            <ScaleLoader
+                              color="white"
+                              loading={isMindeeLoading}
+                              height={10}
+                            />
+                          </div>
+                        </div>
+                      )}
                       {fileSizeTooBig && (
                         <p className="z-[500] text-xs text-red-500">
                           File size too big (less than 5MB)
@@ -463,8 +588,13 @@ const Expense: NextPage = () => {
                         onDragEnter={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"
-                      ></div>
+                        className={cn(
+                          "absolute aspect-video h-full w-full rounded-md object-cover",
+                          isMindeeLoading
+                            ? "z-[400] bg-black bg-opacity-70"
+                            : "z-40 bg-white"
+                        )}
+                      />
                       <div
                         className={cn(
                           "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
@@ -513,7 +643,9 @@ const Expense: NextPage = () => {
                   <div>
                     <label className="text-sm">Description</label>
                     <Input
+                      id="input-description"
                       className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                      disabled={isMindeeLoading}
                       {...register("description", { required: true })}
                     />
                     <div className="h-3">
@@ -528,6 +660,8 @@ const Expense: NextPage = () => {
                     <div className="w-1/3">
                       <label className="text-sm">Amount</label>
                       <Input
+                        id="input-amount"
+                        disabled={isMindeeLoading}
                         className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
                         {...register("amount", {
                           required: true,
@@ -687,9 +821,11 @@ const Expense: NextPage = () => {
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
+                            id="input-date"
+                            disabled={isMindeeLoading}
                             variant={"outline"}
                             className={cn(
-                              "w-[240px] justify-start text-left font-normal focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1",
+                              "w-[240px] justify-start text-left font-normal focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
                               !date && "text-muted-foreground"
                             )}
                           >
@@ -802,7 +938,10 @@ const Expense: NextPage = () => {
                         <span className="sr-only">Open popover</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="flex w-36 flex-col p-2">
+                    <PopoverContent
+                      align="end"
+                      className="flex w-36 flex-col p-2"
+                    >
                       <p className="px-2 text-sm font-medium text-foreground">
                         Edit/Delete
                       </p>

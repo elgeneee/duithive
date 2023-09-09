@@ -1,8 +1,5 @@
 import { reportSchema } from "@/schema/report.schema";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 // import createTemplate from "@/pages/test";
 
 export const reportRouter = createTRPCRouter({
