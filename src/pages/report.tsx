@@ -354,14 +354,14 @@ const Report: NextPage = () => {
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
         </div>
-        <div className="mt-10 w-1/2 space-y-5 rounded-md bg-white p-4">
-          <div className="flex items-center space-x-4">
+        <div className="mt-10 w-full space-y-5 rounded-md bg-white p-4 sm:w-1/2">
+          <div className="flex flex-col items-center space-x-0 space-y-3 sm:flex-row sm:space-x-4 sm:space-y-0">
             <button
               className={cn(
                 dateRange == "week"
                   ? "bg-violet-500 text-primary-foreground"
                   : "border border-violet-500 bg-white text-violet-500",
-                "inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50"
+                "inline-flex h-10 w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50 sm:w-auto"
               )}
               onClick={() => {
                 setFilter("week");
@@ -374,7 +374,7 @@ const Report: NextPage = () => {
                 dateRange == "month"
                   ? "bg-violet-500 text-primary-foreground"
                   : "border border-violet-500 bg-white text-violet-500",
-                "inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50"
+                "inline-flex h-10 w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50 sm:w-auto"
               )}
               onClick={() => {
                 setFilter("month");
@@ -387,7 +387,7 @@ const Report: NextPage = () => {
                 dateRange == "year"
                   ? "bg-violet-500 text-primary-foreground"
                   : "border border-violet-500 bg-white text-violet-500",
-                "inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50"
+                "inline-flex h-10 w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-opacity-50 sm:w-auto"
               )}
               onClick={() => {
                 setFilter("year");
@@ -404,7 +404,7 @@ const Report: NextPage = () => {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                    "w-[300px] justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal md:w-[300px]",
                     !date && "text-muted-foreground"
                   )}
                 >
@@ -438,7 +438,7 @@ const Report: NextPage = () => {
           <div>
             <Button
               disabled={loading}
-              className="w-44 text-center"
+              className="w-full text-center sm:w-44"
               onClick={generatePDF}
             >
               {loading ? (

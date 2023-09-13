@@ -241,12 +241,12 @@ const Budget: NextPage = () => {
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Budget</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-athens-gray-300">{formattedDate}</p>
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
+          <p className="text-left text-athens-gray-300">{formattedDate}</p>
+          <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <Button
-                className="w-64"
+                className="mt-10 w-full sm:mt-0 sm:w-64"
                 onClick={() => {
                   setDate(new Date());
                   const tomorrow = new Date();
@@ -556,376 +556,397 @@ const Budget: NextPage = () => {
             <SkeletonList className="h-[180px]" />
           ) : (
             <>
-              {filteredBudgets?.map((budget) => (
-                <div
-                  key={budget.id}
-                  className={cn(
-                    budget.endDate < new Date() &&
-                      "bg-opacity-60 text-black text-opacity-30",
-                    "flex items-center justify-between space-x-3 rounded-md bg-white p-3"
-                  )}
-                >
-                  <div className="flex w-full items-center justify-between">
+              {filteredBudgets && filteredBudgets?.length > 0 ? (
+                <>
+                  {filteredBudgets?.map((budget) => (
                     <div
+                      key={budget.id}
                       className={cn(
                         budget.endDate < new Date() &&
-                          "bg-opacity-10 text-opacity-30",
-                        "mr-8 flex h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600"
+                          "bg-opacity-60 text-black text-opacity-30",
+                        "flex items-center justify-between space-x-3 rounded-md bg-white p-3"
                       )}
                     >
-                      {
-                        icons.find(
-                          (icon) => icon.id === budget.category?.iconId
-                        )?.icon
-                      }
-                    </div>
-                    <div className="flex w-full flex-col">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="flex items-center space-x-4">
-                            <p className="font-satoshi text-lg font-bold">
-                              {budget.title}
-                            </p>
-                            <Badge
-                              variant={
-                                parseFloat(budget.amount.toString()) <
-                                sumBy(budget.expenses, (item) =>
-                                  parseFloat(item.amount.toString())
-                                )
-                                  ? "destructive"
-                                  : "success"
-                              }
-                            >
-                              {parseFloat(budget.amount.toString()) <
-                              sumBy(budget.expenses, (item) =>
-                                parseFloat(item.amount.toString())
-                              )
-                                ? "Exceeded"
-                                : "On Track"}
-                            </Badge>
-                          </span>
-                          <span className="flex items-center space-x-2">
-                            <p
-                              className={cn(
-                                budget.endDate < new Date() &&
-                                  "text-opacity-30",
-                                "font-base text-xs text-[#9e9e9e]"
-                              )}
-                            >
-                              Ends at{" "}
-                              {budget.endDate.getDate() < 10
-                                ? `0${budget.endDate.getDate()}`
-                                : budget.endDate.getDate()}
-                              /
-                              {budget.endDate.getMonth() < 10
-                                ? `0${budget.endDate.getMonth() + 1}`
-                                : budget.endDate.getMonth()}
-                              /{budget.endDate.getFullYear()}
-                            </p>
-                            {budget.endDate < new Date() && (
-                              <ExpiredBadge>Expired</ExpiredBadge>
-                            )}
-                          </span>
+                      <div className="flex w-full items-center justify-between">
+                        <div
+                          className={cn(
+                            budget.endDate < new Date() &&
+                              "bg-opacity-10 text-opacity-30",
+                            "mr-8 flex h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600"
+                          )}
+                        >
+                          {
+                            icons.find(
+                              (icon) => icon.id === budget.category?.iconId
+                            )?.icon
+                          }
                         </div>
-                        <p className="font-satoshi text-sm font-semibold">
-                          Budget {userCurrency?.symbol}
-                          {parseFloat(budget.amount.toString()).toFixed(2)}
-                        </p>
-                      </div>
-                      <Progress
-                        value={
-                          (sumBy(budget.expenses, (item) =>
-                            parseFloat(item.amount.toString())
-                          ) /
-                            parseFloat(budget.amount.toString())) *
-                          100
-                        }
-                        className="my-2"
-                        customProp={
-                          budget.endDate < new Date() ? "bg-opacity-30" : ""
-                        }
-                      />
-                      <div className="flex items-center justify-between">
-                        <p className="font-satoshi text-sm font-semibold">
-                          Spent {userCurrency?.symbol}
-                          {sumBy(budget.expenses, (item) =>
-                            parseFloat(item.amount.toString())
-                          ).toFixed(2)}
-                        </p>
-                        <p className="font-satoshi text-sm font-semibold">
-                          Remaining: {userCurrency?.symbol}
-                          {Math.max(
-                            0,
-                            parseFloat(budget.amount.toString()) -
-                              sumBy(budget.expenses, (item) =>
-                                parseFloat(item.amount.toString())
-                              )
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-                      {budget.expenses.length > 0 && (
-                        <div className="mt-4">
-                          <Accordion type="single" collapsible>
-                            <AccordionItem value="item-1">
-                              <AccordionTrigger>
-                                <span
+                        <div className="flex w-full flex-col">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="flex items-center space-x-4">
+                                <p className="font-satoshi text-lg font-bold">
+                                  {budget.title}
+                                </p>
+                                <Badge
+                                  variant={
+                                    parseFloat(budget.amount.toString()) <
+                                    sumBy(budget.expenses, (item) =>
+                                      parseFloat(item.amount.toString())
+                                    )
+                                      ? "destructive"
+                                      : "success"
+                                  }
+                                >
+                                  {parseFloat(budget.amount.toString()) <
+                                  sumBy(budget.expenses, (item) =>
+                                    parseFloat(item.amount.toString())
+                                  )
+                                    ? "Exceeded"
+                                    : "On Track"}
+                                </Badge>
+                              </span>
+                              <span className="flex items-center space-x-2">
+                                <p
                                   className={cn(
                                     budget.endDate < new Date() &&
-                                      "text-opacity-40",
-                                    "flex items-center space-x-2 text-athens-gray-400"
+                                      "text-opacity-30",
+                                    "font-base text-xs text-[#9e9e9e]"
                                   )}
                                 >
-                                  <FileStack size={20} />
-                                  <span>
-                                    Expenses ({budget.expenses.length})
-                                  </span>
-                                </span>
-                              </AccordionTrigger>
-                              <AccordionContent>
-                                <div className="divide-y">
-                                  {budget.expenses.map((expense, index) => (
-                                    <div
-                                      key={expense.id}
+                                  Ends at{" "}
+                                  {budget.endDate.getDate() < 10
+                                    ? `0${budget.endDate.getDate()}`
+                                    : budget.endDate.getDate()}
+                                  /
+                                  {budget.endDate.getMonth() < 10
+                                    ? `0${budget.endDate.getMonth() + 1}`
+                                    : budget.endDate.getMonth()}
+                                  /{budget.endDate.getFullYear()}
+                                </p>
+                                {budget.endDate < new Date() && (
+                                  <ExpiredBadge>Expired</ExpiredBadge>
+                                )}
+                              </span>
+                            </div>
+                            <p className="font-satoshi text-sm font-semibold">
+                              Budget {userCurrency?.symbol}
+                              {parseFloat(budget.amount.toString()).toFixed(2)}
+                            </p>
+                          </div>
+                          <Progress
+                            value={
+                              (sumBy(budget.expenses, (item) =>
+                                parseFloat(item.amount.toString())
+                              ) /
+                                parseFloat(budget.amount.toString())) *
+                              100
+                            }
+                            className="my-2"
+                            customProp={
+                              budget.endDate < new Date() ? "bg-opacity-30" : ""
+                            }
+                          />
+                          <div className="flex items-center justify-between">
+                            <p className="font-satoshi text-sm font-semibold">
+                              Spent {userCurrency?.symbol}
+                              {sumBy(budget.expenses, (item) =>
+                                parseFloat(item.amount.toString())
+                              ).toFixed(2)}
+                            </p>
+                            <p className="font-satoshi text-sm font-semibold">
+                              Remaining: {userCurrency?.symbol}
+                              {Math.max(
+                                0,
+                                parseFloat(budget.amount.toString()) -
+                                  sumBy(budget.expenses, (item) =>
+                                    parseFloat(item.amount.toString())
+                                  )
+                              ).toFixed(2)}
+                            </p>
+                          </div>
+                          {budget.expenses.length > 0 && (
+                            <div className="mt-4">
+                              <Accordion type="single" collapsible>
+                                <AccordionItem value="item-1">
+                                  <AccordionTrigger>
+                                    <span
                                       className={cn(
-                                        index % 2 === 0 && "",
-                                        "flex justify-between space-y-1 rounded-lg px-3 py-1"
+                                        budget.endDate < new Date() &&
+                                          "text-opacity-40",
+                                        "flex items-center space-x-2 text-athens-gray-400"
                                       )}
                                     >
-                                      <div>
-                                        <p className="font-medium">
-                                          {expense.description}
-                                        </p>
-                                        <p className="text-xs text-[#A0A5AF]">
-                                          {expense.transactionDate.toLocaleDateString(
-                                            "en-US",
-                                            {
-                                              month: "long",
-                                              day: "numeric",
-                                              year: "numeric",
-                                            }
-                                          )}
-                                        </p>
-                                      </div>
-                                      <p className="text-sm font-medium">
-                                        -{userCurrency?.symbol}
-                                        {parseFloat(
-                                          expense.amount.toString()
-                                        ).toFixed(2)}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghostSecondary"
-                        className="h-8 w-8 rounded-md p-0"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Open popover</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="flex w-36 flex-col p-2">
-                      <p className="px-2 text-sm font-medium text-foreground">
-                        Edit/Delete
-                      </p>
-                      <Separator className="my-2" />
-                      <Dialog
-                        open={editDialogOpen}
-                        onOpenChange={setEditDialogOpen}
-                      >
-                        <button
-                          onClick={() => {
-                            if (inputTitleRef.current) {
-                              inputTitleRef.current.defaultValue = budget.title;
-                            }
-                            if (inputAmountRef.current) {
-                              inputAmountRef.current.defaultValue =
-                                budget.amount.toString();
-                            }
-                            editSetValue("id", budget.id);
-                            editSetValue("title", budget.title);
-                            editSetValue(
-                              "amount",
-                              parseFloat(budget.amount.toString())
-                            );
-                            setEditDialogOpen(true);
-                          }}
-                          className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <Edit className="h-4 w-4" />
-                          <p className="text-sm">Edit</p>
-                        </button>
-
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Edit Budget</DialogTitle>
-                          </DialogHeader>
-                          <form
-                            className="mt-3"
-                            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                            onSubmit={editHandleSubmit(onEditSubmit)}
-                          >
-                            <div>
-                              <label className="text-sm">Title</label>
-                              <Input
-                                className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                                placeholder="Enter description"
-                                defaultValue={budget.title}
-                                onChange={(e) => {
-                                  editSetValue("title", e.target.value);
-                                }}
-                                ref={inputTitleRef}
-                              />
-
-                              <div className="h-3">
-                                {editErrors.title && (
-                                  <span className="text-xxs text-red-500">
-                                    {editErrors.title.message}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-1/3">
-                                <label className="text-sm">Budget</label>
-                                <Input
-                                  className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                                  placeholder="Enter amount"
-                                  defaultValue={parseFloat(
-                                    budget.amount.toString()
-                                  )}
-                                  onChange={(e) => {
-                                    editSetValue(
-                                      "amount",
-                                      parseFloat(e.target.value)
-                                    );
-                                  }}
-                                  type="number"
-                                  step="0.01"
-                                  ref={inputAmountRef}
-                                />
-                                <div className="h-3">
-                                  {editErrors.amount && (
-                                    <span className="text-xxs text-red-500">
-                                      {editErrors.amount.message}
+                                      <FileStack size={20} />
+                                      <span>
+                                        Expenses ({budget.expenses.length})
+                                      </span>
                                     </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-2/3">
-                                <label className="mb-2 text-sm">Category</label>
-                                <Button
-                                  variant="disabled"
-                                  disabled
-                                  role="combobox"
-                                  className="mt-2 w-full justify-start text-left font-normal"
-                                >
-                                  {
-                                    categories.find(
-                                      (category) =>
-                                        category.value ===
-                                        budget?.category?.name
-                                    )?.value
-                                  }
-                                </Button>
-                                <div className="h-3"></div>
-                              </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="divide-y">
+                                      {budget.expenses.map((expense, index) => (
+                                        <div
+                                          key={expense.id}
+                                          className={cn(
+                                            index % 2 === 0 && "",
+                                            "flex justify-between space-y-1 rounded-lg px-3 py-1"
+                                          )}
+                                        >
+                                          <div>
+                                            <p className="font-medium">
+                                              {expense.description}
+                                            </p>
+                                            <p className="text-xs text-[#A0A5AF]">
+                                              {expense.transactionDate.toLocaleDateString(
+                                                "en-US",
+                                                {
+                                                  month: "long",
+                                                  day: "numeric",
+                                                  year: "numeric",
+                                                }
+                                              )}
+                                            </p>
+                                          </div>
+                                          <p className="text-sm font-medium">
+                                            -{userCurrency?.symbol}
+                                            {parseFloat(
+                                              expense.amount.toString()
+                                            ).toFixed(2)}
+                                          </p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
                             </div>
-                            <div className="flex space-x-3">
-                              <div className="w-1/2">
-                                <div className="flex flex-col">
-                                  <p className="mb-2 text-sm">StartDate</p>
-                                  <Button
-                                    type="button"
-                                    disabled
-                                    variant={"disabled"}
-                                    className="w-full justify-start text-left font-normal"
-                                  >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {format(budget.startDate, "PPP")}
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="w-1/2">
-                                <div className="flex flex-col">
-                                  <p className="mb-2 text-sm">Deadline</p>
-                                  <Button
-                                    type="button"
-                                    disabled
-                                    variant={"disabled"}
-                                    className="w-full justify-start text-left font-normal"
-                                  >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                          )}
+                        </div>
+                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghostSecondary"
+                            className="h-8 w-8 rounded-md p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Open popover</span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="flex w-36 flex-col p-2">
+                          <p className="px-2 text-sm font-medium text-foreground">
+                            Edit/Delete
+                          </p>
+                          <Separator className="my-2" />
+                          <Dialog
+                            open={editDialogOpen}
+                            onOpenChange={setEditDialogOpen}
+                          >
+                            <button
+                              onClick={() => {
+                                if (inputTitleRef.current) {
+                                  inputTitleRef.current.defaultValue =
+                                    budget.title;
+                                }
+                                if (inputAmountRef.current) {
+                                  inputAmountRef.current.defaultValue =
+                                    budget.amount.toString();
+                                }
+                                editSetValue("id", budget.id);
+                                editSetValue("title", budget.title);
+                                editSetValue(
+                                  "amount",
+                                  parseFloat(budget.amount.toString())
+                                );
+                                setEditDialogOpen(true);
+                              }}
+                              className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <p className="text-sm">Edit</p>
+                            </button>
 
-                                    {format(budget.endDate, "PPP")}
-                                  </Button>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Budget</DialogTitle>
+                              </DialogHeader>
+                              <form
+                                className="mt-3"
+                                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                                onSubmit={editHandleSubmit(onEditSubmit)}
+                              >
+                                <div>
+                                  <label className="text-sm">Title</label>
+                                  <Input
+                                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                    placeholder="Enter description"
+                                    defaultValue={budget.title}
+                                    onChange={(e) => {
+                                      editSetValue("title", e.target.value);
+                                    }}
+                                    ref={inputTitleRef}
+                                  />
+
+                                  <div className="h-3">
+                                    {editErrors.title && (
+                                      <span className="text-xxs text-red-500">
+                                        {editErrors.title.message}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                            <Button
-                              type="submit"
-                              disabled={isEditLoading}
-                              className="mt-6 w-full"
-                            >
-                              {isEditLoading ? (
-                                <Loader2
-                                  className="mr-2 h-4 w-4 animate-spin"
-                                  color="#803FE8"
-                                />
-                              ) : (
-                                <span>Save</span>
-                              )}
-                            </Button>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                      <Dialog
-                        open={deleteDialogOpen}
-                        onOpenChange={setDeleteDialogOpen}
-                      >
-                        <DialogTrigger>
-                          <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
-                            <Trash2 className="h-4 w-4" />
-                            <p className="text-sm">Delete</p>
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Are you absolutely sure?</DialogTitle>
-                            <DialogDescription>
-                              This action cannot be undone. This will
-                              permanently remove your expense record from the
-                              system.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter className="flex justify-center">
-                            <Button
-                              variant={"secondary"}
-                              onClick={() => setDeleteDialogOpen(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              variant={"destructive"}
-                              onClick={() => handleDelete(budget.id)}
-                            >
-                              Delete
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </PopoverContent>
-                  </Popover>
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-1/3">
+                                    <label className="text-sm">Budget</label>
+                                    <Input
+                                      className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                      placeholder="Enter amount"
+                                      defaultValue={parseFloat(
+                                        budget.amount.toString()
+                                      )}
+                                      onChange={(e) => {
+                                        editSetValue(
+                                          "amount",
+                                          parseFloat(e.target.value)
+                                        );
+                                      }}
+                                      type="number"
+                                      step="0.01"
+                                      ref={inputAmountRef}
+                                    />
+                                    <div className="h-3">
+                                      {editErrors.amount && (
+                                        <span className="text-xxs text-red-500">
+                                          {editErrors.amount.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="w-2/3">
+                                    <label className="mb-2 text-sm">
+                                      Category
+                                    </label>
+                                    <Button
+                                      variant="disabled"
+                                      disabled
+                                      role="combobox"
+                                      className="mt-2 w-full justify-start text-left font-normal"
+                                    >
+                                      {
+                                        categories.find(
+                                          (category) =>
+                                            category.value ===
+                                            budget?.category?.name
+                                        )?.value
+                                      }
+                                    </Button>
+                                    <div className="h-3"></div>
+                                  </div>
+                                </div>
+                                <div className="flex space-x-3">
+                                  <div className="w-1/2">
+                                    <div className="flex flex-col">
+                                      <p className="mb-2 text-sm">StartDate</p>
+                                      <Button
+                                        type="button"
+                                        disabled
+                                        variant={"disabled"}
+                                        className="w-full justify-start text-left font-normal"
+                                      >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {format(budget.startDate, "PPP")}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="w-1/2">
+                                    <div className="flex flex-col">
+                                      <p className="mb-2 text-sm">Deadline</p>
+                                      <Button
+                                        type="button"
+                                        disabled
+                                        variant={"disabled"}
+                                        className="w-full justify-start text-left font-normal"
+                                      >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+
+                                        {format(budget.endDate, "PPP")}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="submit"
+                                  disabled={isEditLoading}
+                                  className="mt-6 w-full"
+                                >
+                                  {isEditLoading ? (
+                                    <Loader2
+                                      className="mr-2 h-4 w-4 animate-spin"
+                                      color="#803FE8"
+                                    />
+                                  ) : (
+                                    <span>Save</span>
+                                  )}
+                                </Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                          <Dialog
+                            open={deleteDialogOpen}
+                            onOpenChange={setDeleteDialogOpen}
+                          >
+                            <DialogTrigger>
+                              <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
+                                <Trash2 className="h-4 w-4" />
+                                <p className="text-sm">Delete</p>
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Are you absolutely sure?
+                                </DialogTitle>
+                                <DialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently remove your expense record from
+                                  the system.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter className="flex justify-center">
+                                <Button
+                                  variant={"secondary"}
+                                  onClick={() => setDeleteDialogOpen(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  variant={"destructive"}
+                                  onClick={() => handleDelete(budget.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="relative items-center justify-center align-middle">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/upload.png"
+                    className="mx-auto my-auto flex h-56  items-center sm:h-96"
+                    alt="image-upload"
+                  />
+                  <p className="text-center text-sm italic text-athens-gray-300/75">
+                    No budgets yet
+                  </p>
                 </div>
-              ))}
+              )}
             </>
           )}
         </div>

@@ -58,7 +58,7 @@ function SideNav() {
   };
 
   return (
-    <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear lg:static lg:flex lg:translate-x-0">
+    <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear sm:static sm:flex sm:translate-x-0">
       <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" className="w-16 pr-4" alt="logo" />

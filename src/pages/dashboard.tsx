@@ -291,8 +291,8 @@ const Dashboard: NextPage = () => {
         ) : (
           <>
             {/* first layer */}
-            <div className="mt-10 flex space-x-3">
-              <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
+              <div className="flex h-36 w-full flex-col  justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
                 <ResponsiveContainer width="100%" height="50%">
                   <AreaChart
                     data={incomeAreaData}
@@ -340,7 +340,7 @@ const Dashboard: NextPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex h-36 w-1/5 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+              <div className="flex h-36 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
                 <ResponsiveContainer width="100%" height="50%" className={""}>
                   <AreaChart
                     data={expenseAreaData}
@@ -391,7 +391,7 @@ const Dashboard: NextPage = () => {
               <div
                 className={cn(
                   !dashboardData?.budgets?.length && "justify-center",
-                  "flex h-36 w-3/5 items-center rounded-lg border border-athens-gray-100 bg-white p-2"
+                  "flex h-36 w-full items-center rounded-lg border border-athens-gray-100 bg-white p-2 sm:w-3/5"
                 )}
               >
                 {dashboardData?.budgets?.length ? (
@@ -456,8 +456,8 @@ const Dashboard: NextPage = () => {
             </div>
 
             {/* secondlayer */}
-            <div className="mt-10 flex space-x-3">
-              <div className="flex h-96 w-2/3 flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
+              <div className="flex h-96 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-2/3">
                 <div className="803FE8 flex justify-end space-x-3 font-bold">
                   <button
                     className={cn(
@@ -526,7 +526,7 @@ const Dashboard: NextPage = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex h-96 w-1/3 flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3">
+              <div className="flex h-96 w-full flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/3">
                 <p className="pl-4 font-satoshi text-xl font-bold">
                   Categories
                 </p>
@@ -574,7 +574,7 @@ const Dashboard: NextPage = () => {
             </div>
 
             {/* third layer */}
-            <div className="mt-10 flex w-2/3 flex-col rounded-lg border border-athens-gray-100 bg-white p-3">
+            <div className="mt-10 flex w-full flex-col rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-2/3">
               <div className="flex items-center justify-between">
                 <p className="font-satoshi text-xl font-bold">
                   Latest Spendings

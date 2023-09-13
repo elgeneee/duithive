@@ -37,7 +37,11 @@ export const resetPasswordTemplate = (token: string) => `
                       <h1 style="color:#1e1e2d; margin:0;font-size:26px;">You have requested to reset your password</h1>
                       <span style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                       <p style="color:#455056; font-size:15px;line-height:24px; margin:0;"> We cannot simply send you your old password. A unique link to reset your password has been generated for you. To reset your password, click the following link. </p>
-                      <a href="http://localhost:3000/auth/reset-password?token=${token}" style="background:#9D74F3;text-decoration:none !important; font-weight:30; margin-top:35px; color:#fff;text-transform:uppercase; font-size:16px;padding:10px 24px;display:inline-block;border-radius:10px;">Reset Password</a>
+                      <a href="${
+                        process.env.NODE_ENV === "production"
+                          ? "https://duithive.vercel.app"
+                          : "http://localhost:3000"
+                      }/auth/reset-password?token=${token}" style="background:#9D74F3;text-decoration:none !important; font-weight:30; margin-top:35px; color:#fff;text-transform:uppercase; font-size:16px;padding:10px 24px;display:inline-block;border-radius:10px;">Reset Password</a>
                     </td>
                   </tr>
                   <tr>

@@ -516,13 +516,14 @@ const Expense: NextPage = () => {
     <AppLayout>
       <main className="p-4">
         <h1 className="text-3xl font-bold">Expense</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-athens-gray-300">{formattedDate}</p>
-          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-          {/* <button onClick={handleMindee}>Mindee</button> */}
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
+          <p className="text-left text-athens-gray-300 ">{formattedDate}</p>
+          <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <Button className="w-64" onClick={() => setDialogOpen(true)}>
+              <Button
+                className="mt-10 w-full sm:mt-0 sm:w-64"
+                onClick={() => setDialogOpen(true)}
+              >
                 <Plus size={15} />
                 <span className="ml-3">Add Expense</span>
               </Button>
@@ -891,437 +892,470 @@ const Expense: NextPage = () => {
             <SkeletonList className="h-[60px]" />
           ) : (
             <>
-              {filteredExpenses?.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
-                >
-                  <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
-                    {
-                      icons.find((icon) => icon.id === expense.category?.iconId)
-                        ?.icon
-                    }
-                  </div>
-                  <div className="flex flex-1 justify-between">
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {expense.description}
-                      </p>
-                      <p className="text-sm font-normal text-[#A0A5AF]">
-                        {expense.category?.name}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {userCurrency?.symbol}
-                        {parseFloat(expense.amount.toString()).toFixed(2)}
-                      </p>
-                      <p className="text-sm font-normal text-[#A0A5AF]">
-                        {expense.transactionDate.getDate() < 10
-                          ? `0${expense.transactionDate.getDate()}`
-                          : expense.transactionDate.getDate()}
-                        /
-                        {expense.transactionDate.getMonth() < 10
-                          ? `0${expense.transactionDate.getMonth() + 1}`
-                          : expense.transactionDate.getMonth()}
-                        /{expense.transactionDate.getFullYear()}
-                      </p>
-                    </div>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghostSecondary"
-                        className="h-8 w-8 rounded-md p-0"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Open popover</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="end"
-                      className="flex w-36 flex-col p-2"
+              {filteredExpenses && filteredExpenses?.length > 0 ? (
+                <>
+                  {filteredExpenses?.map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
                     >
-                      <p className="px-2 text-sm font-medium text-foreground">
-                        Edit/Delete
-                      </p>
-                      <Separator className="my-2" />
-                      <Dialog
-                        open={editDialogOpen}
-                        onOpenChange={setEditDialogOpen}
-                      >
-                        <button
-                          onClick={() => {
-                            setEditDate(expense.transactionDate);
-                            if (inputDescriptionRef.current) {
-                              inputDescriptionRef.current.defaultValue =
-                                expense.description;
-                            }
-                            if (inputAmountRef.current) {
-                              inputAmountRef.current.defaultValue =
-                                expense.amount.toString();
-                            }
-                            editSetValue("id", expense.id);
-                            setEditCategoryValue(expense.category?.name || "");
-                            editSetValue("description", expense.description);
-                            editSetValue(
-                              "amount",
-                              parseFloat(expense.amount.toString())
-                            );
-                            editSetValue("date", expense.transactionDate);
-                            editSetValue("category", {
-                              id: categories.length + 1,
-                              value: expense.category?.name ?? "",
-                              label: expense.category?.name ?? "",
-                              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                              iconId: expense.category!.iconId,
-                            });
-                            setEditDialogOpen(true);
-                          }}
-                          className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <Edit className="h-4 w-4" />
-                          <p className="text-sm">Edit</p>
-                        </button>
-
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Edit Expense</DialogTitle>
-                          </DialogHeader>
-                          <form
-                            className="mt-10 space-y-3"
-                            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                            onSubmit={editHandleSubmit(onEditSubmit)}
+                      <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
+                        {
+                          icons.find(
+                            (icon) => icon.id === expense.category?.iconId
+                          )?.icon
+                        }
+                      </div>
+                      <div className="flex flex-1 justify-between">
+                        <div>
+                          <p className="text-sm font-semibold">
+                            {expense.description}
+                          </p>
+                          <p className="text-sm font-normal text-[#A0A5AF]">
+                            {expense.category?.name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">
+                            {userCurrency?.symbol}
+                            {parseFloat(expense.amount.toString()).toFixed(2)}
+                          </p>
+                          <p className="text-sm font-normal text-[#A0A5AF]">
+                            {expense.transactionDate.getDate() < 10
+                              ? `0${expense.transactionDate.getDate()}`
+                              : expense.transactionDate.getDate()}
+                            /
+                            {expense.transactionDate.getMonth() < 10
+                              ? `0${expense.transactionDate.getMonth() + 1}`
+                              : expense.transactionDate.getMonth()}
+                            /{expense.transactionDate.getFullYear()}
+                          </p>
+                        </div>
+                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghostSecondary"
+                            className="h-8 w-8 rounded-md p-0"
                           >
-                            <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
-                              <label
-                                htmlFor="image-upload"
-                                className={cn(
-                                  "group relative mx-auto flex h-32 w-full flex-col items-center justify-center rounded-lg border border-[#e2e8f0]  transition duration-100"
-                                )}
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Open popover</span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          align="end"
+                          className="flex w-36 flex-col p-2"
+                        >
+                          <p className="px-2 text-sm font-medium text-foreground">
+                            Edit/Delete
+                          </p>
+                          <Separator className="my-2" />
+                          <Dialog
+                            open={editDialogOpen}
+                            onOpenChange={setEditDialogOpen}
+                          >
+                            <button
+                              onClick={() => {
+                                setEditDate(expense.transactionDate);
+                                if (inputDescriptionRef.current) {
+                                  inputDescriptionRef.current.defaultValue =
+                                    expense.description;
+                                }
+                                if (inputAmountRef.current) {
+                                  inputAmountRef.current.defaultValue =
+                                    expense.amount.toString();
+                                }
+                                editSetValue("id", expense.id);
+                                setEditCategoryValue(
+                                  expense.category?.name || ""
+                                );
+                                editSetValue(
+                                  "description",
+                                  expense.description
+                                );
+                                editSetValue(
+                                  "amount",
+                                  parseFloat(expense.amount.toString())
+                                );
+                                editSetValue("date", expense.transactionDate);
+                                editSetValue("category", {
+                                  id: categories.length + 1,
+                                  value: expense.category?.name ?? "",
+                                  label: expense.category?.name ?? "",
+                                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                                  iconId: expense.category!.iconId,
+                                });
+                                setEditDialogOpen(true);
+                              }}
+                              className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <p className="text-sm">Edit</p>
+                            </button>
+
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Expense</DialogTitle>
+                              </DialogHeader>
+                              <form
+                                className="mt-10 space-y-3"
+                                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                                onSubmit={editHandleSubmit(onEditSubmit)}
                               >
-                                <div className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"></div>
-                                <div
-                                  className={cn(
-                                    "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
-                                    expense.imgUrl && "hidden"
-                                  )}
-                                >
-                                  <p className="font-light italic text-[#A0A5AF]">
-                                    No image available
-                                  </p>
-                                </div>
-                                {expense.imgUrl && (
-                                  //eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={expense.imgUrl}
-                                    alt="Preview"
-                                    className="z-[200] aspect-video h-full rounded-lg object-contain"
-                                  />
-                                )}
-                              </label>
-                            </div>
-                            <div>
-                              <label className="text-sm">Description</label>
-                              <Input
-                                className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                                placeholder="Enter description"
-                                defaultValue={expense.description}
-                                onChange={(e) => {
-                                  editSetValue("description", e.target.value);
-                                }}
-                                ref={inputDescriptionRef}
-                              />
-
-                              <div className="h-3">
-                                {editErrors.description && (
-                                  <span className="text-xxs text-red-500">
-                                    {editErrors.description.message}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-1/3">
-                                <label className="text-sm">Amount</label>
-                                <Input
-                                  className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                                  placeholder="Enter amount"
-                                  defaultValue={parseFloat(
-                                    expense.amount.toString()
-                                  )}
-                                  onChange={(e) => {
-                                    editSetValue(
-                                      "amount",
-                                      parseFloat(e.target.value)
-                                    );
-                                  }}
-                                  type="number"
-                                  step="0.01"
-                                  ref={inputAmountRef}
-                                />
-                                <div className="h-3">
-                                  {editErrors.amount && (
-                                    <span className="text-xxs text-red-500">
-                                      {editErrors.amount.message}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-2/3">
-                                <p className="mb-2 text-sm">Category</p>
-                                <Popover
-                                  open={openCategory}
-                                  onOpenChange={setOpenCategory}
-                                >
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      role="combobox"
-                                      aria-expanded={openCategory}
-                                      className="w-full justify-between"
-                                    >
-                                      {editCategoryValue
-                                        ? categories.find(
-                                            (category) =>
-                                              category.label ===
-                                              editCategoryValue
-                                          )?.value || editCategoryValue
-                                        : "Select category"}
-                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-full p-0">
-                                    <Command>
-                                      <CommandInput
-                                        placeholder="Search category..."
-                                        onChangeCapture={handleEditInputChange}
-                                      />
-                                      <CommandEmpty>
-                                        <div className="flex flex-col">
-                                          <Tabs
-                                            defaultValue="text"
-                                            className="w-full text-center"
-                                          >
-                                            <TabsList>
-                                              <TabsTrigger value="text">
-                                                Text
-                                              </TabsTrigger>
-                                              <TabsTrigger value="icon">
-                                                Icon
-                                              </TabsTrigger>
-                                            </TabsList>
-                                            <TabsContent value="text">
-                                              <Input
-                                                className="h-7 text-xs "
-                                                value={editDispValue}
-                                                disabled
-                                              />
-                                            </TabsContent>
-                                            <TabsContent value="icon">
-                                              <div className="flex justify-center">
-                                                <div className="grid grid-cols-5 gap-2">
-                                                  {icons.map(
-                                                    (icon, index) =>
-                                                      index > 6 && (
-                                                        <div
-                                                          key={icon.id}
-                                                          className={cn(
-                                                            "rounded-sm p-2 hover:cursor-pointer",
-                                                            icon.id ===
-                                                              editIconId
-                                                              ? "bg-violet-500 text-primary-foreground"
-                                                              : "hover:bg-muted "
-                                                          )}
-                                                          onClick={() => {
-                                                            setEditIconId(
-                                                              icon.id
-                                                            );
-                                                          }}
-                                                        >
-                                                          {icon.icon}
-                                                        </div>
-                                                      )
-                                                  )}
-                                                </div>
-                                              </div>
-                                            </TabsContent>
-                                          </Tabs>
-
-                                          <button
-                                            onClick={() => {
-                                              setEditCategoryValue(
-                                                editDispValue
-                                              );
-                                              editSetValue("category", {
-                                                id: categories.length + 1,
-                                                value: editDispValue,
-                                                label: editDispValue,
-                                                iconId: editIconId,
-                                              });
-                                              categories.push({
-                                                id: categories.length + 1,
-                                                value: editDispValue,
-                                                label: editDispValue,
-                                                iconId: editIconId,
-                                              });
-                                              setOpenCategory(false);
-                                            }}
-                                            className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
-                                          >
-                                            Create &quot;{editDispValue}&quot;
-                                          </button>
-                                        </div>
-                                      </CommandEmpty>
-                                      <CommandGroup>
-                                        {categories.map((category) => (
-                                          <CommandItem
-                                            key={category.id}
-                                            onSelect={() => {
-                                              setEditCategoryValue(
-                                                category.value ===
-                                                  editCategoryValue
-                                                  ? ""
-                                                  : category.value
-                                              );
-                                              editSetValue("category", {
-                                                id: category.id,
-                                                value: category.value,
-                                                label: category.value,
-                                                iconId: category.iconId,
-                                              });
-                                              setOpenCategory(false);
-                                            }}
-                                          >
-                                            <Check
-                                              className={cn(
-                                                "mr-2 h-4 w-4",
-                                                editCategoryValue ===
-                                                  category.value
-                                                  ? "opacity-100"
-                                                  : "opacity-0"
-                                              )}
-                                            />
-                                            {icons[category?.iconId - 1]?.icon}
-                                            <span className="ml-3">
-                                              {category.value}
-                                            </span>
-                                          </CommandItem>
-                                        ))}
-                                      </CommandGroup>
-                                    </Command>
-                                  </PopoverContent>
-                                </Popover>
-                                <div className="h-3">
-                                  {editErrors.category && (
-                                    <span className="text-xxs text-red-500">
-                                      {editErrors.category.message}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex flex-col">
-                                <p className="mb-2 text-sm">Date</p>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant={"outline"}
+                                <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
+                                  <label
+                                    htmlFor="image-upload"
+                                    className={cn(
+                                      "group relative mx-auto flex h-32 w-full flex-col items-center justify-center rounded-lg border border-[#e2e8f0]  transition duration-100"
+                                    )}
+                                  >
+                                    <div className="absolute z-40 aspect-video h-full w-full rounded-md bg-white object-cover"></div>
+                                    <div
                                       className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !editDate && "text-muted-foreground"
+                                        "absolute z-50 flex flex-col items-center justify-center text-center text-xs font-medium transition-all duration-100",
+                                        expense.imgUrl && "hidden"
                                       )}
                                     >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {editDate ? (
-                                        format(editDate, "PPP")
-                                      ) : (
-                                        <span>Pick a date</span>
-                                      )}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                      mode="single"
-                                      selected={editDate}
-                                      onSelect={(data) => {
-                                        setEditDate(data);
-                                        editSetValue("date", data as Date);
-                                      }}
-                                      initialFocus
-                                      disabled={(date) =>
-                                        date > new Date() ||
-                                        date < new Date("1900-01-01")
-                                      }
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                                <div className="h-3">
-                                  {editErrors.date && (
-                                    <span className="text-xxs text-red-500">
-                                      {editErrors.date.message}
-                                    </span>
-                                  )}
+                                      <p className="font-light italic text-[#A0A5AF]">
+                                        No image available
+                                      </p>
+                                    </div>
+                                    {expense.imgUrl && (
+                                      //eslint-disable-next-line @next/next/no-img-element
+                                      <img
+                                        src={expense.imgUrl}
+                                        alt="Preview"
+                                        className="z-[200] aspect-video h-full rounded-lg object-contain"
+                                      />
+                                    )}
+                                  </label>
                                 </div>
-                              </div>
-                            </div>
-                            <Button
-                              type="submit"
-                              disabled={isEditLoading}
-                              className="w-full"
-                            >
-                              {isEditLoading ? (
-                                <Loader2
-                                  className="mr-2 h-4 w-4 animate-spin"
-                                  color="#803FE8"
-                                />
-                              ) : (
-                                <span>Save</span>
-                              )}
-                            </Button>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                      <Dialog
-                        open={deleteDialogOpen}
-                        onOpenChange={setDeleteDialogOpen}
-                      >
-                        <DialogTrigger>
-                          <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
-                            <Trash2 className="h-4 w-4" />
-                            <p className="text-sm">Delete</p>
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Are you absolutely sure?</DialogTitle>
-                            <DialogDescription>
-                              This action cannot be undone. This will
-                              permanently remove your expense record from the
-                              system.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter className="flex justify-center">
-                            <Button
-                              variant={"secondary"}
-                              onClick={() => setDeleteDialogOpen(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              variant={"destructive"}
-                              onClick={() => handleDelete(expense.id)}
-                            >
-                              Delete
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </PopoverContent>
-                  </Popover>
+                                <div>
+                                  <label className="text-sm">Description</label>
+                                  <Input
+                                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                    placeholder="Enter description"
+                                    defaultValue={expense.description}
+                                    onChange={(e) => {
+                                      editSetValue(
+                                        "description",
+                                        e.target.value
+                                      );
+                                    }}
+                                    ref={inputDescriptionRef}
+                                  />
+
+                                  <div className="h-3">
+                                    {editErrors.description && (
+                                      <span className="text-xxs text-red-500">
+                                        {editErrors.description.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-1/3">
+                                    <label className="text-sm">Amount</label>
+                                    <Input
+                                      className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                                      placeholder="Enter amount"
+                                      defaultValue={parseFloat(
+                                        expense.amount.toString()
+                                      )}
+                                      onChange={(e) => {
+                                        editSetValue(
+                                          "amount",
+                                          parseFloat(e.target.value)
+                                        );
+                                      }}
+                                      type="number"
+                                      step="0.01"
+                                      ref={inputAmountRef}
+                                    />
+                                    <div className="h-3">
+                                      {editErrors.amount && (
+                                        <span className="text-xxs text-red-500">
+                                          {editErrors.amount.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="w-2/3">
+                                    <p className="mb-2 text-sm">Category</p>
+                                    <Popover
+                                      open={openCategory}
+                                      onOpenChange={setOpenCategory}
+                                    >
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          role="combobox"
+                                          aria-expanded={openCategory}
+                                          className="w-full justify-between"
+                                        >
+                                          {editCategoryValue
+                                            ? categories.find(
+                                                (category) =>
+                                                  category.label ===
+                                                  editCategoryValue
+                                              )?.value || editCategoryValue
+                                            : "Select category"}
+                                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-full p-0">
+                                        <Command>
+                                          <CommandInput
+                                            placeholder="Search category..."
+                                            onChangeCapture={
+                                              handleEditInputChange
+                                            }
+                                          />
+                                          <CommandEmpty>
+                                            <div className="flex flex-col">
+                                              <Tabs
+                                                defaultValue="text"
+                                                className="w-full text-center"
+                                              >
+                                                <TabsList>
+                                                  <TabsTrigger value="text">
+                                                    Text
+                                                  </TabsTrigger>
+                                                  <TabsTrigger value="icon">
+                                                    Icon
+                                                  </TabsTrigger>
+                                                </TabsList>
+                                                <TabsContent value="text">
+                                                  <Input
+                                                    className="h-7 text-xs "
+                                                    value={editDispValue}
+                                                    disabled
+                                                  />
+                                                </TabsContent>
+                                                <TabsContent value="icon">
+                                                  <div className="flex justify-center">
+                                                    <div className="grid grid-cols-5 gap-2">
+                                                      {icons.map(
+                                                        (icon, index) =>
+                                                          index > 6 && (
+                                                            <div
+                                                              key={icon.id}
+                                                              className={cn(
+                                                                "rounded-sm p-2 hover:cursor-pointer",
+                                                                icon.id ===
+                                                                  editIconId
+                                                                  ? "bg-violet-500 text-primary-foreground"
+                                                                  : "hover:bg-muted "
+                                                              )}
+                                                              onClick={() => {
+                                                                setEditIconId(
+                                                                  icon.id
+                                                                );
+                                                              }}
+                                                            >
+                                                              {icon.icon}
+                                                            </div>
+                                                          )
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                </TabsContent>
+                                              </Tabs>
+
+                                              <button
+                                                onClick={() => {
+                                                  setEditCategoryValue(
+                                                    editDispValue
+                                                  );
+                                                  editSetValue("category", {
+                                                    id: categories.length + 1,
+                                                    value: editDispValue,
+                                                    label: editDispValue,
+                                                    iconId: editIconId,
+                                                  });
+                                                  categories.push({
+                                                    id: categories.length + 1,
+                                                    value: editDispValue,
+                                                    label: editDispValue,
+                                                    iconId: editIconId,
+                                                  });
+                                                  setOpenCategory(false);
+                                                }}
+                                                className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                              >
+                                                Create &quot;{editDispValue}
+                                                &quot;
+                                              </button>
+                                            </div>
+                                          </CommandEmpty>
+                                          <CommandGroup>
+                                            {categories.map((category) => (
+                                              <CommandItem
+                                                key={category.id}
+                                                onSelect={() => {
+                                                  setEditCategoryValue(
+                                                    category.value ===
+                                                      editCategoryValue
+                                                      ? ""
+                                                      : category.value
+                                                  );
+                                                  editSetValue("category", {
+                                                    id: category.id,
+                                                    value: category.value,
+                                                    label: category.value,
+                                                    iconId: category.iconId,
+                                                  });
+                                                  setOpenCategory(false);
+                                                }}
+                                              >
+                                                <Check
+                                                  className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    editCategoryValue ===
+                                                      category.value
+                                                      ? "opacity-100"
+                                                      : "opacity-0"
+                                                  )}
+                                                />
+                                                {
+                                                  icons[category?.iconId - 1]
+                                                    ?.icon
+                                                }
+                                                <span className="ml-3">
+                                                  {category.value}
+                                                </span>
+                                              </CommandItem>
+                                            ))}
+                                          </CommandGroup>
+                                        </Command>
+                                      </PopoverContent>
+                                    </Popover>
+                                    <div className="h-3">
+                                      {editErrors.category && (
+                                        <span className="text-xxs text-red-500">
+                                          {editErrors.category.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="flex flex-col">
+                                    <p className="mb-2 text-sm">Date</p>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant={"outline"}
+                                          className={cn(
+                                            "w-[240px] justify-start text-left font-normal",
+                                            !editDate && "text-muted-foreground"
+                                          )}
+                                        >
+                                          <CalendarIcon className="mr-2 h-4 w-4" />
+                                          {editDate ? (
+                                            format(editDate, "PPP")
+                                          ) : (
+                                            <span>Pick a date</span>
+                                          )}
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                          mode="single"
+                                          selected={editDate}
+                                          onSelect={(data) => {
+                                            setEditDate(data);
+                                            editSetValue("date", data as Date);
+                                          }}
+                                          initialFocus
+                                          disabled={(date) =>
+                                            date > new Date() ||
+                                            date < new Date("1900-01-01")
+                                          }
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                    <div className="h-3">
+                                      {editErrors.date && (
+                                        <span className="text-xxs text-red-500">
+                                          {editErrors.date.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="submit"
+                                  disabled={isEditLoading}
+                                  className="w-full"
+                                >
+                                  {isEditLoading ? (
+                                    <Loader2
+                                      className="mr-2 h-4 w-4 animate-spin"
+                                      color="#803FE8"
+                                    />
+                                  ) : (
+                                    <span>Save</span>
+                                  )}
+                                </Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                          <Dialog
+                            open={deleteDialogOpen}
+                            onOpenChange={setDeleteDialogOpen}
+                          >
+                            <DialogTrigger>
+                              <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
+                                <Trash2 className="h-4 w-4" />
+                                <p className="text-sm">Delete</p>
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Are you absolutely sure?
+                                </DialogTitle>
+                                <DialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently remove your expense record from
+                                  the system.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter className="flex justify-center">
+                                <Button
+                                  variant={"secondary"}
+                                  onClick={() => setDeleteDialogOpen(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  variant={"destructive"}
+                                  onClick={() => handleDelete(expense.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="relative items-center justify-center align-middle">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/upload.png"
+                    className="mx-auto my-auto flex h-56  items-center sm:h-96"
+                    alt="image-upload"
+                  />
+                  <p className="text-center text-sm italic text-athens-gray-300/75">
+                    No expenses yet
+                  </p>
                 </div>
-              ))}
+              )}
             </>
           )}
         </div>

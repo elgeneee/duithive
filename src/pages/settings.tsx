@@ -354,7 +354,7 @@ const Settings: NextPage = () => {
                     Update your personal details here
                   </p>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-col space-x-0 space-y-2 sm:flex-row sm:space-x-3 sm:space-y-0">
                   <Button
                     variant={"outline"}
                     className="border-violet-500 text-violet-500 hover:text-violet-600"
@@ -378,13 +378,13 @@ const Settings: NextPage = () => {
                 </div>
               </div>
               <hr />
-              <div className="my-5 flex items-center justify-between">
+              <div className="my-5 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Username</p>
                 </div>
-                <div>
+                <div className="w-full sm:w-[300px]">
                   <Input
-                    className="mt-2 w-[300px] border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
                     defaultValue={userSettings?.name as string}
                     {...register("username", { required: true })}
                   />
@@ -395,35 +395,36 @@ const Settings: NextPage = () => {
                   )}
                 </div>
               </div>
-              <div className="my-5 flex items-center justify-between">
+              <div className="my-5 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Email</p>
                 </div>
-                <div>
+                <div className="w-full sm:w-[300px]">
                   <Input
-                    className="mt-2 w-[300px] border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                    className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
                     disabled={true}
                     type="email"
                     value={emailValue}
                   />
                 </div>
               </div>
-              <div className="my-7 flex justify-between">
+              <div className="my-7 flex flex-col items-start justify-between sm:flex-row">
                 <div>
                   <p className="font-semibold">Photo</p>
                 </div>
-                <div className="flex space-x-3">
-                  <Avatar className="h-12 w-12 border border-athens-gray-200">
+                <div className="flex w-full sm:w-auto  sm:space-x-2">
+                  <Avatar className="hidden h-12 w-12 border border-athens-gray-200 sm:block">
                     <AvatarImage src={userSettings?.image as string} />
                     <AvatarFallback className="bg-white">
                       {userSettings?.name?.substring(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
+                  {/* <div className="w-full h-96 bg-black">s</div> */}
+                  <div className="mt-2 w-full sm:mt-0">
                     <label
                       htmlFor="image-upload"
                       className={cn(
-                        "group relative mx-auto flex aspect-square w-[300px] cursor-pointer flex-col items-center justify-center rounded-lg  border border-dashed  transition duration-100 hover:border-athens-gray-300",
+                        "group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-lg border  border-dashed transition  duration-100 hover:border-athens-gray-300 sm:w-[300px]",
                         dragActive
                           ? "border-athens-gray-300"
                           : "border-athens-gray-200"
@@ -503,23 +504,22 @@ const Settings: NextPage = () => {
                       </p>
                     )}
                   </div>
-
                   {/* drag-and-drop */}
                 </div>
               </div>
 
-              <div className="my-5 flex items-center justify-between">
+              <div className="my-5 flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <div>
                   <p className="font-semibold">Currency</p>
                 </div>
-                <div className="flex space-x-3">
+                <div className="mt-2 w-full sm:mt-0 sm:w-[200px]">
                   <Popover open={currencyOpen} onOpenChange={setCurrencyOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={currencyOpen}
-                        className="w-[200px] justify-between bg-white"
+                        className="flex w-full bg-white sm:w-[200px]"
                       >
                         {currencyValue
                           ? currencies.find(
@@ -647,7 +647,7 @@ const Settings: NextPage = () => {
                   Update your notification settings here
                 </p>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-col space-x-0 space-y-2 sm:flex-row sm:space-x-3 sm:space-y-0">
                 <Button
                   variant={"outline"}
                   className="border-violet-500 text-violet-500 hover:text-violet-600"
