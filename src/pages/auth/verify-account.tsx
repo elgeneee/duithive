@@ -50,18 +50,50 @@ const VerifyAccount: NextPage = () => {
     index: number
   ) => {
     currentOTPIndex = index;
-    if (key === "Backspace") setActiveOTPIndex(currentOTPIndex - 1);
+    if (key === "Backspace") {
+      inputRef.current?.focus();
+      const newOtp = otp;
+      newOtp[index] = "";
+      setOtp(newOtp);
+      setActiveOTPIndex(currentOTPIndex - 1);
+    }
   };
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeOTPIndex]);
 
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const clipboardData = event.clipboardData;
+
+      if (clipboardData) {
+        const otpClipboard = clipboardData
+          .getData("text")
+          .replace(/[^0-9]/g, "")
+          .slice(0, 4)
+          .split("");
+
+        const newOtp = new Array(4).fill("");
+        for (let i = 0; i < otpClipboard.length; i++) {
+          newOtp[i] = otpClipboard[i];
+        }
+        setActiveOTPIndex(otpClipboard.length);
+        setOtp(newOtp);
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  });
+
   const { mutate: verifyEmail, isLoading: loading } =
     api.auth.verifyEmail.useMutation({
       onSuccess: async () => {
         // setInput("");
-        // void ctx.posts.getAll.invalidate();
+        setActiveOTPIndex(0);
+        setOtp(new Array(4).fill(""));
         await router.push("/auth/login");
       },
       onError: (e) => {
@@ -72,6 +104,8 @@ const VerifyAccount: NextPage = () => {
         } else {
           // toast.error("Failed to create! Please try again later.");
         }
+        setActiveOTPIndex(0);
+        setOtp(new Array(4).fill(""));
       },
     });
 

@@ -189,7 +189,12 @@ function Navbar() {
                           <Loader className="animate-spi w-3" />
                         </>
                       ) : (
-                        <span className={cn("text-xs font-light underline", notifications?.length === 0 && "hidden")}>
+                        <span
+                          className={cn(
+                            "text-xs font-light underline",
+                            notifications?.length === 0 && "hidden"
+                          )}
+                        >
                           Mark all as read
                         </span>
                       )}
