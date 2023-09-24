@@ -47,6 +47,7 @@ export const userRouter = createTRPCRouter({
             currency: true,
             image: true,
             notification: true,
+            monthlyReport: true,
           },
         });
 
@@ -97,7 +98,8 @@ export const userRouter = createTRPCRouter({
             email: input.email,
           },
           data: {
-            notification: input?.notification as boolean,
+            notification: input.notification as boolean,
+            monthlyReport: input.monthlyReport as boolean,
           },
         });
 

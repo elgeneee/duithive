@@ -13,4 +13,5 @@ export const userSettingsSchema = z.object({
 export const userNotificationSchema = z.object({
   email: z.string().email().min(5),
   notification: z.boolean().nullable(),
+  monthlyReport: z.boolean().nullable(),
 });

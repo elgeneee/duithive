@@ -66,6 +66,7 @@ model User {
     budget        Budget[]
     report        Report[]
     notifications Notification[]
+    monthlyReport Boolean        @default(false)
 
     @@index([currencyId])
 }

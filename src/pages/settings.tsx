@@ -93,8 +93,8 @@ const Settings: NextPage = () => {
   const [fileSizeTooBig, setFileSizeTooBig] = useState<boolean>(false);
   const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
 
-  //
   const [notificationAlert, setNotificationAlert] = useState<boolean>();
+  const [monthlyReport, setMonthlyReport] = useState<boolean>();
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-US", {
     year: "numeric",
@@ -186,6 +186,7 @@ const Settings: NextPage = () => {
       setCurrencyValue(userSettings.currency?.name.toLowerCase() as string);
       setEmailValue(userSettings.email as string);
       setNotificationAlert(userSettings.notification);
+      setMonthlyReport(userSettings.monthlyReport);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSettings]);
@@ -315,6 +316,8 @@ const Settings: NextPage = () => {
       email: emailValue,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       notification: notificationAlert!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      monthlyReport: monthlyReport!,
     });
   };
 
@@ -672,7 +675,7 @@ const Settings: NextPage = () => {
             <div className="my-5 flex items-center justify-between rounded-lg border border-athens-gray-100 bg-white px-3 py-3">
               <div>
                 <p className="font-semibold">Alert emails</p>
-                <p className="text-sm font-semibold text-athens-gray-300">
+                <p className="text-sm font-medium text-athens-gray-300">
                   Receive emails about budget status
                 </p>
               </div>
@@ -680,6 +683,21 @@ const Settings: NextPage = () => {
                 <Switch
                   checked={notificationAlert}
                   onCheckedChange={setNotificationAlert}
+                  id="notification"
+                />
+              </div>
+            </div>
+            <div className="my-5 flex items-center justify-between rounded-lg border border-athens-gray-100 bg-white px-3 py-3">
+              <div>
+                <p className="font-semibold">Monthly Report</p>
+                <p className="text-sm font-medium text-athens-gray-300">
+                  Receive emails about monthly spending report, turning off will not generate any report at end of each month
+                </p>
+              </div>
+              <div>
+                <Switch
+                  checked={monthlyReport}
+                  onCheckedChange={setMonthlyReport}
                   id="notification"
                 />
               </div>
