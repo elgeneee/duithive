@@ -55,7 +55,9 @@ const Login: NextPage = () => {
       window.location.replace("/dashboard");
     } else {
       toast({
-        description: signInRes?.error || "An error occurred",
+        variant: "error",
+        status: "error",
+        title: signInRes?.error || "An error occurred",
       });
     }
     setLoading(false);

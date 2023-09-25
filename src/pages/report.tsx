@@ -29,6 +29,7 @@ import sumBy from "lodash/sumBy";
 import { reportStyles as styles } from "@/store/reportStyles";
 import { columns } from "@/components/ui/reportColumns";
 import { customAlphabet } from "nanoid";
+import { useToast } from "@/components/ui/use-toast";
 
 const colors: string[] = [
   "#9D74F3",
@@ -41,6 +42,8 @@ const colors: string[] = [
 
 const Report: NextPage = () => {
   const { data: session } = useSession();
+  const { toast } = useToast();
+
   const [dateRange, setDateRange] = useState<string>("week");
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
@@ -65,14 +68,27 @@ const Report: NextPage = () => {
     onSuccess: () => {
       setLoading(false);
       void ctx.report.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Report generated successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });

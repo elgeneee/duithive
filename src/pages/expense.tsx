@@ -52,6 +52,8 @@ import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { env } from "@/env.mjs";
+import { useToast } from "@/components/ui/use-toast";
+
 // import groupBy from "lodash/groupBy";
 // import map from "lodash/map";
 // import moment from "moment";
@@ -112,6 +114,7 @@ const getFilteredExpense = (query: string, expenses: Expense) => {
 
 const Expense: NextPage = () => {
   const { data: session } = useSession();
+  const { toast } = useToast();
 
   const {
     register,
@@ -194,46 +197,32 @@ const Expense: NextPage = () => {
   const { mutate: deleteExpense } = api.expense.deleteExpense.useMutation({
     onSuccess: () => {
       void ctx.expense.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Expense deleted successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });
   const { data: expenses, isLoading: isLoadingExpenses } =
     api.expense.getAll.useQuery();
-
-  // const testSeparate = () => {
-  //   const expenseGroupedData = map(
-  //     groupBy(expenses, (expense) =>
-  //       expense.transactionDate?.toLocaleDateString()
-  //     ),
-  //     (expenses, date) => ({ date, expenses })
-  //   );
-
-  //   const currDate = new Date("2023-02-01");
-  //   const yesterday = moment(currDate);
-  //   const currentDate = moment(new Date("2023-03-01")); // Reference date
-
-  // };
-
-  // useEffect(() => {
-  //   const expenseGroupedData = map(
-  //     groupBy(expenses, (expense) =>
-  //       expense.transactionDate?.toLocaleDateString()
-  //     ),
-  //     (expenses, date) => ({ date, expenses })
-  //   );
-  //     console.log(expenseGroupedData);
-  //   setGroupedExpenses(expenseGroupedData);
-
-  //   console.log('I am triggered')
-  // },[expenses]);
 
   const { mutate: createExpense } = api.expense.create.useMutation({
     onSuccess: () => {
@@ -246,14 +235,27 @@ const Expense: NextPage = () => {
       setReceiptImage(null);
       setImageName("");
       void ctx.expense.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Expense created successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });
@@ -271,14 +273,27 @@ const Expense: NextPage = () => {
         setEditCategoryValue("");
         setEditDispValue("");
         void ctx.expense.getAll.invalidate();
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Success!",
+        });
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
 
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });

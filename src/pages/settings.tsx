@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-// import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -126,14 +125,11 @@ const Settings: NextPage = () => {
       });
     },
     onError: (e) => {
-      const errorMessage = e.data;
-      if (errorMessage) {
-        toast({
-          variant: "error",
-          status: "error",
-          title: errorMessage.code,
-        });
-      }
+      toast({
+        variant: "error",
+        status: "error",
+        title: e.message,
+      });
     },
   });
 
@@ -150,14 +146,11 @@ const Settings: NextPage = () => {
         });
       },
       onError: (e) => {
-        const errorMessage = e.data;
-        if (errorMessage) {
-          toast({
-            variant: "error",
-            status: "error",
-            title: errorMessage.code,
-          });
-        }
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message,
+        });
       },
     });
 
@@ -171,11 +164,18 @@ const Settings: NextPage = () => {
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
-        console.log(e);
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });

@@ -56,6 +56,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { icons, categories } from "@/store/category";
 import { type RouterOutputs } from "@/utils/api";
+import { useToast } from "@/components/ui/use-toast";
 
 import { api } from "@/utils/api";
 import { SkeletonList } from "@/components/ui/skeletonList";
@@ -106,6 +107,7 @@ const getFilteredBudgets = (query: string, budgets: Budgets) => {
 
 const Budget: NextPage = () => {
   const { data: session } = useSession();
+  const { toast } = useToast();
 
   const {
     handleSubmit: editHandleSubmit,
@@ -172,16 +174,28 @@ const Budget: NextPage = () => {
       setDispValue("");
       setIconId(1);
       setDialogOpen(false);
-
       void ctx.budget.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Budget created successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });
@@ -192,14 +206,27 @@ const Budget: NextPage = () => {
         editReset;
         setEditDialogOpen(false);
         void ctx.budget.getAll.invalidate();
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Success!",
+        });
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
 
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });
@@ -207,14 +234,27 @@ const Budget: NextPage = () => {
   const { mutate: deleteBudget } = api.budget.deleteBudget.useMutation({
     onSuccess: () => {
       void ctx.budget.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Budget deleted successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });

@@ -37,6 +37,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
+import { useToast } from "@/components/ui/use-toast";
 
 type Incomes = RouterOutputs["income"]["getAll"];
 
@@ -82,6 +83,7 @@ const getFilteredIncomes = (query: string, incomes: Incomes) => {
 
 const Income: NextPage = () => {
   const { data: session } = useSession();
+  const { toast } = useToast();
 
   const {
     register,
@@ -129,14 +131,27 @@ const Income: NextPage = () => {
   const { mutate: deleteIncome } = api.income.deleteIncome.useMutation({
     onSuccess: () => {
       void ctx.income.getAll.invalidate();
+      toast({
+        variant: "success",
+        status: "success",
+        title: "Income deleted successfully!",
+      });
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
 
       if (errorMessage && errorMessage[0]) {
-        // toast.error(errorMessage[0]);
+        toast({
+          variant: "error",
+          status: "error",
+          title: errorMessage[0] || "An error occurred",
+        });
       } else {
-        // toast.error("Failed to create! Please try again later.");
+        toast({
+          variant: "error",
+          status: "error",
+          title: e.message || "An error occurred",
+        });
       }
     },
   });
@@ -149,14 +164,27 @@ const Income: NextPage = () => {
         reset();
         setDialogOpen(false);
         void ctx.income.getAll.invalidate();
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Income created successfully!",
+        });
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
 
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });
@@ -167,14 +195,27 @@ const Income: NextPage = () => {
         editReset;
         setEditDialogOpen(false);
         void ctx.income.getAll.invalidate();
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Success!",
+        });
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
 
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });
