@@ -132,7 +132,7 @@ const VerifyAccount: NextPage = () => {
               <img src="/logo.png" className="w-16 pr-4" alt="logo" />
               <span className="text-violet-600">Duit</span>Hive
             </div>
-            <h2 className="my-4 text-center font-display text-2xl font-semibold tracking-wide">
+            <h2 className="my-4 text-center font-display text-2xl tracking-wide">
               Verify Account
             </h2>
             <p className="text-center text-xs font-medium text-athens-gray-500">

@@ -124,7 +124,7 @@ const SignUp: NextPage = () => {
               <img src="/logo.png" className="w-16 pr-4" alt="logo" />
               <span className="text-violet-600">Duit</span>Hive
             </div>
-            <h2 className="my-4 font-display text-2xl font-semibold tracking-wide">
+            <h2 className="my-4 font-display text-2xl tracking-wide">
               Sign Up
             </h2>
             <p className="mb-4 font-satoshi text-lg font-semibold">

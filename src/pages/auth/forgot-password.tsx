@@ -105,7 +105,7 @@ const ForgotPassword: NextPage = () => {
               </>
             ) : (
               <>
-                <h2 className="my-4 font-display text-2xl font-semibold tracking-wide">
+                <h2 className="my-4 font-display text-2xl tracking-wide">
                   Forgot Password
                 </h2>
                 <form

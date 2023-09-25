@@ -691,7 +691,8 @@ const Settings: NextPage = () => {
               <div>
                 <p className="font-semibold">Monthly Report</p>
                 <p className="text-sm font-medium text-athens-gray-300">
-                  Receive emails about monthly spending report, turning off will not generate any report at end of each month
+                  Receive emails about monthly spending report, turning off will
+                  not generate any report at end of each month
                 </p>
               </div>
               <div>
