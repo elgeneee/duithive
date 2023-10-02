@@ -275,24 +275,24 @@ const Dashboard: NextPage = () => {
         <p className="text-athens-gray-300">{formattedDate}</p>
         {isLoadingDashboard ? (
           <>
-            <div className="mt-10 flex space-x-3">
-              <Skeleton className="h-36 w-1/5 rounded-lg border border-athens-gray-200/40" />
-              <Skeleton className="h-36 w-1/5 rounded-lg border border-athens-gray-200/40" />
-              <Skeleton className="h-36 w-3/5 rounded-lg border border-athens-gray-200/40" />
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/5" />
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/5" />
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-3/5" />
             </div>
-            <div className="mt-10 flex space-x-3">
-              <Skeleton className="h-96 w-2/3 rounded-lg border border-athens-gray-200/40" />
-              <Skeleton className="h-96 w-1/3 rounded-lg border border-athens-gray-200/40" />
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-2/3" />
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/3" />
             </div>
             <div className="mt-10">
-              <Skeleton className="h-96 w-2/3 rounded-lg border border-athens-gray-200/40" />
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-2/3" />
             </div>
           </>
         ) : (
           <>
             {/* first layer */}
             <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-              <div className="flex h-36 w-full flex-col  justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
+              <div className="flex h-36 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
                 <ResponsiveContainer width="100%" height="50%">
                   <AreaChart
                     data={incomeAreaData}

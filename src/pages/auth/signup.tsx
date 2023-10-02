@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { useToast } from "@/components/ui/use-toast";
 
 const signupSchema = z
   .object({
@@ -58,6 +59,8 @@ const signupSchema = z
 type SignUpSchema = z.infer<typeof signupSchema>;
 
 const SignUp: NextPage = () => {
+  const { toast } = useToast();
+
   const {
     register,
     handleSubmit,
@@ -76,21 +79,30 @@ const SignUp: NextPage = () => {
   const { mutate: registerUser, isLoading: loading } =
     api.auth.register.useMutation({
       onSuccess: async (data) => {
-        await router.push(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          `/auth/verify-account?email=${data.user.email!.replaceAll(
-            "@",
-            "%40"
-          )}`
-        );
+        if (data?.user?.email) {
+          await router.push(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            `/auth/verify-account?email=${data.user.email.replaceAll(
+              "@",
+              "%40"
+            )}`
+          );
+        }
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
-
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
       },
     });
@@ -127,9 +139,7 @@ const SignUp: NextPage = () => {
             <h2 className="my-4 font-display text-2xl tracking-wide">
               Sign Up
             </h2>
-            <p className="mb-4 font-satoshi text-lg font-semibold">
-              Create an account
-            </p>
+            <p className="mb-4 font-satoshi text-lg">Create an account</p>
             <form
               className="flex flex-col gap-4"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises

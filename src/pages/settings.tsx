@@ -157,7 +157,6 @@ const Settings: NextPage = () => {
   const { mutate: deleteAccount, isLoading: isDeleteAccountLoading } =
     api.user.deleteAccount.useMutation({
       onSuccess: () => {
-        //toast
         void ctx.user.getUserSettings.invalidate({
           email: session?.user?.email as string,
         });
@@ -325,7 +324,7 @@ const Settings: NextPage = () => {
     if (data.email !== emailValue) {
       setDeleteAccountError("email", {
         type: "custom",
-        message: "Email do not match",
+        message: "Emails do not match",
       });
     } else {
       deleteAccount(data);

@@ -158,7 +158,7 @@ function Navbar() {
           </nav>
         </>
       ) : (
-        <nav className="z-999 sticky top-0 flex w-full items-center justify-end border-b border-[#E9EBEF] bg-white px-4 py-4">
+        <nav className="z-[950] sticky top-0 flex w-full items-center justify-end border-b border-[#E9EBEF] bg-white px-4 py-4">
           <div className="flex items-center justify-end space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger>

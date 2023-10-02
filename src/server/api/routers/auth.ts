@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.NODEMAILER_PASSWORD,
   },
 });
+import { Prisma } from "@prisma/client";
 
 interface DecodedToken {
   user_id: string;
@@ -29,35 +30,38 @@ export const authRouter = createTRPCRouter({
   register: publicProcedure
     .input(userSchema)
     .mutation(async ({ ctx, input }) => {
-      const hash = await bcrypt.hash(input.password, 10);
-      const otp = Math.floor(Math.random() * 10000)
-        .toString()
-        .padStart(4, "0");
-      const user = await ctx.prisma.user.create({
-        data: {
-          email: input.email,
-          password: hash,
-          name: input.username,
-          otp: otp,
-        },
-      });
-
-      //generate email
-      const options = {
-        from: process.env.NODEMAILER_EMAIL,
-        to: input.email,
-        subject: "Verify Email",
-        html: otpTemplate(otp),
-      };
-
       try {
+        const hash = await bcrypt.hash(input.password, 10);
+        const otp = Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0");
+        const user = await ctx.prisma.user.create({
+          data: {
+            email: input.email,
+            password: hash,
+            name: input.username,
+            otp: otp,
+          },
+        });
+
+        //generate email
+        const options = {
+          from: process.env.NODEMAILER_EMAIL,
+          to: input.email,
+          subject: "Verify Email",
+          html: otpTemplate(otp),
+        };
         const info = await transporter.sendMail(options);
         return { user, ...info };
       } catch (err) {
         if (typeof err === "string") {
           throw new Error(err);
+        } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+          if (err.code === "P2002") {
+            throw new Error("User exists! Try using another email");
+          }
         } else {
-          throw new Error("An error occurred");
+          throw new Error("An error occurred!");
         }
       }
     }),
@@ -144,11 +148,9 @@ export const authRouter = createTRPCRouter({
         },
       });
 
-      if (!userOTP) {
-        throw new Error("User not found");
-      }
+      if (!userOTP) throw new Error("User not found!");
 
-      if (userOTP.otp !== input.otp) throw new Error("Wrong OTP");
+      if (userOTP.otp !== input.otp) throw new Error("Wrong OTP!");
 
       try {
         await ctx.prisma.user.update({

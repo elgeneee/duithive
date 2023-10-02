@@ -6,12 +6,14 @@ import { api } from "@/utils/api";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 let currentOTPIndex = 0;
 
 const VerifyAccount: NextPage = () => {
   const router = useRouter();
   const { email } = router.query;
+  const { toast } = useToast();
 
   const [otp, setOtp] = useState<string[]>(new Array(4).fill(""));
   const [activeOTPIndex, setActiveOTPIndex] = useState<number>(0);
@@ -94,15 +96,28 @@ const VerifyAccount: NextPage = () => {
         // setInput("");
         setActiveOTPIndex(0);
         setOtp(new Array(4).fill(""));
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Success!",
+        });
         await router.push("/auth/login");
       },
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
 
         if (errorMessage && errorMessage[0]) {
-          // toast.error(errorMessage[0]);
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
         } else {
-          // toast.error("Failed to create! Please try again later.");
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
         }
         setActiveOTPIndex(0);
         setOtp(new Array(4).fill(""));
