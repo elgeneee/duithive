@@ -15,6 +15,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -22,8 +27,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { SkeletonList } from "@/components/ui/skeletonList";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
+  ChevronRight,
+  ChevronLeft,
   MoreVertical,
   Edit,
   Trash2,
@@ -33,13 +41,12 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import debounce from "lodash/debounce";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
-import { type RouterOutputs } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
-
-type Incomes = RouterOutputs["income"]["getAll"];
+import Link from "next/link";
 
 const createIncomeSchema = z.object({
   title: z.string().min(1, { message: "Title must be at least 1 character" }),
@@ -65,21 +72,6 @@ const editIncomeSchema = z.object({
   }),
   date: z.date(),
 });
-
-const getFilteredIncomes = (query: string, incomes: Incomes) => {
-  if (!query) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return incomes;
-  }
-
-  if (incomes) {
-    return incomes.filter(
-      (income: { description: string; title: string }) =>
-        income.description.toLowerCase().includes(query.toLowerCase()) ||
-        income.title.toLowerCase().includes(query.toLowerCase())
-    );
-  }
-};
 
 const Income: NextPage = () => {
   const { data: session } = useSession();
@@ -122,15 +114,75 @@ const Income: NextPage = () => {
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
   const ctx = api.useContext();
-  const [query, setQuery] = useState<string>("");
+
+  //infiniteQuery
+  const searchParams = useSearchParams();
+  const selectedSize = searchParams.get("page_size");
+  const [page, setPage] = useState<number>(0);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  //search function
+  const [search, setSearch] = useState<string>("");
+
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPage(0);
+    setSearch(e.target.value);
+  };
+
+  const debouncedHandleInputChange = useMemo(
+    () => debounce(handleSearchInput, 200),
+    []
+  );
+
+  // stop debouncing (if any pending) when the component unmounts
+  useEffect(() => {
+    return () => {
+      debouncedHandleInputChange.cancel();
+    };
+  }, [debouncedHandleInputChange]);
 
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
 
+  const {
+    data: searchResults,
+    isLoading: isLoadingSearchResults,
+    refetch: refetchSearch,
+  } = api.income.search.useQuery({
+    searchInput: search,
+    limit: selectedSize ? parseInt(selectedSize) : 10,
+  });
+
+  useEffect(() => {
+    refetchSearch;
+  }, [search, refetchSearch]);
+
+  const {
+    data: incomes,
+    isLoading: isLoadingIncome,
+    fetchNextPage,
+  } = api.income.getPaginated.useInfiniteQuery(
+    {
+      limit: selectedSize ? parseInt(selectedSize) : 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    }
+  );
+
+  const handleFetchNextPage = async () => {
+    await fetchNextPage();
+    setPage((prev) => prev + 1);
+  };
+
+  const handleFetchPreviousPage = () => {
+    setPage((prev) => prev - 1);
+  };
+
   const { mutate: deleteIncome } = api.income.deleteIncome.useMutation({
     onSuccess: () => {
-      void ctx.income.getAll.invalidate();
+      void ctx.income.getPaginated.invalidate();
       toast({
         variant: "success",
         status: "success",
@@ -155,15 +207,15 @@ const Income: NextPage = () => {
       }
     },
   });
-  const { data: incomes, isLoading: isLoadingIncome } =
-    api.income.getAll.useQuery();
+  // const { data: incomes, isLoading: isLoadingIncome } =
+  //   api.income.getAll.useQuery();
 
   const { mutate: createIncome, isLoading: isCreatingIncome } =
     api.income.create.useMutation({
       onSuccess: () => {
         reset();
         setDialogOpen(false);
-        void ctx.income.getAll.invalidate();
+        void ctx.income.getPaginated.invalidate();
         toast({
           variant: "success",
           status: "success",
@@ -194,7 +246,7 @@ const Income: NextPage = () => {
       onSuccess: () => {
         editReset;
         setEditDialogOpen(false);
-        void ctx.income.getAll.invalidate();
+        void ctx.income.getPaginated.invalidate();
         toast({
           variant: "success",
           status: "success",
@@ -232,7 +284,11 @@ const Income: NextPage = () => {
     deleteIncome({ id: id });
   };
 
-  const filteredIncomes = getFilteredIncomes(query, incomes);
+  const toShow = searchResults?.incomes
+    ? searchResults.incomes
+    : incomes?.pages[page]?.incomes;
+
+  const nextCursor = incomes?.pages[page]?.nextCursor;
 
   return (
     <AppLayout>
@@ -366,21 +422,51 @@ const Income: NextPage = () => {
                 </form>
               </DialogContent>
             </Dialog>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger>
+                <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
+                  {selectedSize || 10} / page
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <Link
+                  href={`?page_size=10`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  10
+                </Link>
+                <Link
+                  href={`?page_size=20`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  20
+                </Link>
+                <Link
+                  href={`?page_size=50`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  50
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Input
               className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />
           </div>
         </div>
         <div className="mt-10 space-y-5">
-          {isLoadingIncome ? (
+          {isLoadingIncome || isLoadingSearchResults ? (
             <SkeletonList className="h-[60px]" />
           ) : (
             <>
-              {filteredIncomes && filteredIncomes?.length > 0 ? (
+              {toShow && toShow?.length > 0 ? (
                 <>
-                  {filteredIncomes?.map((income) => (
+                  {toShow?.map((income) => (
                     <div
                       key={income.id}
                       className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
@@ -424,7 +510,10 @@ const Income: NextPage = () => {
                             <span className="sr-only">Open popover</span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="flex w-36 flex-col p-2">
+                        <PopoverContent
+                          align="end"
+                          className="flex w-36 flex-col p-2"
+                        >
                           <p className="px-2 text-sm font-medium text-foreground">
                             Edit/Delete
                           </p>
@@ -664,6 +753,30 @@ const Income: NextPage = () => {
               )}
             </>
           )}
+          <div className="flex justify-end">
+            <div className="flex border border-athens-gray-100 shadow-sm">
+              <Button
+                className="h-10 w-10 rounded-r-none p-1"
+                disabled={page <= 0 || searchResults?.incomes !== undefined}
+                variant="pagination"
+                onClick={handleFetchPreviousPage}
+              >
+                <ChevronLeft size={20} />
+              </Button>
+              <div className="flex h-10 w-10 items-center justify-center border-x border-athens-gray-100 bg-white p-1">
+                {page + 1}
+              </div>
+              <Button
+                className="h-10 w-10 rounded-l-none p-1"
+                variant="pagination"
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onClick={handleFetchNextPage}
+                disabled={!nextCursor || searchResults?.incomes !== undefined}
+              >
+                <ChevronRight size={20} />
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </AppLayout>

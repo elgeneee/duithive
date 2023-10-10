@@ -1,4 +1,9 @@
-import { createIncomeSchema, editIncomeSchema } from "@/schema/income.schema";
+import {
+  createIncomeSchema,
+  editIncomeSchema,
+  getPaginatedSchema,
+  searchSchema,
+} from "@/schema/income.schema";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 
@@ -74,6 +79,122 @@ export const incomeRouter = createTRPCRouter({
       throw new Error(err as string);
     }
   }),
+  getPaginated: protectedProcedure
+    .input(getPaginatedSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const incomes = await ctx.prisma.income.findMany({
+            take: limit + 1,
+            where: {
+              userId: userId.id,
+            },
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              amount: true,
+              transactionDate: true,
+            },
+            cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              transactionDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (incomes.length > limit) {
+            const nextItem = incomes.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            incomes,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  search: protectedProcedure
+    .input(searchSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        if (!input.searchInput) {
+          return {
+            incomes: undefined,
+            nextCursor: undefined,
+          };
+        }
+
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const incomes = await ctx.prisma.income.findMany({
+            // take: limit + 1,
+            // skip: input.skip,
+            where: {
+              userId: userId.id,
+              OR: [
+                {
+                  title: {
+                    contains: input.searchInput ? input.searchInput : undefined,
+                  },
+                },
+                {
+                  description: {
+                    contains: input.searchInput ? input.searchInput : undefined,
+                  },
+                },
+              ],
+            },
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              amount: true,
+              transactionDate: true,
+            },
+            // cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              transactionDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (incomes.length > limit) {
+            const nextItem = incomes.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            incomes: incomes,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
   editIncome: protectedProcedure
     .input(editIncomeSchema)
     .mutation(async ({ ctx, input }) => {

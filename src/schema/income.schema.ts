@@ -24,3 +24,15 @@ export const editIncomeSchema = z.object({
   }),
   date: z.date(),
 });
+
+export const getPaginatedSchema = z.object({
+  limit: z.number().min(1).max(100).nullish(),
+  cursor: z.string().nullish(),
+});
+
+export const searchSchema = z.object({
+  searchInput: z.string().optional(),
+  limit: z.number().min(1).max(100).nullish(),
+  cursor: z.string().nullish(),
+  skip: z.number().optional(),
+});

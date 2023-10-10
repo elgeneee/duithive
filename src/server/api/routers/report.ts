@@ -261,7 +261,6 @@ export const reportRouter = createTRPCRouter({
       }
       return { message: "ok" };
     } catch (err) {
-      console.log(err);
       throw new Error(err as string);
     }
   }),

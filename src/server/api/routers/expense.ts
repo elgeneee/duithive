@@ -1,4 +1,9 @@
-import { editExpenseSchema, expenseSchema } from "@/schema/expense.schema";
+import {
+  editExpenseSchema,
+  expenseSchema,
+  getPaginatedSchema,
+  searchSchema,
+} from "@/schema/expense.schema";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import type { Budget } from "@prisma/client";
 import { z } from "zod";
@@ -125,6 +130,125 @@ export const expenseRouter = createTRPCRouter({
       throw new Error(err as string);
     }
   }),
+  getPaginated: protectedProcedure
+    .input(getPaginatedSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const expenses = await ctx.prisma.expense.findMany({
+            take: limit + 1,
+            where: {
+              userId: userId.id,
+            },
+            select: {
+              id: true,
+              description: true,
+              category: {
+                select: {
+                  name: true,
+                  iconId: true,
+                },
+              },
+              amount: true,
+              transactionDate: true,
+              imgUrl: true,
+            },
+            cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              transactionDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (expenses.length > limit) {
+            const nextItem = expenses.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            expenses,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  search: protectedProcedure
+    .input(searchSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        if (!input.searchInput) {
+          return {
+            expenses: undefined,
+            nextCursor: undefined,
+          };
+        }
+
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const expenses = await ctx.prisma.expense.findMany({
+            // take: limit + 1,
+            // skip: input.skip,
+            where: {
+              userId: userId.id,
+              description: {
+                contains: input.searchInput ? input.searchInput : undefined,
+              },
+            },
+            select: {
+              id: true,
+              description: true,
+              category: {
+                select: {
+                  name: true,
+                  iconId: true,
+                },
+              },
+              amount: true,
+              transactionDate: true,
+              imgUrl: true,
+            },
+            // cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              transactionDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (expenses.length > limit) {
+            const nextItem = expenses.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            expenses,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
   getExpenseReport: protectedProcedure
     .input(
       z.object({ startDate: z.date().optional(), endDate: z.date().optional() })

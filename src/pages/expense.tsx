@@ -25,6 +25,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -32,10 +37,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { SkeletonList } from "@/components/ui/skeletonList";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import {
   Check,
   ChevronsUpDown,
+  ChevronRight,
+  ChevronLeft,
   MoreVertical,
   Edit,
   Trash2,
@@ -49,10 +56,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
-import { type RouterOutputs } from "@/utils/api";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { env } from "@/env.mjs";
 import { useToast } from "@/components/ui/use-toast";
+import debounce from "lodash/debounce";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 // import groupBy from "lodash/groupBy";
 // import map from "lodash/map";
@@ -61,7 +70,6 @@ import { useToast } from "@/components/ui/use-toast";
 // import relativeTime from "dayjs/plugin/relativeTime";
 // import { set } from "lodash";
 // dayjs.extend(relativeTime);
-type Expense = RouterOutputs["expense"]["getAll"];
 
 const createExpenseSchema = z.object({
   description: z
@@ -98,19 +106,6 @@ const editExpenseSchema = z.object({
     iconId: z.number(),
   }),
 });
-
-const getFilteredExpense = (query: string, expenses: Expense) => {
-  if (!query) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return expenses;
-  }
-
-  if (expenses) {
-    return expenses.filter((expense: { description: string }) =>
-      expense.description.toLowerCase().includes(query.toLowerCase())
-    );
-  }
-};
 
 const Expense: NextPage = () => {
   const { data: session } = useSession();
@@ -163,7 +158,6 @@ const Expense: NextPage = () => {
   const [editDispValue, setEditDispValue] = useState<string>("");
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState<string>("");
 
   //drag-and-drop image
   const [dragActive, setDragActive] = useState<boolean>(false);
@@ -176,27 +170,74 @@ const Expense: NextPage = () => {
 
   const ctx = api.useContext();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { data: expenses, isLoading } = api.expense.getAll.useQuery();
+  //infiniteQuery
+  const searchParams = useSearchParams();
+  const selectedSize = searchParams.get("page_size");
+  const [page, setPage] = useState<number>(0);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  //search function
+  const [search, setSearch] = useState<string>("");
 
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
 
-  // moment.updateLocale("en", {
-  //   calendar: {
-  //     lastDay: "[Yesterday]",
-  //     sameDay: "[Today]",
-  //     nextDay: "[Tomorrow]",
-  //     lastWeek: "[Last] dddd",
-  //     nextWeek: "[Next] dddd",
-  //     sameElse: "L",
-  //   },
-  // });
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPage(0);
+    setSearch(e.target.value);
+  };
+
+  const debouncedHandleInputChange = useMemo(
+    () => debounce(handleSearchInput, 200),
+    []
+  );
+
+  // stop debouncing (if any pending) when the component unmounts
+  useEffect(() => {
+    return () => {
+      debouncedHandleInputChange.cancel();
+    };
+  }, [debouncedHandleInputChange]);
+
+  const {
+    data: searchResults,
+    isLoading: isLoadingSearchResults,
+    refetch: refetchSearch,
+  } = api.expense.search.useQuery({
+    searchInput: search,
+    limit: selectedSize ? parseInt(selectedSize) : 10,
+  });
+
+  useEffect(() => {
+    refetchSearch;
+  }, [search, refetchSearch]);
+
+  const {
+    data: expenses,
+    isLoading: isLoadingExpenses,
+    fetchNextPage,
+  } = api.expense.getPaginated.useInfiniteQuery(
+    {
+      limit: selectedSize ? parseInt(selectedSize) : 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    }
+  );
+
+  const handleFetchNextPage = async () => {
+    await fetchNextPage();
+    setPage((prev) => prev + 1);
+  };
+
+  const handleFetchPreviousPage = () => {
+    setPage((prev) => prev - 1);
+  };
 
   const { mutate: deleteExpense } = api.expense.deleteExpense.useMutation({
     onSuccess: () => {
-      void ctx.expense.getAll.invalidate();
+      void ctx.expense.getPaginated.invalidate();
       toast({
         variant: "success",
         status: "success",
@@ -221,8 +262,6 @@ const Expense: NextPage = () => {
       }
     },
   });
-  const { data: expenses, isLoading: isLoadingExpenses } =
-    api.expense.getAll.useQuery();
 
   const { mutate: createExpense } = api.expense.create.useMutation({
     onSuccess: () => {
@@ -234,7 +273,7 @@ const Expense: NextPage = () => {
       setDialogOpen(false);
       setReceiptImage(null);
       setImageName("");
-      void ctx.expense.getAll.invalidate();
+      void ctx.expense.getPaginated.invalidate();
       toast({
         variant: "success",
         status: "success",
@@ -272,7 +311,7 @@ const Expense: NextPage = () => {
         setEditIconId(8);
         setEditCategoryValue("");
         setEditDispValue("");
-        void ctx.expense.getAll.invalidate();
+        void ctx.expense.getPaginated.invalidate();
         toast({
           variant: "success",
           status: "success",
@@ -495,8 +534,6 @@ const Expense: NextPage = () => {
     deleteExpense({ id: id });
   };
 
-  const filteredExpenses = getFilteredExpense(query, expenses);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMindee = (file: File): Promise<any> => {
     return new Promise((resolve) => {
@@ -518,14 +555,16 @@ const Expense: NextPage = () => {
         "POST",
         "https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict"
       );
-      xhr.setRequestHeader(
-        "Authorization",
-        // "Token dba52da65c3aaecae71bb1495aa9b486"
-        `Token ${env.NEXT_PUBLIC_MINDEE}`
-      );
+      xhr.setRequestHeader("Authorization", `Token ${env.NEXT_PUBLIC_MINDEE}`);
       xhr.send(data);
     });
   };
+
+  const toShow = searchResults?.expenses
+    ? searchResults.expenses
+    : expenses?.pages[page]?.expenses;
+
+  const nextCursor = expenses?.pages[page]?.nextCursor;
 
   return (
     <AppLayout>
@@ -536,7 +575,7 @@ const Expense: NextPage = () => {
           <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <Button
-                className="mt-10 w-full sm:mt-0 sm:w-64"
+                className="mt-10 w-full sm:mt-0 sm:w-72"
                 onClick={() => setDialogOpen(true)}
               >
                 <Plus size={15} />
@@ -894,22 +933,52 @@ const Expense: NextPage = () => {
                 </form>
               </DialogContent>
             </Dialog>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger>
+                <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
+                  {selectedSize || 10} / page
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <Link
+                  href={`?page_size=10`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  10
+                </Link>
+                <Link
+                  href={`?page_size=20`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  20
+                </Link>
+                <Link
+                  href={`?page_size=50`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  50
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Input
               className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />
           </div>
         </div>
 
         <div className="mt-10 space-y-5">
-          {isLoadingExpenses ? (
+          {isLoadingExpenses || isLoadingSearchResults ? (
             <SkeletonList className="h-[60px]" />
           ) : (
             <>
-              {filteredExpenses && filteredExpenses?.length > 0 ? (
+              {toShow && toShow?.length > 0 ? (
                 <>
-                  {filteredExpenses?.map((expense) => (
+                  {toShow?.map((expense) => (
                     <div
                       key={expense.id}
                       className="flex items-center justify-between space-x-3 rounded-md bg-white p-3"
@@ -1373,6 +1442,30 @@ const Expense: NextPage = () => {
               )}
             </>
           )}
+          <div className="flex justify-end">
+            <div className="flex border border-athens-gray-100 shadow-sm">
+              <Button
+                className="h-10 w-10 rounded-r-none p-1"
+                disabled={page <= 0 || searchResults?.expenses !== undefined}
+                variant="pagination"
+                onClick={handleFetchPreviousPage}
+              >
+                <ChevronLeft size={20} />
+              </Button>
+              <div className="flex h-10 w-10 items-center justify-center border-x border-athens-gray-100 bg-white p-1">
+                {page + 1}
+              </div>
+              <Button
+                className="h-10 w-10 rounded-l-none p-1"
+                variant="pagination"
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onClick={handleFetchNextPage}
+                disabled={!nextCursor || searchResults?.expenses !== undefined}
+              >
+                <ChevronRight size={20} />
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </AppLayout>

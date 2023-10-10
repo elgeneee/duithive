@@ -2,6 +2,8 @@ import {
   budgetSchema,
   editBudgetSchema,
   checkBudgetExceedSchema,
+  getPaginatedSchema,
+  searchSchema,
 } from "@/schema/budget.schema";
 import {
   createTRPCRouter,
@@ -124,6 +126,127 @@ export const budgetRouter = createTRPCRouter({
       throw new Error(err as string);
     }
   }),
+  getPaginated: protectedProcedure
+    .input(getPaginatedSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const budgets = await ctx.prisma.budget.findMany({
+            take: limit + 1,
+            where: {
+              userId: userId.id,
+            },
+            select: {
+              id: true,
+              title: true,
+              category: {
+                select: {
+                  name: true,
+                  iconId: true,
+                },
+              },
+              amount: true,
+              startDate: true,
+              endDate: true,
+              expenses: true,
+            },
+            cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              endDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (budgets.length > limit) {
+            const nextItem = budgets.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            budgets,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  search: protectedProcedure
+    .input(searchSchema)
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor;
+      try {
+        if (!input.name) {
+          return {
+            budgets: undefined,
+            nextCursor: undefined,
+          };
+        }
+
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userId) {
+          const budgets = await ctx.prisma.budget.findMany({
+            // take: limit + 1,
+            // skip: input.skip,
+            where: {
+              userId: userId.id,
+              title: {
+                contains: input.name ? input.name : undefined,
+              },
+            },
+            select: {
+              id: true,
+              title: true,
+              category: {
+                select: {
+                  name: true,
+                  iconId: true,
+                },
+              },
+              amount: true,
+              startDate: true,
+              endDate: true,
+              expenses: true,
+            },
+            // cursor: cursor ? { id: cursor } : undefined,
+            orderBy: {
+              endDate: "desc",
+            },
+          });
+
+          let nextCursor: typeof cursor | undefined = undefined;
+          if (budgets.length > limit) {
+            const nextItem = budgets.pop(); // return the last item from the array
+            nextCursor = nextItem?.id;
+          }
+          return {
+            budgets: budgets,
+            nextCursor,
+          };
+        }
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
   deleteBudget: protectedProcedure
     .input(
       z.object({

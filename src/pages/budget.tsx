@@ -26,6 +26,11 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ExpiredBadge } from "@/components/ui/expired-badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -36,10 +41,13 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Check,
   ChevronsUpDown,
+  ChevronRight,
+  ChevronLeft,
   MoreVertical,
   Edit,
   FileStack,
@@ -49,18 +57,17 @@ import {
   CalendarIcon,
 } from "lucide-react";
 import sumBy from "lodash/sumBy";
+import debounce from "lodash/debounce";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { icons, categories } from "@/store/category";
-import { type RouterOutputs } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
-
 import { api } from "@/utils/api";
 import { SkeletonList } from "@/components/ui/skeletonList";
-type Budgets = RouterOutputs["budget"]["getAll"];
+import Link from "next/link";
 
 const createBudgetSchema = z
   .object({
@@ -92,23 +99,9 @@ const editBudgetSchema = z.object({
   }),
 });
 
-const getFilteredBudgets = (query: string, budgets: Budgets) => {
-  if (!query) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return budgets;
-  }
-
-  if (budgets) {
-    return budgets.filter((budget: { title: string }) =>
-      budget.title.toLowerCase().includes(query.toLowerCase())
-    );
-  }
-};
-
 const Budget: NextPage = () => {
   const { data: session } = useSession();
   const { toast } = useToast();
-
   const {
     handleSubmit: editHandleSubmit,
     formState: { errors: editErrors },
@@ -127,14 +120,21 @@ const Budget: NextPage = () => {
     return tomorrow;
   });
   const [open, setOpen] = useState<boolean>(false);
-  // const [moreOpen, setMoreOpen] = useState<boolean>(false);
   const [categoryValue, setCategoryValue] = useState<string>("");
   const [dispValue, setDispValue] = useState<string>("");
   const [iconId, setIconId] = useState<number>(8);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const inputTitleRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState<string>("");
+
+  //infiniteQuery
+  const searchParams = useSearchParams();
+  const selectedSize = searchParams.get("page_size");
+  const [page, setPage] = useState<number>(0);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  //search function
+  const [search, setSearch] = useState<string>("");
 
   const {
     register,
@@ -160,12 +160,61 @@ const Budget: NextPage = () => {
     day: "2-digit",
   });
 
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPage(0);
+    setSearch(e.target.value);
+  };
+
+  const debouncedHandleInputChange = useMemo(
+    () => debounce(handleSearchInput, 200),
+    []
+  );
+
+  // stop debouncing (if any pending) when the component unmounts
+  useEffect(() => {
+    return () => {
+      debouncedHandleInputChange.cancel();
+    };
+  }, [debouncedHandleInputChange]);
+
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
     email: session?.user?.email as string,
   });
 
-  const { data: budgets, isLoading: isLoadingBudgets } =
-    api.budget.getAll.useQuery();
+  const {
+    data: searchResults,
+    isLoading: isLoadingSearchResults,
+    refetch: refetchSearch,
+  } = api.budget.search.useQuery({
+    name: search,
+    limit: selectedSize ? parseInt(selectedSize) : 10,
+  });
+
+  useEffect(() => {
+    refetchSearch;
+  }, [search, refetchSearch]);
+
+  const {
+    data: budgets,
+    isLoading: isLoadingBudgets,
+    fetchNextPage,
+  } = api.budget.getPaginated.useInfiniteQuery(
+    {
+      limit: selectedSize ? parseInt(selectedSize) : 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    }
+  );
+
+  const handleFetchNextPage = async () => {
+    await fetchNextPage();
+    setPage((prev) => prev + 1);
+  };
+
+  const handleFetchPreviousPage = () => {
+    setPage((prev) => prev - 1);
+  };
 
   const { mutate: createBudget } = api.budget.create.useMutation({
     onSuccess: () => {
@@ -174,7 +223,7 @@ const Budget: NextPage = () => {
       setDispValue("");
       setIconId(1);
       setDialogOpen(false);
-      void ctx.budget.getAll.invalidate();
+      void ctx.budget.getPaginated.invalidate();
       toast({
         variant: "success",
         status: "success",
@@ -205,7 +254,7 @@ const Budget: NextPage = () => {
       onSuccess: () => {
         editReset;
         setEditDialogOpen(false);
-        void ctx.budget.getAll.invalidate();
+        void ctx.budget.getPaginated.invalidate();
         toast({
           variant: "success",
           status: "success",
@@ -233,7 +282,7 @@ const Budget: NextPage = () => {
 
   const { mutate: deleteBudget } = api.budget.deleteBudget.useMutation({
     onSuccess: () => {
-      void ctx.budget.getAll.invalidate();
+      void ctx.budget.getPaginated.invalidate();
       toast({
         variant: "success",
         status: "success",
@@ -275,7 +324,11 @@ const Budget: NextPage = () => {
     deleteBudget({ id: id });
   };
 
-  const filteredBudgets = getFilteredBudgets(query, budgets);
+  const toShow = searchResults?.budgets
+    ? searchResults.budgets
+    : budgets?.pages[page]?.budgets;
+
+  const nextCursor = budgets?.pages[page]?.nextCursor;
 
   return (
     <AppLayout>
@@ -584,21 +637,51 @@ const Budget: NextPage = () => {
                 </form>
               </DialogContent>
             </Dialog>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger>
+                <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
+                  {selectedSize || 10} / page
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <Link
+                  href={`?page_size=10`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  10
+                </Link>
+                <Link
+                  href={`?page_size=20`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  20
+                </Link>
+                <Link
+                  href={`?page_size=50`}
+                  onClick={() => setDropdownOpen(false)}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  50
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Input
               className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />
           </div>
         </div>
         <div className="mt-10 space-y-5">
-          {isLoadingBudgets ? (
-            <SkeletonList className="h-[180px]" />
+          {isLoadingBudgets || isLoadingSearchResults ? (
+            <SkeletonList className="h-[80px]" />
           ) : (
             <>
-              {filteredBudgets && filteredBudgets?.length > 0 ? (
+              {toShow && toShow?.length > 0 ? (
                 <>
-                  {filteredBudgets?.map((budget) => (
+                  {toShow?.map((budget) => (
                     <div
                       key={budget.id}
                       className={cn(
@@ -989,6 +1072,30 @@ const Budget: NextPage = () => {
               )}
             </>
           )}
+          <div className="flex justify-end">
+            <div className="flex border border-athens-gray-100 shadow-sm">
+              <Button
+                className="h-10 w-10 rounded-r-none p-1"
+                disabled={page <= 0 || searchResults?.budgets !== undefined}
+                variant="pagination"
+                onClick={handleFetchPreviousPage}
+              >
+                <ChevronLeft size={20} />
+              </Button>
+              <div className="flex h-10 w-10 items-center justify-center border-x border-athens-gray-100 bg-white p-1">
+                {page + 1}
+              </div>
+              <Button
+                className="h-10 w-10 rounded-l-none p-1"
+                variant="pagination"
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onClick={handleFetchNextPage}
+                disabled={!nextCursor || searchResults?.budgets !== undefined}
+              >
+                <ChevronRight size={20} />
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </AppLayout>
