@@ -172,4 +172,22 @@ export const userRouter = createTRPCRouter({
         throw new Error(err as string);
       }
     }),
+  // getUserWithMonthlyReport: publicProcedure.query(async ({ ctx }) => {
+  //   try {
+  //     const users = await ctx.prisma.user.findMany({
+  //       where: {
+  //         monthlyReport: true,
+  //       },
+  //       select: {
+  //         id: true,
+  //         email: true,
+  //         currency: true,
+  //       },
+  //     });
+
+  //     return users;
+  //   } catch (err) {
+  //     throw new Error(err as string);
+  //   }
+  // }),
 });
