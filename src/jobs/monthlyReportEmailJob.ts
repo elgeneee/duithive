@@ -7,11 +7,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type GetEvents, Inngest } from "inngest";
 import { PrismaClient } from "@prisma/client";
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import fs from "fs-extra";
 import hbs from "handlebars";
 import path from "path";
-
+import chromium from "@sparticuz/chromium-min";
 const prisma = new PrismaClient();
 const inngest = new Inngest({ id: "duithive" });
 type Events = GetEvents<typeof inngest>;
@@ -116,7 +117,32 @@ export const monthlyReportEmailJob = inngest.createFunction(
         }
       );
 
-      const browser = await puppeteer.launch({ headless: "new" });
+      // const browser = await puppeteer.launch({
+      //   headless: "new",
+      //   args: [
+      //     `--no-sandbox`,
+      //     `--headless`,
+      //     `--disable-gpu`,
+      //     `--disable-dev-shm-usage`,
+      //   ],
+      // });
+
+      // const browser = await puppeteer.launch({
+      //   executablePath: await edgeChromium.executablePath,
+      //   args: edgeChromium.args,
+      //   headless: false,
+      // });
+
+      const browser = await puppeteer.launch({
+        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(
+          `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+        ),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
+      });
+
       const page = await browser.newPage();
 
       const content = await compile(
