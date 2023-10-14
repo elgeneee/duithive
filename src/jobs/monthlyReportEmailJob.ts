@@ -132,16 +132,26 @@ export const monthlyReportEmailJob = inngest.createFunction(
       //   args: edgeChromium.args,
       //   headless: false,
       // });
-
-      const browser = await puppeteer.launch({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(
-          `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
-        ),
-        headless: chromium.headless,
-        ignoreHTTPSErrors: true,
-      });
+      let browser;
+      if (process.env.NODE_ENV === "production") {
+        browser = await puppeteer.launch({
+          args: [
+            ...chromium.args,
+            "--hide-scrollbars",
+            "--disable-web-security",
+          ],
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath(
+            `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+          ),
+          headless: chromium.headless,
+          ignoreHTTPSErrors: true,
+        });
+      } else {
+        browser = await puppeteer.launch({
+          headless: "new",
+        });
+      }
 
       const page = await browser.newPage();
 
@@ -155,7 +165,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
 
       await page.setContent(content);
       await page.pdf({
-        path: "./output.pdf",
+        path: "./temp/output.pdf",
         format: "A4",
         printBackground: true,
       });
@@ -166,7 +176,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
 
       //cloudinary upload
       const formData = new FormData();
-      const pdfBlob = new Blob([fs.readFileSync("./output.pdf")], {
+      const pdfBlob = new Blob([fs.readFileSync("./temp/output.pdf")], {
         type: "application/pdf",
       });
       formData.append("file", pdfBlob);
