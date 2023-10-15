@@ -493,9 +493,9 @@ const Income: NextPage = () => {
                               ? `0${income.transactionDate.getDate()}`
                               : income.transactionDate.getDate()}
                             /
-                            {income.transactionDate.getMonth() < 10
+                            {income.transactionDate.getMonth() + 1 < 10
                               ? `0${income.transactionDate.getMonth() + 1}`
-                              : income.transactionDate.getMonth()}
+                              : income.transactionDate.getMonth() + 1}
                             /{income.transactionDate.getFullYear()}
                           </p>
                         </div>

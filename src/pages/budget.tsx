@@ -742,9 +742,9 @@ const Budget: NextPage = () => {
                                     ? `0${budget.endDate.getDate()}`
                                     : budget.endDate.getDate()}
                                   /
-                                  {budget.endDate.getMonth() < 10
+                                  {budget.endDate.getMonth() + 1 < 10
                                     ? `0${budget.endDate.getMonth() + 1}`
-                                    : budget.endDate.getMonth()}
+                                    : budget.endDate.getMonth() + 1}
                                   /{budget.endDate.getFullYear()}
                                 </p>
                                 {budget.endDate < new Date() && (

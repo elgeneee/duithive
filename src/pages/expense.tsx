@@ -1009,9 +1009,9 @@ const Expense: NextPage = () => {
                               ? `0${expense.transactionDate.getDate()}`
                               : expense.transactionDate.getDate()}
                             /
-                            {expense.transactionDate.getMonth() < 10
+                            {expense.transactionDate.getMonth() + 1 < 10
                               ? `0${expense.transactionDate.getMonth() + 1}`
-                              : expense.transactionDate.getMonth()}
+                              : expense.transactionDate.getMonth() + 1}
                             /{expense.transactionDate.getFullYear()}
                           </p>
                         </div>
