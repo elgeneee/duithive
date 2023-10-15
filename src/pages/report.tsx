@@ -50,7 +50,6 @@ const Report: NextPage = () => {
     to: addDays(new Date(), 7),
   });
   const [loading, setLoading] = useState<boolean>(false);
-
   const ctx = api.useContext();
 
   const { data: expenses, refetch } = api.expense.getExpenseReport.useQuery({
@@ -320,11 +319,14 @@ const Report: NextPage = () => {
     try {
       setLoading(true);
       const report = await expenseReport();
-      const blobPdf1 =  pdf(report);
-      blobPdf1.updateContainer(report);
-      const blobPdf = await blobPdf1.toBlob();
+      const result =  pdf(report);
+      result.updateContainer(report);
+      const blobs = result.toString();
+      console.log(blobs)
+      const blobPdf = await result.toBlob();
       console.log(blobPdf)
       const pdfURL = URL.createObjectURL(blobPdf);
+      console.log(pdfURL)
       window.open(pdfURL, "_blank");
 
       const randomString = generateRandomString();
