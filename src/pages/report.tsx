@@ -320,8 +320,9 @@ const Report: NextPage = () => {
     try {
       setLoading(true);
       const report = await expenseReport();
-      console.log(report)
-      const blobPdf = await pdf(report).toBlob();
+      const blobPdf1 =  pdf(report);
+      blobPdf1.updateContainer(report);
+      const blobPdf = await blobPdf1.toBlob();
       console.log(blobPdf)
       const pdfURL = URL.createObjectURL(blobPdf);
       window.open(pdfURL, "_blank");
