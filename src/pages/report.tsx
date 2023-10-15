@@ -319,7 +319,8 @@ const Report: NextPage = () => {
   const generatePDF = async () => {
     try {
       setLoading(true);
-      const blobPdf = await pdf(await expenseReport()).toBlob();
+      const report = await expenseReport();
+      const blobPdf = await pdf(report).toBlob();
       const pdfURL = URL.createObjectURL(blobPdf);
       window.open(pdfURL, "_blank");
 
