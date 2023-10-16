@@ -198,7 +198,7 @@ const Report: NextPage = () => {
                 ))}
               </View>
             </View>
-            {/* <View style={styles.chart}>
+            <View style={styles.chart}>
               <ReactPDFChart>
                 <PieChart width={730} height={250} id="piechart">
                   <Pie
@@ -211,15 +211,14 @@ const Report: NextPage = () => {
                     innerRadius={60}
                     outerRadius={80}
                     fill="#82ca9d"
-                    // label
                   >
-                    {groupedData.map((entry, index) => (
+                    {groupedData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={colors[index]} />
                     ))}
                   </Pie>
                 </PieChart>
               </ReactPDFChart>
-            </View> */}
+            </View>
           </View>
           {/* Header row */}
           {expenses && expenses?.length > 0 && (
