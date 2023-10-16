@@ -36,6 +36,7 @@ export const reportStyles = StyleSheet.create({
     borderBottomColor: "#8595ab",
     paddingHorizontal: 4,
     paddingVertical: 2,
+    marginTop: "10px",
   },
   dateView: {
     justifyContent: "flex-start",
