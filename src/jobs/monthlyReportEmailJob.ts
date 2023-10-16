@@ -59,7 +59,7 @@ hbs.registerHelper("amountFormat", function (value: number) {
 
 export const monthlyReportEmailJob = inngest.createFunction(
   { id: "monthly-activity-send-report" },
-  { cron: "5 0 * * *" },
+  { cron: "15 * * * *" },
   async ({ step }) => {
     const results = [];
     const startDate = new Date();
@@ -165,7 +165,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
 
       await page.setContent(content);
       await page.pdf({
-        path: "./temp/output.pdf",
+        path: "/tmp/output.pdf",
         format: "A4",
         printBackground: true,
       });
@@ -176,7 +176,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
 
       //cloudinary upload
       const formData = new FormData();
-      const pdfBlob = new Blob([fs.readFileSync("./temp/output.pdf")], {
+      const pdfBlob = new Blob([fs.readFileSync("/tmp/output.pdf")], {
         type: "application/pdf",
       });
       formData.append("file", pdfBlob);
@@ -240,6 +240,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
           data: {
             email: result.email,
             url: result.url,
+            
           },
         };
       }
