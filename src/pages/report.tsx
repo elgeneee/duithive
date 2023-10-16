@@ -201,7 +201,8 @@ const Report: NextPage = () => {
                         },
                       ]}
                     >
-                      {item.category}
+                      {item.category} - ({userCurrency?.symbol}
+                      {parseFloat(item.totalAmount.toString()).toFixed(2)})
                     </Text>
                   </View>
                 ))}
