@@ -156,8 +156,6 @@ const Report: NextPage = () => {
       })
     );
 
-    console.log(groupedData)
-
     return (
       <Document>
         <Page size="A4" style={styles.page}>
@@ -265,7 +263,7 @@ const Report: NextPage = () => {
               </View>
             </View>
           )}
-          {/* {expenses?.map((item, index) => (
+          {expenses?.map((item, index) => (
             <View key={index} style={styles.dataRow}>
               <View style={styles.cell}>
                 <Text style={styles.text}>{item.description}</Text>
@@ -291,7 +289,7 @@ const Report: NextPage = () => {
                 </Text>
               </View>
             </View>
-          ))} */}
+          ))}
           {expenses && expenses.length > 0 && (
             <View style={{ flexDirection: "row" }}>
               <View style={styles.cell}></View>
