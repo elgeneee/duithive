@@ -137,15 +137,24 @@ export const monthlyReportEmailJob = inngest.createFunction(
       // });
       let browser;
       if (process.env.NODE_ENV === "production") {
+        // browser = await puppeteer.launch({
+        //   args: [
+        //     ...chromium.args,
+        //     "--hide-scrollbars",
+        //     "--disable-web-security",
+        //   ],
+        //   defaultViewport: chromium.defaultViewport,
+        //   executablePath: await chromium.executablePath(
+        //     `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+        //   ),
+        //   headless: chromium.headless,
+        //   ignoreHTTPSErrors: true,
+        // });
         browser = await puppeteer.launch({
-          args: [
-            ...chromium.args,
-            "--hide-scrollbars",
-            "--disable-web-security",
-          ],
+          args: chromium.args,
           defaultViewport: chromium.defaultViewport,
           executablePath: await chromium.executablePath(
-            `https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar`
+            "https://github.com/Sparticuz/chromium/releases/download/v115.0.0/chromium-v115.0.0-pack.tar"
           ),
           headless: chromium.headless,
           ignoreHTTPSErrors: true,
