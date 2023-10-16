@@ -59,7 +59,7 @@ hbs.registerHelper("amountFormat", function (value: number) {
 
 export const monthlyReportEmailJob = inngest.createFunction(
   { id: "monthly-activity-send-report" },
-  { cron: "15 * * * *" },
+  { cron: "*/15 * * * *" },
   async ({ step }) => {
     const results = [];
     const startDate = new Date();
@@ -240,7 +240,6 @@ export const monthlyReportEmailJob = inngest.createFunction(
           data: {
             email: result.email,
             url: result.url,
-            
           },
         };
       }
