@@ -58,7 +58,10 @@ hbs.registerHelper("amountFormat", function (value: number) {
 });
 
 export const monthlyReportEmailJob = inngest.createFunction(
-  { id: "monthly-activity-send-report" },
+  {
+    id: "monthly-activity-send-report",
+    batchEvents: { maxSize: 100, timeout: "60s" },
+  },
   { cron: "*/15 * * * *" },
   async ({ step }) => {
     const results = [];
