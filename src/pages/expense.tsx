@@ -593,7 +593,7 @@ const Expense: NextPage = () => {
                   {/* drag-and-drop */}
                   <label className="text-sm">Receipt / Bill</label>
 
-                  <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
+                  <div className="z-[9999] duration-700 animate-in fade-in slide-in-from-left-8">
                     <label
                       htmlFor="image-upload"
                       className={cn(
@@ -1086,7 +1086,7 @@ const Expense: NextPage = () => {
                                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                                 onSubmit={editHandleSubmit(onEditSubmit)}
                               >
-                                <div className="z-[9999] animate-in fade-in slide-in-from-left-8 duration-700">
+                                <div className="z-[9999] duration-700 animate-in fade-in slide-in-from-left-8">
                                   <label
                                     htmlFor="image-upload"
                                     className={cn(

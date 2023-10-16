@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -14,13 +16,22 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { DataTable } from "@/components/ui/data-table";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { CalendarIcon, Download, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
 import { pdf, Document, Page, Text, View, Image } from "@react-pdf/renderer";
 import { type DateRange } from "react-day-picker";
-import { PieChart, Pie, Cell } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Line,
+} from "recharts";
 import { api } from "@/utils/api";
 import ReactPDFChart from "react-pdf-charts";
 import groupBy from "lodash/groupBy";
@@ -30,6 +41,7 @@ import { reportStyles as styles } from "@/store/reportStyles";
 import { columns } from "@/components/ui/reportColumns";
 import { customAlphabet } from "nanoid";
 import { useToast } from "@/components/ui/use-toast";
+import { useCurrentPng } from "recharts-to-png";
 
 const colors: string[] = [
   "#9D74F3",
@@ -40,16 +52,63 @@ const colors: string[] = [
   "#AB8EF7",
 ];
 
+const data = [
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+];
+
 const Report: NextPage = () => {
   const { data: session } = useSession();
   const { toast } = useToast();
-
+  const [getAreaPng, { ref: areaRef }] = useCurrentPng();
   const [dateRange, setDateRange] = useState<string>("week");
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 7),
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [png, setPng] = useState<string>("");
+  const chartRef = useRef(null);
   const ctx = api.useContext();
 
   const { data: expenses, refetch } = api.expense.getExpenseReport.useQuery({
@@ -143,6 +202,63 @@ const Report: NextPage = () => {
     }
   };
 
+  const LineChartV = () => {
+    return (
+      <div>
+        <LineChart ref={chartRef} data={data} height={300} width={500}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <CartesianGrid stroke="#eee" strokeDasharray="5" />
+          <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+          <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
+        </LineChart>
+      </div>
+    );
+  };
+
+  const generatePieChart = (groupedData: any) => {
+    return (
+      <PieChart width={730} height={250} id="piechart">
+        <Pie
+          isAnimationActive={false}
+          data={groupedData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={80}
+          fill="#82ca9d"
+        >
+          {groupedData.map((_: any, index: number) => (
+            <Cell key={`cell-${index}`} fill={colors[index]} />
+          ))}
+        </Pie>
+      </PieChart>
+    );
+  };
+
+  const test = async (groupedData: any) => {
+
+
+
+    // Create a new <div> element
+    const newDiv = document.createElement("div");
+
+    // Optionally, you can set attributes, classes, or content for the new <div>
+    newDiv.id = "3"; // Set an ID
+    newDiv.classList.add(""); // Add a CSS class
+
+    // Append the new <div> beneath <div id="2"> inside <div id="1">
+    // eslint-disable-next-line no-var
+    var firstLayer = document.getElementById("first-layer");
+    firstLayer?.appendChild(newDiv);
+
+    const png2 = await getAreaPng();
+    setPng(png2 as string);
+    console.log(png);
+  };
+
   const expenseReport = async () => {
     await refetch();
 
@@ -155,6 +271,8 @@ const Report: NextPage = () => {
         totalAmount: sumBy(group, (item) => parseFloat(item.amount.toString())),
       })
     );
+
+    console.log(groupedData);
 
     return (
       <Document>
@@ -181,7 +299,7 @@ const Report: NextPage = () => {
                         width: 15,
                         height: 15,
                         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                        backgroundColor: `${colors[index]}`,
+                        backgroundColor: `${colors[index % colors.length]}`,
                       }}
                     />
                     <Text
@@ -199,25 +317,44 @@ const Report: NextPage = () => {
               </View>
             </View>
             <View style={styles.chart}>
-              <ReactPDFChart>
-                <PieChart width={730} height={250} id="piechart">
+{/* <ReactPDFChart>
+              <PieChart width={730} height={250} id="piechart">
                   <Pie
                     isAnimationActive={false}
                     data={groupedData}
-                    dataKey="totalAmount"
-                    nameKey="category"
+ dataKey="value" nameKey="name"
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={80}
                     fill="#82ca9d"
                   >
-                    {groupedData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={colors[index]} />
+                     {groupedData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
-                  </Pie>
+                    </Pie>
                 </PieChart>
-              </ReactPDFChart>
+                </ReactPDFChart> */}
+                <ReactPDFChart>
+  <PieChart width={730} height={250} id="piechart">
+    <Pie
+      isAnimationActive={false}
+      data={groupedData}
+      dataKey="totalAmount"
+      nameKey="category"
+      cx="50%"
+      cy="50%"
+      innerRadius={60}
+      outerRadius={80}
+      fill="#82ca9d"
+    >
+      {groupedData.map((entry, index) => (
+        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+      ))}
+    </Pie>
+  </PieChart>
+</ReactPDFChart>
+
             </View>
           </View>
           {/* Header row */}
@@ -319,7 +456,7 @@ const Report: NextPage = () => {
       setLoading(true);
       const report = await expenseReport();
       const blobPdf = await pdf(report).toBlob();
-      console.log(blobPdf)
+      console.log(blobPdf);
       const pdfURL = URL.createObjectURL(blobPdf);
       window.open(pdfURL, "_blank");
 
@@ -374,8 +511,14 @@ const Report: NextPage = () => {
         <div className="flex items-center justify-between">
           <p className="text-athens-gray-300">{formattedDate}</p>
         </div>
-        <div className="mt-10 w-full space-y-5 rounded-md bg-white p-4 sm:w-1/2">
-          <div className="flex flex-col items-center space-x-0 space-y-3 sm:flex-row sm:space-x-4 sm:space-y-0">
+        <div
+          id="first-layer"
+          className="mt-10 w-full space-y-5 rounded-md bg-white p-4 sm:w-1/2"
+        >
+          <div
+            id="1"
+            className="flex flex-col items-center space-x-0 space-y-3 sm:flex-row sm:space-x-4 sm:space-y-0"
+          >
             <button
               className={cn(
                 dateRange == "week"
@@ -416,7 +559,6 @@ const Report: NextPage = () => {
               This Year
             </button>
           </div>
-
           <div className={cn("grid gap-2")}>
             <Popover>
               <PopoverTrigger asChild>
@@ -473,6 +615,9 @@ const Report: NextPage = () => {
                 </span>
               )}
             </Button>
+            {/* <Button className="w-full text-center sm:w-44" onClick={test}>
+              test
+            </Button> */}
           </div>
         </div>
         <div className="mt-10 rounded-md bg-white p-8">
