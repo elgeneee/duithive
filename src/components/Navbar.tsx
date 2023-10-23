@@ -162,13 +162,13 @@ function Navbar() {
           <div className="flex items-center justify-end space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="relative">
+                <div className="relative flex h-8 w-8 items-center justify-center rounded-md duration-300 hover:bg-athens-gray-100/70 active:bg-athens-gray-200/50">
                   <Inbox size={25} />
                   {notifications &&
                     notifications.some(
                       (notification) => !notification.read
                     ) && (
-                      <span className="absolute right-0 top-0 z-20 inline-flex h-2 w-2 justify-center rounded-full bg-red-500 text-[8px]" />
+                      <span className="absolute right-1 top-1 z-20 inline-flex h-2 w-2 justify-center rounded-full bg-red-500 text-[8px]" />
                     )}
                 </div>
               </DropdownMenuTrigger>

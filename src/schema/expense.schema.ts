@@ -47,3 +47,29 @@ export const searchSchema = z.object({
   cursor: z.string().nullish(),
   skip: z.number().optional(),
 });
+
+export const createBatchSchema = z.object({
+  fileName: z.string(),
+  records: z.array(
+    z.object({
+      Description: z
+        .string()
+        .min(5, { message: "Description must be at least 5 characters" }),
+      Amount: z.number({
+        required_error: "Amount is required",
+        invalid_type_error: "Amount must be a number",
+      }),
+      Category: z.enum([
+        "Restaurants",
+        "Shopping",
+        "Sports",
+        "Transport",
+        "Groceries",
+        "Entertainment",
+        "Auto",
+      ]),
+      Date: z.date(),
+      Image: z.string().optional(),
+    })
+  ),
+});

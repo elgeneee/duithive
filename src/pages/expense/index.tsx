@@ -50,6 +50,7 @@ import {
   Plus,
   CalendarIcon,
   UploadCloud,
+  Upload,
 } from "lucide-react";
 import { icons, categories } from "@/store/category";
 import { useForm } from "react-hook-form";
@@ -62,6 +63,7 @@ import { useToast } from "@/components/ui/use-toast";
 import debounce from "lodash/debounce";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 
 // import groupBy from "lodash/groupBy";
 // import map from "lodash/map";
@@ -169,6 +171,7 @@ const Expense: NextPage = () => {
   const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
 
   const ctx = api.useContext();
+  const router = useRouter();
 
   //infiniteQuery
   const searchParams = useSearchParams();
@@ -575,11 +578,13 @@ const Expense: NextPage = () => {
           <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <Button
-                className="mt-10 w-full sm:mt-0 sm:w-72"
+                className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
                 onClick={() => setDialogOpen(true)}
               >
                 <Plus size={15} />
-                <span className="ml-3">Add Expense</span>
+                <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
+                  Add Expense
+                </span>
               </Button>
               <DialogContent>
                 <DialogHeader>
@@ -933,6 +938,15 @@ const Expense: NextPage = () => {
                 </form>
               </DialogContent>
             </Dialog>
+            <Button
+              onClick={() => void router.push("/expense/batch/upload")}
+              className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
+            >
+              <Upload size={15} />
+              <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
+                Batch Upload
+              </span>
+            </Button>
             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger>
                 <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
@@ -964,7 +978,7 @@ const Expense: NextPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             <Input
-              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              className="w-full items-center border border-athens-gray-200  bg-white bg-[url('/search.png')] bg-left bg-no-repeat pl-11 sm:hidden sm:w-52 md:hidden lg:block"
               onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />

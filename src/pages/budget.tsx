@@ -857,7 +857,10 @@ const Budget: NextPage = () => {
                             <span className="sr-only">Open popover</span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="flex w-36 flex-col p-2">
+                        <PopoverContent
+                          className="flex w-36 flex-col p-2"
+                          align="end"
+                        >
                           <p className="px-2 text-sm font-medium text-foreground">
                             Edit/Delete
                           </p>

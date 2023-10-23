@@ -66,6 +66,7 @@ model User {
     budget        Budget[]
     report        Report[]
     notifications Notification[]
+    batchCreate   BatchCreate[]
     monthlyReport Boolean        @default(false)
 
     @@index([currencyId])
@@ -199,6 +200,24 @@ enum NotificationType {
     ANNOUNCEMENT
     MONTHLYREPORT
     OTHERS
+}
+
+enum BatchType {
+    EXPENSE
+    INCOME
+}
+
+model BatchCreate {
+    id        String    @id @default(uuid())
+    fileName  String    @db.Text
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    createdAt DateTime  @default(now())
+    success   Int
+    failed    Int
+    type      BatchType
+
+    @@index([userId])
 }
 
 model Category {

@@ -3,6 +3,7 @@ import {
   editIncomeSchema,
   getPaginatedSchema,
   searchSchema,
+  createBatchSchema,
 } from "@/schema/income.schema";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
@@ -216,7 +217,6 @@ export const incomeRouter = createTRPCRouter({
         throw new Error(err as string);
       }
     }),
-
   deleteIncome: protectedProcedure
     .input(
       z.object({
@@ -234,4 +234,86 @@ export const incomeRouter = createTRPCRouter({
         throw new Error(err as string);
       }
     }),
+  createBatchIncome: protectedProcedure
+    .input(createBatchSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        //getUserId
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!userId) {
+          throw new Error("User not found");
+        }
+
+        const incomeRecords = input.records.map((record) => {
+          return {
+            title: record.Title,
+            description: record.Description,
+            amount: record.Amount,
+            transactionDate: record.Date,
+            userId: userId.id,
+          };
+        });
+
+        const incomes = await ctx.prisma.income.createMany({
+          data: incomeRecords,
+        });
+
+        await ctx.prisma.batchCreate.create({
+          data: {
+            fileName: input.fileName,
+            success: incomes.count,
+            failed: 0,
+            userId: userId.id,
+            type: "INCOME",
+          },
+        });
+
+        return incomes;
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  getBatchIncome: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const userId = await ctx.prisma.user.findUnique({
+        where: {
+          email: ctx.session.user.email as string,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (userId) {
+        const uploadedRecords = await ctx.prisma.batchCreate.findMany({
+          where: {
+            userId: userId.id,
+            type: "INCOME",
+          },
+          select: {
+            id: true,
+            fileName: true,
+            success: true,
+            failed: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return uploadedRecords;
+      }
+    } catch (err) {
+      throw new Error(err as string);
+    }
+  }),
 });

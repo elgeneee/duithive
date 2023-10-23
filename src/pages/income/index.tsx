@@ -37,6 +37,7 @@ import {
   Trash2,
   Loader2,
   Plus,
+  Upload,
   CalendarIcon,
   DollarSign,
 } from "lucide-react";
@@ -47,6 +48,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const createIncomeSchema = z.object({
   title: z.string().min(1, { message: "Title must be at least 1 character" }),
@@ -114,6 +116,7 @@ const Income: NextPage = () => {
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputAmountRef = useRef<HTMLInputElement>(null);
   const ctx = api.useContext();
+  const router = useRouter();
 
   //infiniteQuery
   const searchParams = useSearchParams();
@@ -299,11 +302,13 @@ const Income: NextPage = () => {
           <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <Button
-                className="mt-10 w-full sm:mt-0 sm:w-64"
+                className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
                 onClick={() => setDialogOpen(true)}
               >
                 <Plus size={15} />
-                <span className="ml-3">Add Income</span>
+                <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
+                  Add Income
+                </span>
               </Button>
               <DialogContent>
                 <DialogHeader>
@@ -422,6 +427,15 @@ const Income: NextPage = () => {
                 </form>
               </DialogContent>
             </Dialog>
+            <Button
+              onClick={() => void router.push("/income/batch/upload")}
+              className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
+            >
+              <Upload size={15} />
+              <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
+                Batch Upload
+              </span>
+            </Button>
             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger>
                 <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
@@ -453,7 +467,7 @@ const Income: NextPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             <Input
-              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              className="w-full items-center border border-athens-gray-200  bg-white bg-[url('/search.png')] bg-left bg-no-repeat pl-11 sm:hidden sm:w-52 md:hidden lg:block"
               onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />
@@ -501,7 +515,7 @@ const Income: NextPage = () => {
                         </div>
                       </div>
                       <Popover>
-                        <PopoverTrigger>
+                        <PopoverTrigger asChild>
                           <Button
                             variant="ghostSecondary"
                             className="h-8 w-8 rounded-md p-0"
@@ -700,7 +714,7 @@ const Income: NextPage = () => {
                             open={deleteDialogOpen}
                             onOpenChange={setDeleteDialogOpen}
                           >
-                            <DialogTrigger>
+                            <DialogTrigger asChild>
                               <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
                                 <Trash2 className="h-4 w-4" />
                                 <p className="text-sm">Delete</p>

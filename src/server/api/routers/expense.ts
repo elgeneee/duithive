@@ -3,10 +3,12 @@ import {
   expenseSchema,
   getPaginatedSchema,
   searchSchema,
+  createBatchSchema,
 } from "@/schema/expense.schema";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import type { Budget } from "@prisma/client";
 import { z } from "zod";
+import { categories } from "@/store/category";
 
 export const expenseRouter = createTRPCRouter({
   create: protectedProcedure
@@ -406,4 +408,126 @@ export const expenseRouter = createTRPCRouter({
         throw new Error(err as string);
       }
     }),
+  createBatchExpense: protectedProcedure
+    .input(createBatchSchema)
+    .mutation(async ({ ctx, input }) => {
+      const expenseRecords = [];
+      let successCount = 0;
+      let failedCount = 0;
+      try {
+        //getUserId
+        const userId = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email as string,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!userId) {
+          throw new Error("User not found");
+        }
+
+        try {
+          //row by row
+          for (const row of input.records) {
+            const relevantBudgets = await ctx.prisma.budget.findMany({
+              where: {
+                userId: userId.id,
+                categoryId: categories.find(
+                  (categ) => categ.value === row.Category
+                )?.id,
+                startDate: {
+                  lte: row.Date,
+                },
+                endDate: {
+                  gte: row.Date,
+                },
+              },
+            });
+
+            const expense = await ctx.prisma.expense.create({
+              data: {
+                description: row.Description,
+                amount: row.Amount,
+                transactionDate: row.Date,
+                imgUrl: row.Image,
+                userId: userId.id,
+                categoryId: categories.find(
+                  (categ) => categ.value === row.Category
+                )?.id as number,
+                budgets: {
+                  connect: relevantBudgets.map((budget: Budget) => ({
+                    id: budget.id,
+                  })),
+                },
+              },
+            });
+
+            await ctx.prisma.budget.updateMany({
+              where: {
+                id: {
+                  in: relevantBudgets.map((budget) => budget.id),
+                },
+              },
+              data: { updatedAt: new Date() },
+            });
+            expenseRecords.push(expense);
+            successCount++;
+          }
+        } catch (err) {
+          failedCount++;
+        }
+
+        await ctx.prisma.batchCreate.create({
+          data: {
+            fileName: input.fileName,
+            success: successCount,
+            failed: failedCount,
+            userId: userId.id,
+            type: "EXPENSE",
+          },
+        });
+
+        return expenseRecords;
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  getBatchExpense: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const userId = await ctx.prisma.user.findUnique({
+        where: {
+          email: ctx.session.user.email as string,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (userId) {
+        const uploadedRecords = await ctx.prisma.batchCreate.findMany({
+          where: {
+            userId: userId.id,
+            type: "EXPENSE",
+          },
+          select: {
+            id: true,
+            fileName: true,
+            success: true,
+            failed: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return uploadedRecords;
+      }
+    } catch (err) {
+      throw new Error(err as string);
+    }
+  }),
 });

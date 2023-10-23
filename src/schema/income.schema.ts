@@ -36,3 +36,22 @@ export const searchSchema = z.object({
   cursor: z.string().nullish(),
   skip: z.number().optional(),
 });
+
+export const createBatchSchema = z.object({
+  fileName: z.string(),
+  records: z.array(
+    z.object({
+      Title: z
+        .string()
+        .min(1, { message: "Title must be at least 1 character" }),
+      Description: z
+        .string()
+        .min(5, { message: "Description must be at least 5 characters" }),
+      Amount: z.number({
+        required_error: "Amount is required",
+        invalid_type_error: "Amount must be a number",
+      }),
+      Date: z.date(),
+    })
+  ),
+});
