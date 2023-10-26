@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { clsx } from "clsx";
 import { signOut } from "next-auth/react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 function SideNav() {
   const router = useRouter();
   const navigationOptions = [
@@ -281,11 +282,13 @@ function SideNav() {
 
   return (
     <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear sm:static sm:flex sm:translate-x-0">
-      <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" className="w-16 pr-4" alt="logo" />
-        <span className="text-violet-600">Duit</span>Hive
-      </div>
+      <Link href="/dashboard">
+        <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" className="w-16 pr-4" alt="logo" />
+          <span className="text-violet-600">Duit</span>Hive
+        </div>
+      </Link>
       <div className="no-scrollbar flex flex-col overflow-y-auto p-4 text-white duration-300 ease-linear">
         {/* Sidebar content */}
         <nav className="mt-10">

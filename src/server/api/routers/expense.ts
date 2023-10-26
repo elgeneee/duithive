@@ -387,6 +387,18 @@ export const expenseRouter = createTRPCRouter({
                 })),
               },
             },
+            select: {
+              id: true,
+              description: true,
+              transactionDate: true,
+              amount: true,
+              category: {
+                select: {
+                  name: true,
+                  iconId: true,
+                },
+              },
+            },
           });
 
           return updateExpense;
