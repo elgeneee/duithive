@@ -142,7 +142,7 @@ export const reportRouter = createTRPCRouter({
     endDate.setMonth(endDate.getMonth());
     endDate.setDate(0);
 
-    const emailSubject = `Monthly Spending Recap: ${startDate.toLocaleString(
+    const emailSubject = `[DuitHive] Monthly Spending Recap: ${startDate.toLocaleString(
       "en-US",
       { month: "short" }
     )} ${startDate.getFullYear()}`;

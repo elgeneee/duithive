@@ -1,4 +1,4 @@
-export const monthlyReportTemplate = (url: string) => `
+export const budgetExpiredTemplate = (title: string) => `
 <!doctype html>
 <html lang="en-US">
   <head>
@@ -33,10 +33,11 @@ export const monthlyReportTemplate = (url: string) => `
                   </tr>
                   <tr>
                     <td style="padding:0 35px;">
-                      <h1 style="color:#1e1e2d; margin:0;font-size:26px;">Your Monthly Report Is Here!</h1>
+                      <h1 style="color:#1e1e2d; margin:0;font-size:20px;">Your budget is expiring soon</h1>
                       <span style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
-                      <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Click the link below to view your report.</p>
-                      <a href="${url}" style="background:#9D74F3;text-decoration:none !important; font-weight:30; margin-top:35px; color:#fff;text-transform:uppercase; font-size:16px;padding:10px 24px;display:inline-block;border-radius:10px;">Download</a>
+                      <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Your budget for <span style="font-weight: bold; font-size:17px;line-height:24px; margin:0;">${title}</span> is expiring soon. This is just a reminder, and no further action is required.</p>
+                      <p style="color:#455056; font-size:15px;line-height:24px;">Cheers!</p>
+                      <a href="https://duithive.vercel.app/budget" style="background:#9D74F3;text-decoration:none !important; font-weight:30; margin-top:25px; color:#fff;text-transform:uppercase; font-size:16px;padding:10px 24px;display:inline-block;border-radius:10px;">Go to budget</a>
                     </td>
                   </tr>
                   <tr>

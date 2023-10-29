@@ -869,30 +869,31 @@ const Budget: NextPage = () => {
                             open={editDialogOpen}
                             onOpenChange={setEditDialogOpen}
                           >
-                            <button
-                              onClick={() => {
-                                if (inputTitleRef.current) {
-                                  inputTitleRef.current.defaultValue =
-                                    budget.title;
-                                }
-                                if (inputAmountRef.current) {
-                                  inputAmountRef.current.defaultValue =
-                                    budget.amount.toString();
-                                }
-                                editSetValue("id", budget.id);
-                                editSetValue("title", budget.title);
-                                editSetValue(
-                                  "amount",
-                                  parseFloat(budget.amount.toString())
-                                );
-                                setEditDialogOpen(true);
-                              }}
-                              className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <p className="text-sm">Edit</p>
-                            </button>
-
+                            <DialogTrigger asChild>
+                              <button
+                                onClick={() => {
+                                  if (inputTitleRef.current) {
+                                    inputTitleRef.current.defaultValue =
+                                      budget.title;
+                                  }
+                                  if (inputAmountRef.current) {
+                                    inputAmountRef.current.defaultValue =
+                                      budget.amount.toString();
+                                  }
+                                  editSetValue("id", budget.id);
+                                  editSetValue("title", budget.title);
+                                  editSetValue(
+                                    "amount",
+                                    parseFloat(budget.amount.toString())
+                                  );
+                                  // setEditDialogOpen(true);
+                                }}
+                                className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <p className="text-sm">Edit</p>
+                              </button>
+                            </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
                                 <DialogTitle>Edit Budget</DialogTitle>
@@ -1022,7 +1023,7 @@ const Budget: NextPage = () => {
                             open={deleteDialogOpen}
                             onOpenChange={setDeleteDialogOpen}
                           >
-                            <DialogTrigger>
+                            <DialogTrigger asChild>
                               <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
                                 <Trash2 className="h-4 w-4" />
                                 <p className="text-sm">Delete</p>

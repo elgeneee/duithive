@@ -11,6 +11,18 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
+import { budgetExceedTemplate } from "@/store/budget-exceed";
+import { budgetExpiredTemplate } from "@/store/budget-expired";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  secure: false,
+  service: "gmail",
+  auth: {
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD,
+  },
+});
 
 export const budgetRouter = createTRPCRouter({
   create: protectedProcedure
@@ -304,16 +316,50 @@ export const budgetRouter = createTRPCRouter({
             lt: new Date(currentDate.getTime() + oneDay),
           },
         },
+        select: {
+          id: true,
+          title: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              notification: true,
+            },
+          },
+        },
       });
 
       const notifications = await ctx.prisma.notification.createMany({
         data: budgets.map((budget) => ({
           message: "Budget is expring soon",
           budgetId: budget.id,
-          userId: budget.userId,
+          userId: budget.user.id,
           notificationType: "BUDGETEXPIRED",
         })),
       });
+
+      const updatedBudgets = budgets.filter(
+        (budget) => budget.user.notification
+      );
+
+      //slice into batches (fan-out method)
+      const totalBudgetLength = updatedBudgets.length;
+
+      for (let i = 0; i < totalBudgetLength; i += 100) {
+        const batch = updatedBudgets.slice(i, i + 100);
+        const emailPromises = batch.map(async (budget) => {
+          const options = {
+            from: process.env.NODEMAILER_EMAIL,
+            to: budget.user.email as string,
+            subject: "[DuitHive] Your budget is expiring soon",
+            html: budgetExpiredTemplate(budget.title),
+          };
+
+          // Send email and return a promise
+          return transporter.sendMail(options);
+        });
+        await Promise.all(emailPromises);
+      }
 
       return notifications;
     } catch (err) {
@@ -331,8 +377,20 @@ export const budgetRouter = createTRPCRouter({
           select: {
             id: true,
             expenses: true,
+            title: true,
             amount: true,
-            userId: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                notification: true,
+                currency: {
+                  select: {
+                    symbol: true,
+                  },
+                },
+              },
+            },
           },
         });
 
@@ -349,7 +407,7 @@ export const budgetRouter = createTRPCRouter({
             where: {
               message: "Budget is exceeded",
               budgetId: budget?.id,
-              userId: budget?.userId as string,
+              userId: budget?.user.id as string,
             },
           });
 
@@ -358,10 +416,27 @@ export const budgetRouter = createTRPCRouter({
               data: {
                 message: "Budget is exceeded",
                 budgetId: budget?.id,
-                userId: budget?.userId as string,
+                userId: budget?.user.id as string,
                 notificationType: "BUDGETEXCEED",
               },
             });
+
+            if (budget?.user.notification) {
+              //generate email
+              const options = {
+                from: process.env.NODEMAILER_EMAIL,
+                to: budget.user.email as string,
+                subject: "[DuitHive] Your budget is exceeded",
+                html: budgetExceedTemplate(
+                  budget.title,
+                  budget.user.currency?.symbol as string,
+                  parseFloat(budget.amount.toString()).toFixed(2)
+                ),
+              };
+
+              //send email
+              await transporter.sendMail(options);
+            }
           }
         }
         return budget;

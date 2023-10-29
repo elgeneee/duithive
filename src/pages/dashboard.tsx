@@ -20,6 +20,8 @@ import {
 import { api } from "@/utils/api";
 import filter from "lodash/filter";
 import groupBy from "lodash/groupBy";
+import times from "lodash/times";
+import find from "lodash/find";
 import map from "lodash/map";
 import sumBy from "lodash/sumBy";
 import { useState, useEffect } from "react";
@@ -50,11 +52,9 @@ const Dashboard: NextPage = () => {
   const { data: session } = useSession();
 
   //area
-  const [expenseAreaData, setExpenseAreaData] = useState<unknown[]>([]);
   const [expenseTotal, setExpenseTotal] = useState<number>(0);
-  const [incomeAreaData, setIncomeAreaData] = useState<unknown[]>([]);
   const [incomeTotal, setIncomeTotal] = useState<number>(0);
-
+  const [areaData, setAreaData] = useState<unknown[]>([]);
   //bar
   const [barChartValue, setBarChartValue] = useState<string>("week");
   const [barData, setBarData] = useState<unknown[]>([]);
@@ -62,6 +62,10 @@ const Dashboard: NextPage = () => {
   //pie
   const [pieData, setPieData] = useState<unknown[]>([]);
   const [pieTotal, setPieTotal] = useState<number>(0);
+
+  //budget status
+  const [activeCount, setActiveCount] = useState<number>(0);
+  const [exceededCount, setExceededCount] = useState<number>(0);
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-US", {
@@ -81,15 +85,34 @@ const Dashboard: NextPage = () => {
       barChartProcess("week");
       pieChartProcess("week");
       areaChartProcess();
+      getActiveCount();
+      getExceededCount();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardData]);
 
+  const getActiveCount = () => {
+    const activeBudgets = filter(dashboardData?.budgets, (budget) => {
+      return budget.startDate <= today && budget.endDate >= today;
+    });
+    setActiveCount(activeBudgets.length);
+  };
+
+  const getExceededCount = () => {
+    const exceededBudgets = filter(dashboardData?.budgets, (budget) => {
+      const totalExpenseAmount = sumBy(budget.expenses, (item) =>
+        parseFloat(item.amount.toString())
+      );
+      return totalExpenseAmount > parseFloat(budget.amount.toString());
+    });
+    setExceededCount(exceededBudgets.length);
+  };
+
   //area chart
   const areaChartProcess = () => {
-    const currDate = new Date();
-    const startDate = new Date(currDate.getFullYear(), currDate.getMonth(), 1);
-    const endDate = new Date(currDate.getFullYear(), currDate.getMonth() + 1);
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 1);
 
     const expenseGroupedData = map(
       groupBy(
@@ -122,39 +145,75 @@ const Dashboard: NextPage = () => {
         totalAmount: sumBy(group, (item) => parseFloat(item.amount.toString())),
       })
     );
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const data = times(
+      new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(),
+      (index) => {
+        const currentDate = new Date(startOfMonth);
+        currentDate.setDate(currentDate.getDate() + index);
+        return {
+          transactionDate: currentDate,
+          expenseAmount: 0,
+          incomeAmount: 0,
+        };
+      }
+    );
+
+    // Update the data array with expenses using getDate() for comparison
+    const mergedData = filter(
+      map(data, (dayData) => {
+        const expenseData = find(
+          expenseGroupedData,
+          (exp) =>
+            dayData.transactionDate.getDate() === exp.transactionDate.getDate()
+        );
+        const incomeData = find(
+          incomeGroupedData,
+          (inc) =>
+            dayData.transactionDate.getDate() === inc.transactionDate.getDate()
+        );
+
+        return {
+          ...dayData,
+          expenseAmount: expenseData ? expenseData.totalAmount : 0,
+          incomeAmount: incomeData ? incomeData.totalAmount : 0,
+        };
+      }),
+      (item) => item.expenseAmount !== 0 || item.incomeAmount !== 0
+    );
+
     const expenseTotal = sumBy(expenseGroupedData, (item) => item.totalAmount);
 
     const incomeTotal = sumBy(incomeGroupedData, (item) => item.totalAmount);
-
-    setExpenseAreaData(expenseGroupedData);
     setExpenseTotal(expenseTotal);
-    setIncomeAreaData(incomeGroupedData);
+    setAreaData(mergedData);
     setIncomeTotal(incomeTotal);
   };
 
   //bar chart process
   const barChartProcess = (filterValue: string) => {
-    const currDate = new Date();
     const expenseGroupedData = [];
     let startDate = new Date();
     let endDate = new Date();
     switch (filterValue) {
       case "week":
         startDate = new Date(
-          currDate.getFullYear(),
-          currDate.getMonth(),
-          currDate.getDate() - 6
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate() - 6
         );
         break;
       case "month":
-        startDate = new Date(currDate.getFullYear(), currDate.getMonth(), 1);
-        endDate = new Date(currDate.getFullYear(), currDate.getMonth() + 1, 0);
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         break;
       case "year":
         startDate = new Date(
-          currDate.getFullYear() - 1,
-          currDate.getMonth(),
-          currDate.getDate()
+          today.getFullYear() - 1,
+          today.getMonth(),
+          today.getDate()
         );
         break;
     }
@@ -229,7 +288,6 @@ const Dashboard: NextPage = () => {
   //pie chart
   const pieChartProcess = (filterValue: string) => {
     let startDate = new Date();
-    const endDate = new Date();
     switch (filterValue) {
       case "week":
         const day = startDate.getDay();
@@ -237,10 +295,10 @@ const Dashboard: NextPage = () => {
         startDate.setDate(diff);
         break;
       case "month":
-        startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
         break;
       case "year":
-        startDate = new Date(endDate.getFullYear(), 0, 1);
+        startDate = new Date(today.getFullYear(), 0, 1);
         break;
     }
 
@@ -249,8 +307,7 @@ const Dashboard: NextPage = () => {
         filter(
           dashboardData?.expenses,
           (item) =>
-            item?.transactionDate >= startDate &&
-            item?.transactionDate <= endDate
+            item?.transactionDate >= startDate && item?.transactionDate <= today
         ),
         (item) => item?.category?.name
       ),
@@ -275,75 +332,27 @@ const Dashboard: NextPage = () => {
         <p className="text-athens-gray-300">{formattedDate}</p>
         {isLoadingDashboard ? (
           <>
-            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/5" />
-              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/5" />
-              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 sm:w-3/5" />
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 lg:w-2/5" />
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 lg:w-3/5" />
             </div>
-            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-2/3" />
-              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-1/3" />
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 lg:w-2/3" />
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 lg:w-1/3" />
             </div>
-            <div className="mt-10">
-              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 sm:w-2/3" />
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <Skeleton className="h-36 w-full rounded-lg border border-athens-gray-200/40 lg:h-96 lg:w-1/5" />
+              <Skeleton className="h-96 w-full rounded-lg border border-athens-gray-200/40 lg:w-1/3" />
             </div>
           </>
         ) : (
           <>
             {/* first layer */}
-            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-              <div className="flex h-36 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
-                <ResponsiveContainer width="100%" height="50%">
-                  <AreaChart
-                    data={incomeAreaData}
-                    margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-                    style={{ position: "static" }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="colorExpense"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#6FCF97"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#6FCF97"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <Area
-                      type="monotone"
-                      dataKey="totalAmount"
-                      stroke="#27AE60"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorExpense)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-                <div>
-                  <p className="font-semibold text-[#A0A5AF]">Income</p>
-                  <p className="text-lg font-semibold">
-                    +{userCurrency?.symbol}{" "}
-                    {incomeTotal.toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-              </div>
-              <div className="flex h-36 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/5">
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <div className="flex h-36 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 lg:w-2/5">
                 <ResponsiveContainer width="100%" height="50%" className={""}>
                   <AreaChart
-                    data={expenseAreaData}
+                    data={areaData}
                     margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
                     style={{ position: "static" }}
                   >
@@ -357,6 +366,24 @@ const Dashboard: NextPage = () => {
                       >
                         <stop
                           offset="5%"
+                          stopColor="#6FCF97"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#6FCF97"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                      <linearGradient
+                        id="colorExpense"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
                           stopColor="#EB5757"
                           stopOpacity={0.8}
                         />
@@ -369,34 +396,54 @@ const Dashboard: NextPage = () => {
                     </defs>
                     <Area
                       type="monotone"
-                      dataKey="totalAmount"
-                      stroke="#EB5757"
+                      dataKey="incomeAmount"
+                      stroke="#27AE60"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorIncome)"
                     />
+                    <Area
+                      type="monotone"
+                      dataKey="expenseAmount"
+                      stroke="#EB5757"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorExpense)"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
-                <div>
-                  <p className="font-semibold text-[#A0A5AF]">Expense</p>
-                  <p className="text-lg font-semibold">
-                    -{userCurrency?.symbol}{" "}
-                    {expenseTotal.toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 2,
-                    })}
-                  </p>
+                <div className="flex w-full">
+                  <div className="w-full">
+                    <p className="font-semibold text-[#A0A5AF]">Income</p>
+                    <p className="text-lg font-semibold">
+                      +{userCurrency?.symbol}{" "}
+                      {incomeTotal.toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                  <div className="w-full">
+                    <p className="font-semibold text-[#A0A5AF]">Expense</p>
+                    <p className="text-lg font-semibold">
+                      -{userCurrency?.symbol}{" "}
+                      {expenseTotal.toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div
                 className={cn(
                   !dashboardData?.budgets?.length && "justify-center",
-                  "flex h-36 w-full items-center rounded-lg border border-athens-gray-100 bg-white p-2 sm:w-3/5"
+                  "flex h-36 w-full items-center rounded-lg border border-athens-gray-100 bg-white p-2 lg:w-3/5"
                 )}
               >
                 {dashboardData?.budgets?.length ? (
                   <div className="w-full space-y-3 font-satoshi">
-                    {dashboardData.budgets.map((budget) => (
+                    {dashboardData.budgets.slice(0, 2).map((budget) => (
                       <div
                         key={budget.id}
                         className="flex w-full items-center justify-between space-x-2"
@@ -456,8 +503,8 @@ const Dashboard: NextPage = () => {
             </div>
 
             {/* secondlayer */}
-            <div className="mt-10 flex flex-col space-x-0 space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-              <div className="flex h-96 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-2/3">
+            <div className="mt-10 flex flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <div className="flex h-96 w-full flex-col justify-between overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 lg:w-2/3">
                 <div className="803FE8 flex justify-end space-x-3 font-bold">
                   <button
                     className={cn(
@@ -526,7 +573,7 @@ const Dashboard: NextPage = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex h-96 w-full flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-1/3">
+              <div className="flex h-96 w-full flex-col overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 lg:w-1/3">
                 <p className="pl-4 font-satoshi text-xl font-bold">
                   Categories
                 </p>
@@ -574,46 +621,83 @@ const Dashboard: NextPage = () => {
             </div>
 
             {/* third layer */}
-            <div className="mt-10 flex w-full flex-col rounded-lg border border-athens-gray-100 bg-white p-3 sm:w-2/3">
-              <div className="flex items-center justify-between">
-                <p className="font-satoshi text-xl font-bold">
-                  Latest Spendings
-                </p>
-                <Link href="/expense">
-                  <p className="text-sm text-[#A0A5AF] hover:underline">
-                    View All
+            <div className="mt-10 flex h-full flex-col space-x-0 space-y-3 lg:flex-row lg:space-x-3 lg:space-y-0">
+              <div className="w-full rounded-lg border border-athens-gray-100 bg-white p-3 lg:w-1/5">
+                <div id="content" className="flex h-full flex-col">
+                  <p className="font-satoshi text-xl font-bold">
+                    Budget Status
                   </p>
-                </Link>
-              </div>
-              <hr className="my-2" />
-              <div className="min-h-[10rem] space-y-4">
-                {dashboardData?.expenses?.length ? (
-                  dashboardData.expenses.slice(0, 5).map((expense) => (
-                    <div
-                      key={expense.id}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-semibold">{expense.description}</p>
-                        <p className="text-xs text-[#A0A5AF]">
-                          {expense.transactionDate.toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
+                  <div className="flex h-full flex-row items-center justify-center p-4 text-center lg:flex-col">
+                    <div className="flex h-full w-full items-center justify-center">
+                      <div className="flex flex-col">
+                        <span className="text-2xl font-semibold text-green-400">
+                          {activeCount}
+                        </span>
+                        <span className="text-lg font-normal">Active</span>
                       </div>
-                      <p className="text-sm font-semibold ">
-                        -{userCurrency?.symbol}
-                        {parseFloat(expense.amount.toString()).toFixed(2)}
-                      </p>
                     </div>
-                  ))
-                ) : (
-                  <p className="translate-y-16 text-center italic text-[#A0A5AF]">
-                    No expenses yet
+                    <div className="hidden h-[0.1rem] w-full bg-gradient-to-r from-white via-athens-gray-200 to-white lg:block" />
+                    <div className="h-12 w-1 items-center justify-center bg-gradient-to-b from-white  via-athens-gray-200 to-white lg:hidden" />
+                    <div className="flex h-full w-full items-center justify-center">
+                      <div className="flex flex-col">
+                        <span className="text-2xl font-semibold text-red-400">
+                          {exceededCount}
+                        </span>
+                        <span className="text-lg font-normal">Exceeded</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full overflow-hidden rounded-lg border border-athens-gray-100 bg-white p-3 lg:w-1/3">
+                <div className="flex items-center justify-between">
+                  <p className="font-satoshi text-xl font-bold">
+                    Latest Spendings
                   </p>
-                )}
+                  <Link href="/expense">
+                    <p className="text-sm text-[#A0A5AF] hover:underline">
+                      View All
+                    </p>
+                  </Link>
+                </div>
+                <hr className="my-2" />
+                <div className="min-h-[10rem] space-y-4">
+                  {dashboardData?.expenses?.length ? (
+                    dashboardData.expenses
+                      .slice(-5)
+                      .reverse()
+                      .map((expense) => (
+                        <div
+                          key={expense.id}
+                          className="flex items-center justify-between"
+                        >
+                          <div>
+                            <p className="font-semibold">
+                              {expense.description}
+                            </p>
+                            <p className="text-xs text-[#A0A5AF]">
+                              {expense.transactionDate.toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "long",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </p>
+                          </div>
+                          <p className="font-semibold">
+                            -{userCurrency?.symbol}
+                            {parseFloat(expense.amount.toString()).toFixed(2)}
+                          </p>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="translate-y-16 text-center italic text-[#A0A5AF]">
+                      No expenses yet
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </>
@@ -642,27 +726,3 @@ export async function getServerSideProps(context: any) {
 }
 
 export default Dashboard;
-
-// const AuthShowcase: React.FC = () => {
-//   const { data: sessionData } = useSession();
-
-//   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-//     undefined, // no input
-//     { enabled: sessionData?.user !== undefined }
-//   );
-
-//   return (
-//     <div className="flex flex-col items-center justify-center gap-4">
-//       <p className="text-center text-2xl text-white">
-//         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-//         {secretMessage && <span> - {secretMessage}</span>}
-//       </p>
-//       <button
-//         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-//         onClick={sessionData ? () => void signOut() : () => void signIn()}
-//       >
-//         {sessionData ? "Sign out" : "Sign in"}
-//       </button>
-//     </div>
-//   );
-// };
