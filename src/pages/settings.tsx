@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type NextPage } from "next";
 import { getSession, useSession } from "next-auth/react";
 import AppLayout from "@/components/AppLayout";
@@ -8,6 +11,21 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DndContext,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+  TouchSensor,
+  MouseSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   Check,
   ChevronsUpDown,
@@ -45,6 +63,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavStore } from "@/store/navStore";
 import { useToast } from "@/components/ui/use-toast";
 import { signOut } from "next-auth/react";
+import { SortableItem } from "@/components/SortableItem";
+import {
+  items1 as items1Order,
+  items2 as items2Order,
+  items3 as items3Order,
+} from "@/store/dndStore";
 
 const userSettingsSchema = z.object({
   username: z
@@ -56,6 +80,12 @@ const userSettingsSchema = z.object({
 const deleteAccountSchema = z.object({
   email: z.string().email().min(5),
 });
+
+type TItem = {
+  id: string;
+  name: string;
+  icon: JSX.Element;
+};
 
 const Settings: NextPage = () => {
   const { data: session } = useSession();
@@ -83,17 +113,26 @@ const Settings: NextPage = () => {
   const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
   const [currencyValue, setCurrencyValue] = useState<string>("");
   const [emailValue, setEmailValue] = useState<string>("");
+
   //drag-and-drop image
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imageName, setImageName] = useState<string>("");
-  //user email
-
   const [fileSizeTooBig, setFileSizeTooBig] = useState<boolean>(false);
   const [fileIsNotImage, setFileIsNotImage] = useState<boolean>(false);
 
   const [notificationAlert, setNotificationAlert] = useState<boolean>();
   const [monthlyReport, setMonthlyReport] = useState<boolean>();
+
+  //dndkit
+  const [isDashboardLoading, setIsDashboardLoading] = useState<boolean>(false);
+  const [items1, setItems1] = useState<TItem[]>();
+  const [items2, setItems2] = useState<TItem[]>();
+  const [items3, setItems3] = useState<TItem[]>();
+  const [activeItem1, setActiveItem1] = useState<TItem>();
+  const [activeItem2, setActiveItem2] = useState<TItem>();
+  const [activeItem3, setActiveItem3] = useState<TItem>();
+
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-US", {
     year: "numeric",
@@ -178,6 +217,39 @@ const Settings: NextPage = () => {
         }
       },
     });
+
+  useEffect(() => {
+    const dashboardOrdering = localStorage.getItem("dashboardOrdering");
+
+    if (dashboardOrdering) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const dashboardOrderingJSON = JSON.parse(dashboardOrdering);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (dashboardOrderingJSON?.[1]?.[0]?.id == "1") {
+        setItems1(items1Order);
+      } else {
+        setItems1([...items1Order].reverse());
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (dashboardOrderingJSON?.[2]?.[0]?.id == "3") {
+        setItems2(items2Order);
+      } else {
+        setItems2([...items2Order].reverse());
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (dashboardOrderingJSON?.[3]?.[0]?.id == "5") {
+        setItems3(items3Order);
+      } else {
+        setItems3([...items3Order].reverse());
+      }
+    } else {
+      setItems1(items1Order);
+      setItems2(items2Order);
+      setItems3(items3Order);
+    }
+  }, []);
 
   useEffect(() => {
     if (userSettings) {
@@ -320,6 +392,68 @@ const Settings: NextPage = () => {
     });
   };
 
+  const resetDashboard = () => {
+    const updatedItems1 = items1Order.map((item) => {
+      return { id: item?.id, name: item.name };
+    });
+    const updatedItems2 = items2Order.map((item) => {
+      return { id: item.id, name: item.name };
+    });
+    const updatedItems3 = items3Order.map((item) => {
+      return { id: item.id, name: item.name };
+    });
+
+    localStorage.setItem(
+      "dashboardOrdering",
+      JSON.stringify({
+        1: updatedItems1,
+        2: updatedItems2,
+        3: updatedItems3,
+      })
+    );
+
+    setItems1(items1Order);
+    setItems2(items2Order);
+    setItems3(items3Order);
+
+    toast({
+      variant: "success",
+      status: "success",
+      title: "Dashboard reset successfully!",
+    });
+  };
+
+  const onDashboardSubmit = async () => {
+    setIsDashboardLoading(true);
+    await delay(300);
+    if (items1 && items2 && items3) {
+      const updatedItems1 = items1.map((item) => {
+        return { id: item?.id, name: item.name };
+      });
+      const updatedItems2 = items2.map((item) => {
+        return { id: item.id, name: item.name };
+      });
+      const updatedItems3 = items3.map((item) => {
+        return { id: item.id, name: item.name };
+      });
+
+      localStorage.setItem(
+        "dashboardOrdering",
+        JSON.stringify({
+          1: updatedItems1,
+          2: updatedItems2,
+          3: updatedItems3,
+        })
+      );
+    }
+    setIsDashboardLoading(false);
+    toast({
+      variant: "success",
+      status: "success",
+      title: "Dashboard is arranged!",
+    });
+  };
+
   const onDeleteAccountSubmit = (data: z.infer<typeof deleteAccountSchema>) => {
     if (data.email !== emailValue) {
       setDeleteAccountError("email", {
@@ -332,6 +466,113 @@ const Settings: NextPage = () => {
     }
   };
 
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+
+  const handleDragStart1 = (event: DragStartEvent) => {
+    const { active } = event;
+    if (items1) {
+      setActiveItem1(items1.find((item) => item.id === active.id));
+    }
+  };
+
+  const handleDragStart2 = (event: DragStartEvent) => {
+    const { active } = event;
+    if (items2) {
+      setActiveItem2(items2.find((item) => item.id === active.id));
+    }
+  };
+
+  const handleDragStart3 = (event: DragStartEvent) => {
+    const { active } = event;
+    if (items3) {
+      setActiveItem3(items3.find((item) => item.id === active.id));
+    }
+  };
+
+  const handleDragEnd1 = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    if (items1) {
+      const activeItem = items1.find((item) => item.id === active.id);
+      const overItem = items1.find((item) => item.id === over.id);
+
+      if (!activeItem || !overItem) {
+        return;
+      }
+
+      const activeIndex = items1.findIndex((item) => item.id === active.id);
+      const overIndex = items1.findIndex((item) => item.id === over.id);
+
+      if (activeIndex !== overIndex) {
+        setItems1((prev) =>
+          arrayMove<TItem>(prev ? prev : [], activeIndex, overIndex)
+        );
+      }
+      setActiveItem1(undefined);
+    }
+  };
+
+  const handleDragEnd2 = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    if (items2) {
+      const activeItem = items2.find((item) => item.id === active.id);
+      const overItem = items2.find((item) => item.id === over.id);
+
+      if (!activeItem || !overItem) {
+        return;
+      }
+
+      const activeIndex = items2.findIndex((item) => item.id === active.id);
+      const overIndex = items2.findIndex((item) => item.id === over.id);
+
+      if (activeIndex !== overIndex) {
+        setItems2((prev) =>
+          arrayMove<TItem>(prev ? prev : [], activeIndex, overIndex)
+        );
+      }
+      setActiveItem2(undefined);
+    }
+  };
+
+  const handleDragEnd3 = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    if (items3) {
+      const activeItem = items3.find((item) => item.id === active.id);
+      const overItem = items3.find((item) => item.id === over.id);
+
+      if (!activeItem || !overItem) {
+        return;
+      }
+
+      const activeIndex = items3.findIndex((item) => item.id === active.id);
+      const overIndex = items3.findIndex((item) => item.id === over.id);
+
+      if (activeIndex !== overIndex) {
+        setItems3((prev) =>
+          arrayMove<TItem>(prev ? prev : [], activeIndex, overIndex)
+        );
+      }
+      setActiveItem3(undefined);
+    }
+  };
+
+  const handleDragCancel1 = () => {
+    setActiveItem1(undefined);
+  };
+
+  const handleDragCancel2 = () => {
+    setActiveItem2(undefined);
+  };
+
+  const handleDragCancel3 = () => {
+    setActiveItem3(undefined);
+  };
+
   return (
     <AppLayout>
       <main className="p-4">
@@ -342,8 +583,11 @@ const Settings: NextPage = () => {
             <TabsTrigger value="profile" className="w-20 text-base">
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className=" w-36 text-base">
+            <TabsTrigger value="notifications" className="w-32 text-base">
               Notifications
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="w-32 text-base">
+              Dashboard
             </TabsTrigger>
           </TabsList>
           <TabsContent value="profile">
@@ -700,6 +944,141 @@ const Settings: NextPage = () => {
                   onCheckedChange={setMonthlyReport}
                   id="notification"
                 />
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="dashboard">
+            <div className="flex items-center justify-between">
+              <div className="my-5">
+                <p className="font-semibold">Dashboard Layout</p>
+                <p className="text-sm font-medium text-athens-gray-300">
+                  Customize your dashboard layout here, drag to reorder
+                </p>
+              </div>
+              <div className="flex flex-col space-x-0 space-y-2 sm:flex-row sm:space-x-3 sm:space-y-0">
+                <Button variant={"accent"} onClick={resetDashboard}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-refresh-ccw"
+                  >
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                    <path d="M16 16h5v5" />
+                  </svg>
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isDashboardLoading}
+                  className="w-32"
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                  onClick={onDashboardSubmit}
+                >
+                  {isDashboardLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" color="#803FE8" />
+                  ) : (
+                    <span>Save Changes</span>
+                  )}
+                </Button>
+              </div>
+            </div>
+            <hr />
+            <div className="mt-10 space-y-5">
+              <div className="space-y-3 rounded-lg bg-athens-gray-100 p-3">
+                <p className="text-sm font-semibold text-athens-gray-700">
+                  Row 1:
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  onDragStart={handleDragStart1}
+                  onDragEnd={handleDragEnd1}
+                  onDragCancel={handleDragCancel1}
+                >
+                  <SortableContext
+                    items={items1 || []}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {items1?.map((item) => (
+                      <SortableItem key={item.id} id={item.id} item={item} />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeItem1 ? (
+                      <SortableItem
+                        key={activeItem1.id}
+                        id={activeItem1.id}
+                        item={activeItem1}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </div>
+
+              <div className="space-y-3 rounded-lg bg-athens-gray-100 p-3">
+                <p className="text-sm font-semibold text-athens-gray-700">
+                  Row 2:
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  onDragStart={handleDragStart2}
+                  onDragEnd={handleDragEnd2}
+                  onDragCancel={handleDragCancel2}
+                >
+                  <SortableContext
+                    items={items2 || []}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {items2?.map((item) => (
+                      <SortableItem key={item.id} id={item.id} item={item} />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeItem2 ? (
+                      <SortableItem
+                        key={activeItem2.id}
+                        id={activeItem2.id}
+                        item={activeItem2}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </div>
+              <div className="space-y-3 rounded-lg bg-athens-gray-100 p-3">
+                <p className="text-sm font-semibold text-athens-gray-700">
+                  Row 3:
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  onDragStart={handleDragStart3}
+                  onDragEnd={handleDragEnd3}
+                  onDragCancel={handleDragCancel3}
+                >
+                  <SortableContext
+                    items={items3 || []}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {items3?.map((item) => (
+                      <SortableItem key={item.id} id={item.id} item={item} />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeItem3 ? (
+                      <SortableItem
+                        key={activeItem3.id}
+                        id={activeItem3.id}
+                        item={activeItem3}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
               </div>
             </div>
           </TabsContent>
