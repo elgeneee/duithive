@@ -118,7 +118,7 @@ const ForgotPassword: NextPage = () => {
                       Email
                     </label>
                     <Input
-                      className="mt-2"
+                      className="mt-2 border border-input"
                       {...register("email", { required: true })}
                     />
                     {errors.email && (

@@ -132,7 +132,7 @@ const ResetPassword: NextPage = () => {
                 </label>
                 <Input
                   type="password"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   onKeyDown={handleKeyDown}
                   {...register("password", { required: true })}
                 />
@@ -149,7 +149,7 @@ const ResetPassword: NextPage = () => {
                 </label>
                 <Input
                   type="password"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   onKeyDown={handleKeyDown}
                   {...register("confirmPassword", { required: true })}
                 />

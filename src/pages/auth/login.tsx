@@ -102,7 +102,7 @@ const Login: NextPage = () => {
                   Email
                 </label>
                 <Input
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   {...register("email", { required: true })}
                 />
                 {errors.email && (
@@ -117,7 +117,7 @@ const Login: NextPage = () => {
                 </label>
                 <Input
                   type="password"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   {...register("password", { required: true })}
                 />
                 {errors.password && (

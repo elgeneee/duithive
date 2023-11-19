@@ -93,7 +93,7 @@ export const authRouter = createTRPCRouter({
       const options = {
         from: process.env.NODEMAILER_EMAIL,
         to: input.email,
-        subject: "Reset your password here",
+        subject: "[DuitHive] Reset your password here",
         html: resetPasswordTemplate(token),
       };
 

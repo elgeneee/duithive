@@ -150,7 +150,7 @@ const SignUp: NextPage = () => {
                   Email
                 </label>
                 <Input
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   {...register("email", { required: true })}
                 />
                 {errors.email && (
@@ -165,7 +165,7 @@ const SignUp: NextPage = () => {
                 </label>
                 <Input
                   type="username"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   {...register("username", { required: true })}
                 />
                 {errors.username && (
@@ -180,7 +180,7 @@ const SignUp: NextPage = () => {
                 </label>
                 <Input
                   type="password"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   onKeyDown={handleKeyDown}
                   {...register("password", { required: true })}
                 />
@@ -196,7 +196,7 @@ const SignUp: NextPage = () => {
                 </label>
                 <Input
                   type="password"
-                  className="mt-2"
+                  className="mt-2 border border-input"
                   onKeyDown={handleKeyDown}
                   {...register("confirmPassword", { required: true })}
                 />

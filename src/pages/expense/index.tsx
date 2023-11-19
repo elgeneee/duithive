@@ -64,7 +64,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import { env } from "@/env.mjs";
 import { useToast } from "@/components/ui/use-toast";
 import debounce from "lodash/debounce";
 import Link from "next/link";
@@ -356,7 +355,7 @@ const Expense: NextPage = () => {
     setDragActive(true);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -376,65 +375,59 @@ const Expense: NextPage = () => {
         setImageName("");
       } else {
         const reader = new FileReader();
-        reader.onload = async (e) => {
-          setReceiptImage(file);
+        reader.onload = (e) => {
           setImageName(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+        setReceiptImage(file);
+        setMindeeLoading(true);
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        const res = await fetch("https://elgene-duithive-ocr-1.hf.space/ocr/", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
 
-          //start Mindee
-          setMindeeLoading(true);
+        if (data?.menu?.[0]?.nm !== undefined) {
           const descriptionElement = document.getElementById(
             "input-description"
           ) as HTMLInputElement;
+          descriptionElement.value = data.menu[0].nm || "";
+          setValue("description", (data.menu[0].nm as string) || "");
+        }
+
+        if (data?.nm !== undefined) {
+          const descriptionElement = document.getElementById(
+            "input-description"
+          ) as HTMLInputElement;
+          descriptionElement.value = data.nm || "";
+          setValue("description", (data.nm as string) || "");
+        }
+
+        if (data?.total?.total_price !== undefined) {
+          const value = Number(
+            parseFloat(
+              (data.total.total_price as string).replace(/[^0-9.]/g, "")
+            ).toFixed(2)
+          );
           const amountElement = document.getElementById(
             "input-amount"
           ) as HTMLInputElement;
-
-          const resp = await handleMindee(file);
-          if (resp.api_request.status === "success") {
-            descriptionElement.value =
-              resp.document.inference.prediction.supplier_name.value || "";
-            amountElement.value =
-              resp.document.inference.prediction.total_amount.value || "";
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            setDate(new Date(resp.document.inference.prediction.date.value));
-
-            setValue(
-              "description",
-              (resp.document.inference.prediction.supplier_name
-                .value as string) || ""
-            );
-            setValue(
-              "amount",
-              resp.document.inference.prediction.total_amount.value as number
-            );
-            setValue(
-              "date",
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              new Date(resp.document.inference.prediction.date.value)
-            );
-
-            setMindeeLoading(false);
-          }
-        };
-        reader.readAsDataURL(file);
+          amountElement.value = value.toString() || "";
+          setValue("amount", value);
+        }
+        setMindeeLoading(false);
       }
     }
   };
 
-  const deleteImage = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setReceiptImage(null);
-    setImageName("");
-  };
-
-  const onChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileSizeTooBig(false);
     setFileIsNotImage(false);
     setReceiptImage(null);
-    const validImageType = ["image/jpeg", "image/png"];
     const file = e.currentTarget.files && e.currentTarget.files[0];
+    const validImageType = ["image/jpeg", "image/png"];
     if (file) {
       if (file.size / 1024 / 1024 > 5) {
         setFileSizeTooBig(true);
@@ -446,52 +439,123 @@ const Expense: NextPage = () => {
         setImageName("");
       } else {
         const reader = new FileReader();
-        reader.onload = async (e) => {
-          setReceiptImage(file);
+        reader.onload = (e) => {
           setImageName(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+        setReceiptImage(file);
+        setMindeeLoading(true);
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        const res = await fetch("https://elgene-duithive-ocr-1.hf.space/ocr/", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
 
-          //start Mindee
-          setMindeeLoading(true);
+        if (data?.menu?.[0]?.nm !== undefined) {
           const descriptionElement = document.getElementById(
             "input-description"
           ) as HTMLInputElement;
+          descriptionElement.value = data.menu[0].nm || "";
+          setValue("description", (data.menu[0].nm as string) || "");
+        }
+
+        if (data?.nm !== undefined) {
+          const descriptionElement = document.getElementById(
+            "input-description"
+          ) as HTMLInputElement;
+          descriptionElement.value = data.nm || "";
+          setValue("description", (data.nm as string) || "");
+        }
+
+        if (data?.total?.total_price !== undefined) {
+          const value = Number(
+            parseFloat(
+              (data.total.total_price as string).replace(/[^0-9.]/g, "")
+            ).toFixed(2)
+          );
           const amountElement = document.getElementById(
             "input-amount"
           ) as HTMLInputElement;
-
-          const resp = await handleMindee(file);
-          if (resp.api_request.status === "success") {
-            descriptionElement.value =
-              resp.document.inference.prediction.supplier_name.value || "";
-            amountElement.value =
-              resp.document.inference.prediction.total_amount.value || "";
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            setDate(new Date(resp.document.inference.prediction.date.value));
-
-            setValue(
-              "description",
-              (resp.document.inference.prediction.supplier_name
-                .value as string) || ""
-            );
-            setValue(
-              "amount",
-              resp.document.inference.prediction.total_amount.value as number
-            );
-            setValue(
-              "date",
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              new Date(resp.document.inference.prediction.date.value)
-            );
-
-            setMindeeLoading(false);
-          }
-        };
-
-        reader.readAsDataURL(file);
+          amountElement.value = value.toString() || "";
+          setValue("amount", value);
+        }
+        setMindeeLoading(false);
       }
     }
   };
+
+  const deleteImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setReceiptImage(null);
+    setImageName("");
+  };
+
+  // const mindeeOnChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setFileSizeTooBig(false);
+  //   setFileIsNotImage(false);
+  //   setReceiptImage(null);
+  //   const validImageType = ["image/jpeg", "image/png"];
+  //   const file = e.currentTarget.files && e.currentTarget.files[0];
+  //   if (file) {
+  //     if (file.size / 1024 / 1024 > 5) {
+  //       setFileSizeTooBig(true);
+  //       setReceiptImage(null);
+  //       setImageName("");
+  //     } else if (!validImageType.includes(file.type)) {
+  //       setFileIsNotImage(true);
+  //       setReceiptImage(null);
+  //       setImageName("");
+  //     } else {
+  //       const reader = new FileReader();
+  //       reader.onload = async (e) => {
+  //         setReceiptImage(file);
+  //         setImageName(e.target?.result as string);
+
+  //         //start Mindee
+  //         setMindeeLoading(true);
+  //         const descriptionElement = document.getElementById(
+  //           "input-description"
+  //         ) as HTMLInputElement;
+  //         const amountElement = document.getElementById(
+  //           "input-amount"
+  //         ) as HTMLInputElement;
+
+  //         const resp = await handleMindee(file);
+  //         if (resp.api_request.status === "success") {
+  //           descriptionElement.value =
+  //             resp.document.inference.prediction.supplier_name.value || "";
+  //           amountElement.value =
+  //             resp.document.inference.prediction.total_amount.value || "";
+
+  //           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  //           setDate(new Date(resp.document.inference.prediction.date.value));
+
+  //           setValue(
+  //             "description",
+  //             (resp.document.inference.prediction.supplier_name
+  //               .value as string) || ""
+  //           );
+  //           setValue(
+  //             "amount",
+  //             resp.document.inference.prediction.total_amount.value as number
+  //           );
+  //           setValue(
+  //             "date",
+  //             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  //             new Date(resp.document.inference.prediction.date.value)
+  //           );
+
+  //           setMindeeLoading(false);
+  //         }
+  //       };
+
+  //       reader.readAsDataURL(file);
+  //     }
+  //   }
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDispValue(e.target.value);
@@ -543,30 +607,30 @@ const Expense: NextPage = () => {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleMindee = (file: File): Promise<any> => {
-    return new Promise((resolve) => {
-      const data = new FormData();
-      data.append("document", file, file.name);
+  // const handleMindee = (file: File): Promise<any> => {
+  //   return new Promise((resolve) => {
+  //     const data = new FormData();
+  //     data.append("document", file, file.name);
 
-      const xhr = new XMLHttpRequest();
+  //     const xhr = new XMLHttpRequest();
 
-      xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const responseData = JSON.parse(this.responseText);
-          resolve(responseData); // Resolve the Promise with the response data
-          // JSON parsing error
-        }
-      });
+  //     xhr.addEventListener("readystatechange", function () {
+  //       if (this.readyState === 4) {
+  //         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //         const responseData = JSON.parse(this.responseText);
+  //         resolve(responseData); // Resolve the Promise with the response data
+  //         // JSON parsing error
+  //       }
+  //     });
 
-      xhr.open(
-        "POST",
-        "https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict"
-      );
-      xhr.setRequestHeader("Authorization", `Token ${env.NEXT_PUBLIC_MINDEE}`);
-      xhr.send(data);
-    });
-  };
+  //     xhr.open(
+  //       "POST",
+  //       "https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict"
+  //     );
+  //     xhr.setRequestHeader("Authorization", `Token ${env.NEXT_PUBLIC_MINDEE}`);
+  //     xhr.send(data);
+  //   });
+  // };
 
   const toShow = searchResults?.expenses
     ? searchResults.expenses
@@ -657,6 +721,7 @@ const Expense: NextPage = () => {
                         onDragOver={handleDragOver}
                         onDragEnter={handleDragOver}
                         onDragLeave={handleDragLeave}
+                        // eslint-disable-next-line @typescript-eslint/no-misused-promises
                         onDrop={handleDrop}
                         className={cn(
                           "absolute aspect-video h-full w-full rounded-md object-cover",
@@ -704,6 +769,7 @@ const Expense: NextPage = () => {
                         type="file"
                         accept="image/*"
                         className="sr-only"
+                        // eslint-disable-next-line @typescript-eslint/no-misused-promises
                         onChange={onChangeImage}
                       />
                     </div>

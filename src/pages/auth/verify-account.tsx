@@ -169,7 +169,7 @@ const VerifyAccount: NextPage = () => {
                       onChange={handleChange}
                       onKeyDown={(e) => handleOTPKeyDown(e, index)}
                       pattern="[0-9]*"
-                      className="h-14 w-12 text-center text-lg font-bold"
+                      className="h-14 w-12 border border-input text-center text-lg font-bold"
                       value={otp[index]}
                     />
                   );
