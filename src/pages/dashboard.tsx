@@ -108,13 +108,31 @@ const Dashboard: NextPage = () => {
   }, []);
 
   const getActiveCount = () => {
+    const todayDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
     const activeBudgets = filter(dashboardData?.budgets, (budget) => {
-      return budget.startDate <= today && budget.endDate >= today;
+      const start = new Date(budget.startDate);
+      const end = new Date(budget.endDate);
+      const startDate = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+      );
+      const endDate = new Date(
+        end.getFullYear(),
+        end.getMonth(),
+        end.getDate()
+      );
+      return startDate <= todayDate && endDate >= todayDate;
     });
     setActiveCount(activeBudgets.length);
   };
 
   const getExceededCount = () => {
+    console.log(dashboardData?.budgets);
     const exceededBudgets = filter(dashboardData?.budgets, (budget) => {
       const totalExpenseAmount = sumBy(budget.expenses, (item) =>
         parseFloat(item.amount.toString())

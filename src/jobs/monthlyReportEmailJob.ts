@@ -218,7 +218,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
         email: user.email,
         url: cloudinaryResponse.secure_url,
         userId: user.id,
-        fileName: `duithive_monthlyreport1_${startDate
+        fileName: `duithive_monthlyreport_${startDate
           .toLocaleString("en-US", {
             month: "short",
           })
@@ -231,7 +231,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     const reportData = results.map((result) => ({
       userId: result.userId,
       url: result.url,
-      fileName: `duithive_monthlyreport1_${startDate
+      fileName: `duithive_monthlyreport_${startDate
         .toLocaleString("en-US", {
           month: "short",
         })

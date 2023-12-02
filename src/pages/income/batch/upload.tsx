@@ -251,7 +251,9 @@ const BatchIncome: NextPage = () => {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) {
+    if (bytes < 0) {
+      return "0 B";
+    } else if (bytes >= 0 && bytes < 1024) {
       return bytes.toString() + " B";
     } else if (bytes < 1024 * 1024) {
       return (bytes / 1024).toFixed(2) + " KB";
@@ -259,7 +261,6 @@ const BatchIncome: NextPage = () => {
       return (bytes / (1024 * 1024)).toFixed(2) + " MB";
     }
   };
-
   return (
     <AppLayout>
       <MotionConfig transition={{ duration: 0.2 }}>

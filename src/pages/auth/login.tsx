@@ -86,7 +86,10 @@ const Login: NextPage = () => {
               <img src="/logo.png" className="w-16 pr-4" alt="logo" />
               <span className="text-violet-600">Duit</span>Hive
             </div>
-            <h2 className="my-4 font-display text-2xl font-normal tracking-wide">
+            <h2
+              data-testid="heading"
+              className="my-4 font-display text-2xl font-normal tracking-wide"
+            >
               Log In
             </h2>
             <p className="mb-4 font-satoshi text-lg font-semibold">
@@ -102,6 +105,7 @@ const Login: NextPage = () => {
                   Email
                 </label>
                 <Input
+                  data-testid="email-input"
                   className="mt-2 border border-input"
                   {...register("email", { required: true })}
                 />
@@ -116,6 +120,7 @@ const Login: NextPage = () => {
                   Password
                 </label>
                 <Input
+                  data-testid="password-input"
                   type="password"
                   className="mt-2 border border-input"
                   {...register("password", { required: true })}
@@ -135,7 +140,7 @@ const Login: NextPage = () => {
                 </Link>
               </div>
 
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" data-testid="login" disabled={loading}>
                 {loading ? (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
@@ -174,6 +179,7 @@ const Login: NextPage = () => {
             <p className="mt-8 whitespace-pre text-center text-xs font-medium">
               Don&rsquo;t have an account?
               <Link
+                data-testid="create-account"
                 className="whitespace-pre text-xs text-violet-500"
                 href="/auth/signup"
               >

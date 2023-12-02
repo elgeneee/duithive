@@ -330,7 +330,6 @@ const Report: NextPage = () => {
       setLoading(true);
       const report = await expenseReport();
       const blobPdf = await pdf(report).toBlob();
-      console.log(blobPdf);
       const pdfURL = URL.createObjectURL(blobPdf);
       window.open(pdfURL, "_blank");
 
