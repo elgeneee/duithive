@@ -8,6 +8,24 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 
+//rate limiting
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { TRPCError } from "@trpc/server";
+
+// Create a new ratelimiter, that allows 3 requests per 10 seconds
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "10 s"),
+  analytics: true,
+  /**
+   * Optional prefix for the keys used in redis. This is useful if you want to share a redis
+   * instance with other applications and want to avoid key collisions. The default prefix is
+   * "@upstash/ratelimit"
+   */
+  prefix: "@upstash/ratelimit",
+});
+
 export const incomeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createIncomeSchema)
@@ -26,6 +44,14 @@ export const incomeRouter = createTRPCRouter({
         if (!userId) {
           throw new Error("User not found");
         }
+
+        const { success } = await ratelimit.limit(userId.id);
+
+        if (!success)
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests, try again later",
+          });
 
         const income = await ctx.prisma.income.create({
           data: {
