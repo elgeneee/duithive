@@ -427,7 +427,7 @@ const Expense: NextPage = () => {
     setFileIsNotImage(false);
     setReceiptImage(null);
     const file = e.currentTarget.files && e.currentTarget.files[0];
-    const validImageType = ["image/jpeg", "image/png"];
+    const validImageType = ["image/jpeg"];
     if (file) {
       if (file.size / 1024 / 1024 > 5) {
         setFileSizeTooBig(true);
@@ -750,7 +750,7 @@ const Expense: NextPage = () => {
                           </span>{" "}
                           or drag & drop
                         </p>
-                        <p>SVG, PNG or JPG</p>
+                        <p>JPG ONLY</p>
                         <p>Accept image files only (Max at 5MB)</p>
                       </div>
                       {receiptImage && (
@@ -767,7 +767,7 @@ const Expense: NextPage = () => {
                         id="image-upload"
                         name="image"
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg"
                         className="sr-only"
                         // eslint-disable-next-line @typescript-eslint/no-misused-promises
                         onChange={onChangeImage}

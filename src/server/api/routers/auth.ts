@@ -64,7 +64,7 @@ export const authRouter = createTRPCRouter({
         const options = {
           from: process.env.NODEMAILER_EMAIL,
           to: input.email,
-          subject: "Verify Email",
+          subject: "[DuitHive] Verify Email",
           html: otpTemplate(otp),
         };
         const info = await transporter.sendMail(options);
