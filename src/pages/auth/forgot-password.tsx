@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { getSession } from "next-auth/react";
 
 const loginSchema = z.object({
   email: z.string().email().min(5),
@@ -155,5 +156,23 @@ const ForgotPassword: NextPage = () => {
     </>
   );
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getServerSideProps(context: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const session = await getSession(context);
+  if (session) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { session },
+  };
+}
 
 export default ForgotPassword;
