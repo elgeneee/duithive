@@ -25,10 +25,12 @@ const xlsxSchema = z.object({
   Description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
-  Amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  Amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
   Date: z.date(),
 });
 

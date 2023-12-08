@@ -60,10 +60,12 @@ const createIncomeSchema = z.object({
   description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
-  amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
 });
 
@@ -73,10 +75,12 @@ const editIncomeSchema = z.object({
   description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
-  amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
 });
 

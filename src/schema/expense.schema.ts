@@ -4,10 +4,12 @@ export const expenseSchema = z.object({
   description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
-  amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
     id: z.number(),
@@ -23,10 +25,12 @@ export const editExpenseSchema = z.object({
   description: z
     .string()
     .min(5, { message: "Description must be at least 5 characters" }),
-  amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
     id: z.number(),
@@ -55,10 +59,12 @@ export const createBatchSchema = z.object({
       Description: z
         .string()
         .min(5, { message: "Description must be at least 5 characters" }),
-      Amount: z.number({
-        required_error: "Amount is required",
-        invalid_type_error: "Amount must be a number",
-      }),
+      Amount: z
+        .number({
+          required_error: "Amount is required",
+          invalid_type_error: "Amount must be a number",
+        })
+        .min(0, { message: "Must be greater than 0" }),
       Category: z.enum([
         "Restaurants",
         "Shopping",

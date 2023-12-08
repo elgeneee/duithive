@@ -72,10 +72,12 @@ import Link from "next/link";
 const createBudgetSchema = z
   .object({
     title: z.string().min(1, { message: "Title must be at least 1 character" }),
-    amount: z.number({
-      required_error: "Amount is required",
-      invalid_type_error: "Amount must be a number",
-    }),
+    amount: z
+      .number({
+        required_error: "Amount is required",
+        invalid_type_error: "Amount must be a number",
+      })
+      .min(0, { message: "Must be greater than 0" }),
     category: z.object({
       id: z.number(),
       value: z.string(),
@@ -93,10 +95,12 @@ const createBudgetSchema = z
 const editBudgetSchema = z.object({
   id: z.string(),
   title: z.string().min(1, { message: "Title must be at least 1 character" }),
-  amount: z.number({
-    required_error: "Amount is required",
-    invalid_type_error: "Amount must be a number",
-  }),
+  amount: z
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
+    })
+    .min(0, { message: "Must be greater than 0" }),
 });
 
 const Budget: NextPage = () => {
@@ -140,7 +144,7 @@ const Budget: NextPage = () => {
     register,
     reset,
     handleSubmit,
-    formState: { errors, isSubmitting: isCreatingBudget },
+    formState: { errors },
     setValue,
   } = useForm<z.infer<typeof createBudgetSchema>>({
     resolver: zodResolver(createBudgetSchema),
@@ -216,38 +220,39 @@ const Budget: NextPage = () => {
     setPage((prev) => prev - 1);
   };
 
-  const { mutate: createBudget } = api.budget.create.useMutation({
-    onSuccess: () => {
-      reset();
-      setCategoryValue("");
-      setDispValue("");
-      setIconId(1);
-      setDialogOpen(false);
-      void ctx.budget.getPaginated.invalidate();
-      toast({
-        variant: "success",
-        status: "success",
-        title: "Budget created successfully!",
-      });
-    },
-    onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
+  const { mutate: createBudget, isLoading: isCreatingBudget } =
+    api.budget.create.useMutation({
+      onSuccess: () => {
+        reset();
+        setCategoryValue("");
+        setDispValue("");
+        setIconId(1);
+        setDialogOpen(false);
+        void ctx.budget.getPaginated.invalidate();
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Budget created successfully!",
+        });
+      },
+      onError: (e) => {
+        const errorMessage = e.data?.zodError?.fieldErrors.content;
 
-      if (errorMessage && errorMessage[0]) {
-        toast({
-          variant: "error",
-          status: "error",
-          title: errorMessage[0] || "An error occurred",
-        });
-      } else {
-        toast({
-          variant: "error",
-          status: "error",
-          title: e.message || "An error occurred",
-        });
-      }
-    },
-  });
+        if (errorMessage && errorMessage[0]) {
+          toast({
+            variant: "error",
+            status: "error",
+            title: errorMessage[0] || "An error occurred",
+          });
+        } else {
+          toast({
+            variant: "error",
+            status: "error",
+            title: e.message || "An error occurred",
+          });
+        }
+      },
+    });
 
   const { mutate: editBudget, isLoading: isEditLoading } =
     api.budget.editBudget.useMutation({
