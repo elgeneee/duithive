@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import SideNav from "./SideNav";
 import Head from "next/head";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ function AppLayout({ children }: AppLayoutProps) {
           <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
               {children}
+              <SpeedInsights />
             </div>
           </main>
         </div>
