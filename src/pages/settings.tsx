@@ -105,6 +105,7 @@ const Settings: NextPage = () => {
   const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
   const [currencyValue, setCurrencyValue] = useState<string>("");
   const [emailValue, setEmailValue] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
   //drag-and-drop image
   const [dragActive, setDragActive] = useState<boolean>(false);
@@ -593,12 +594,12 @@ const Settings: NextPage = () => {
                   </p>
                 </div>
                 <div className="flex flex-col space-x-0 space-y-2 sm:flex-row sm:space-x-3 sm:space-y-0">
-                  <Button
+                  {/* <Button
                     variant={"outline"}
                     className="border-violet-500 text-violet-500 hover:text-violet-600"
                   >
                     Cancel
-                  </Button>
+                  </Button> */}
                   <Button
                     type="submit"
                     disabled={isSubmitting}
@@ -874,7 +875,10 @@ const Settings: NextPage = () => {
                 Once you delete your account, there is no going back. Please be
                 certain.
               </p>
-              <Dialog>
+              <Dialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button
                     variant="destructive"
@@ -934,7 +938,12 @@ const Settings: NextPage = () => {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="secondary">Cancel</Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setDeleteDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
                       <Button
                         type="submit"
                         variant="destructive"
@@ -975,12 +984,12 @@ const Settings: NextPage = () => {
                 </p>
               </div>
               <div className="flex flex-col space-x-0 space-y-2 sm:flex-row sm:space-x-3 sm:space-y-0">
-                <Button
+                {/* <Button
                   variant={"outline"}
                   className="border-violet-500 text-violet-500 hover:text-violet-600"
                 >
                   Cancel
-                </Button>
+                </Button> */}
                 <Button
                   type="submit"
                   disabled={isEditNotificationLoading}

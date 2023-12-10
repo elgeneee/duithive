@@ -132,7 +132,6 @@ const Dashboard: NextPage = () => {
   };
 
   const getExceededCount = () => {
-    console.log(dashboardData?.budgets);
     const exceededBudgets = filter(dashboardData?.budgets, (budget) => {
       const totalExpenseAmount = sumBy(budget.expenses, (item) =>
         parseFloat(item.amount.toString())
