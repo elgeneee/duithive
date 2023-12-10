@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-import { Inbox, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
@@ -15,13 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AlertTriangle, Loader } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
 import { navigationOptions } from "@/store/navigation";
 import { useRouter } from "next/router";
-// import type { RouterOutputs } from "@/utils/api";
 import { signOut } from "next-auth/react";
 // type Notifications = RouterOutputs["notification"]["getAll"];
 
@@ -148,7 +144,21 @@ function Navbar() {
                       onClick={() => void signOut()}
                       className="flex w-full items-center justify-start rounded-sm bg-white p-2 font-satoshi font-medium  text-[#A0A5AF] transition-colors duration-300 ease-in-out hover:bg-athens-gray-100"
                     >
-                      <LogOut color={"#A0A5AF"} size={20} />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#A0A5AF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
+                      </svg>
                       <p className="ml-5">Sign Out</p>
                     </button>
                   </motion.div>
@@ -163,7 +173,20 @@ function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <div className="relative flex h-8 w-8 items-center justify-center rounded-md duration-300 hover:bg-athens-gray-100/70 active:bg-athens-gray-200/50">
-                  <Inbox size={25} />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                  </svg>
                   {notifications &&
                     notifications.some(
                       (notification) => !notification.read
@@ -185,9 +208,28 @@ function Navbar() {
                       className={cn(isMarking && "cursor-not-allowed")}
                     >
                       {isMarking ? (
-                        <>
-                          <Loader className="animate-spi w-3" />
-                        </>
+                        <div className="animate-spin">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 25 23"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="12" x2="12" y1="2" y2="6" />
+                            <line x1="12" x2="12" y1="18" y2="22" />
+                            <line x1="4.93" x2="7.76" y1="4.93" y2="7.76" />
+                            <line x1="16.24" x2="19.07" y1="16.24" y2="19.07" />
+                            <line x1="2" x2="6" y1="12" y2="12" />
+                            <line x1="18" x2="22" y1="12" y2="12" />
+                            <line x1="4.93" x2="7.76" y1="19.07" y2="16.24" />
+                            <line x1="16.24" x2="19.07" y1="7.76" y2="4.93" />
+                          </svg>
+                        </div>
                       ) : (
                         <span
                           className={cn(
@@ -219,13 +261,22 @@ function Navbar() {
                       {notifications?.map((notification) => (
                         <DropdownMenuItem key={notification.id}>
                           <div className="flex space-x-3">
-                            <div>
-                              <AlertTriangle
-                                className=" aspect-square rounded-md bg-orange-200 p-1 text-orange-500"
-                                size={28}
-                              />
+                            <div className="mt-1 aspect-square h-7 w-7 rounded-md bg-orange-200 p-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 25 25"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="text-orange-500"
+                              >
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                                <path d="M12 9v4" />
+                                <path d="M12 17h.01" />
+                              </svg>
                             </div>
-
                             <div>
                               <p className="font-medium">
                                 {notification.message}:{" "}

@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/ui/back-button";
 import { useState } from "react";
-import { Download, X, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { api } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
@@ -309,10 +308,22 @@ const BatchExpense: NextPage = () => {
                 href="/DuitHive_Expense_Template.xlsx"
                 className="group mt-10 inline-flex h-10 w-full items-center justify-center space-x-2 rounded-md bg-violet-500 px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-violet-500/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-violet-500/80 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-opacity-50 sm:w-72"
               >
-                <Download
-                  size={20}
-                  className="transition duration-300 ease-in-out group-hover:scale-110"
-                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 transition duration-300 ease-in-out group-hover:scale-110"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
                 <span>Download</span>
               </a>
             </div>
@@ -349,7 +360,21 @@ const BatchExpense: NextPage = () => {
                           onClick={deleteFile}
                           className="absolute right-1 top-0 m-1 rounded-full p-1 transition duration-200 hover:bg-athens-gray-500/10"
                         >
-                          <X size={10} />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-3 w-3"
+                          >
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                          </svg>
                         </button>
                       </div>
 
@@ -462,10 +487,20 @@ const BatchExpense: NextPage = () => {
                         disabled={isBatchCreateLoading}
                       >
                         {isBatchCreateLoading ? (
-                          <Loader2
-                            className="mr-2 h-4 w-4 animate-spin"
-                            color="#803FE8"
-                          />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#803FE8"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4 animate-spin"
+                          >
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                          </svg>
                         ) : (
                           <span>Submit</span>
                         )}

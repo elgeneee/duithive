@@ -36,16 +36,6 @@ import {
 } from "@/components/ui/sheet";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  ChevronRight,
-  ChevronLeft,
-  Trash2,
-  Loader2,
-  Plus,
-  Upload,
-  CalendarIcon,
-  DollarSign,
-} from "lucide-react";
 import { useForm } from "react-hook-form";
 import debounce from "lodash/debounce";
 import { z } from "zod";
@@ -313,7 +303,21 @@ const Income: NextPage = () => {
                 className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
                 onClick={() => setDialogOpen(true)}
               >
-                <Plus size={15} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M5 12h14" />
+                  <path d="M12 5v14" />
+                </svg>
                 <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
                   Add Income
                 </span>
@@ -387,7 +391,30 @@ const Income: NextPage = () => {
                                 !date && "text-muted-foreground"
                               )}
                             >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2 h-4 w-4"
+                              >
+                                <rect
+                                  width="18"
+                                  height="18"
+                                  x="3"
+                                  y="4"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="16" x2="16" y1="2" y2="6" />
+                                <line x1="8" x2="8" y1="2" y2="6" />
+                                <line x1="3" x2="21" y1="10" y2="10" />
+                              </svg>
                               {date ? (
                                 format(date, "PPP")
                               ) : (
@@ -424,10 +451,20 @@ const Income: NextPage = () => {
                     className="w-full"
                   >
                     {isCreatingIncome ? (
-                      <Loader2
-                        className="mr-2 h-4 w-4 animate-spin"
-                        color="#803FE8"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#803FE8"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 animate-spin"
+                      >
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
                     ) : (
                       <span>Create</span>
                     )}
@@ -439,7 +476,22 @@ const Income: NextPage = () => {
               onClick={() => void router.push("/income/batch/upload")}
               className="mt-10 w-full sm:mt-0 sm:w-20 md:w-20 lg:w-20 xl:w-44"
             >
-              <Upload size={15} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" x2="12" y1="3" y2="15" />
+              </svg>
               <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
                 Batch Upload
               </span>
@@ -516,7 +568,21 @@ const Income: NextPage = () => {
                       >
                         <div className="flex items-center justify-between space-x-3 rounded-md border border-athens-gray-200/50 bg-white p-3 transition-colors duration-300 ease-in-out hover:cursor-pointer hover:bg-white/50">
                           <div className="rounded-md bg-violet-400/30 p-3 text-violet-600">
-                            <DollarSign size={20} />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="h-5 w-5"
+                            >
+                              <line x1="12" x2="12" y1="2" y2="22" />
+                              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
                           </div>
                           <div className="flex flex-1 justify-between">
                             <div>
@@ -635,7 +701,35 @@ const Income: NextPage = () => {
                                           !editDate && "text-muted-foreground"
                                         )}
                                       >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="mr-2 h-4 w-4"
+                                        >
+                                          <rect
+                                            width="18"
+                                            height="18"
+                                            x="3"
+                                            y="4"
+                                            rx="2"
+                                            ry="2"
+                                          />
+                                          <line x1="16" x2="16" y1="2" y2="6" />
+                                          <line x1="8" x2="8" y1="2" y2="6" />
+                                          <line
+                                            x1="3"
+                                            x2="21"
+                                            y1="10"
+                                            y2="10"
+                                          />
+                                        </svg>
                                         {editDate ? (
                                           format(editDate, "PPP")
                                         ) : (
@@ -672,10 +766,20 @@ const Income: NextPage = () => {
                               className="w-full"
                             >
                               {isEditLoading ? (
-                                <Loader2
-                                  className="mr-2 h-4 w-4 animate-spin"
-                                  color="#803FE8"
-                                />
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="#803FE8"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="h-4 w-4 animate-spin"
+                                >
+                                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                </svg>
                               ) : (
                                 <span>Save</span>
                               )}
@@ -691,7 +795,24 @@ const Income: NextPage = () => {
                                   className="w-full space-x-3 bg-red-400"
                                   variant={"destructive"}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="h-4 w-4"
+                                  >
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    <line x1="10" x2="10" y1="11" y2="17" />
+                                    <line x1="14" x2="14" y1="11" y2="17" />
+                                  </svg>
                                   <p className="text-sm">Delete</p>
                                 </Button>
                               </DialogTrigger>
@@ -720,7 +841,20 @@ const Income: NextPage = () => {
                                     onClick={() => handleDelete(income.id)}
                                   >
                                     {isDeleting ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="#ffffff"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="h-4 w-4 animate-spin opacity-50"
+                                      >
+                                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                      </svg>
                                     ) : (
                                       <span>Delete</span>
                                     )}
@@ -736,7 +870,6 @@ const Income: NextPage = () => {
                 </>
               ) : (
                 <div className="relative items-center justify-center align-middle">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/upload.png"
                     className="mx-auto my-auto flex h-56  items-center sm:h-96"
@@ -757,7 +890,19 @@ const Income: NextPage = () => {
                 variant="pagination"
                 onClick={handleFetchPreviousPage}
               >
-                <ChevronLeft size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
               </Button>
               <div className="flex h-10 w-10 items-center justify-center border-x border-athens-gray-100 bg-white p-1">
                 {page + 1}
@@ -769,7 +914,19 @@ const Income: NextPage = () => {
                 onClick={handleFetchNextPage}
                 disabled={!nextCursor || searchResults?.incomes !== undefined}
               >
-                <ChevronRight size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
               </Button>
             </div>
           </div>

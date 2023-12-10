@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/popover";
 import { DataTable } from "@/components/ui/data-table";
 import React, { useState } from "react";
-import { CalendarIcon, Download, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
 import { pdf, Document, Page, Text, View, Image } from "@react-pdf/renderer";
@@ -443,7 +442,23 @@ const Report: NextPage = () => {
                     !date && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2 h-4 w-4"
+                  >
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
                   {date?.from ? (
                     date.to ? (
                       <>
@@ -477,13 +492,38 @@ const Report: NextPage = () => {
               onClick={generatePDF}
             >
               {loading ? (
-                <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
-                  color="#803FE8"
-                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#803FE8"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 animate-spin"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
               ) : (
                 <span className="mx-auto flex items-center text-center">
-                  <Download size={20} className="mx-auto text-center" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mx-auto h-4 w-4 text-center"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" x2="12" y1="15" y2="3" />
+                  </svg>
                   <span className="ml-2"> Generate</span>
                 </span>
               )}

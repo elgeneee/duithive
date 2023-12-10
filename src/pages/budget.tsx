@@ -43,19 +43,6 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  Check,
-  ChevronsUpDown,
-  ChevronRight,
-  ChevronLeft,
-  MoreVertical,
-  Edit,
-  FileStack,
-  Trash2,
-  Loader2,
-  Plus,
-  CalendarIcon,
-} from "lucide-react";
 import sumBy from "lodash/sumBy";
 import debounce from "lodash/debounce";
 import { cn } from "@/lib/utils";
@@ -353,7 +340,21 @@ const Budget: NextPage = () => {
                   setDialogOpen(true);
                 }}
               >
-                <Plus size={15} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M5 12h14" />
+                  <path d="M12 5v14" />
+                </svg>
                 <span className="ml-3">Add Budget</span>
               </Button>
               <DialogContent>
@@ -414,7 +415,21 @@ const Budget: NextPage = () => {
                                   (category) => category.label === categoryValue
                                 )?.value || categoryValue
                               : "Select category"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                            >
+                              <path d="m7 15 5 5 5-5" />
+                              <path d="m7 9 5-5 5 5" />
+                            </svg>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0">
@@ -511,14 +526,25 @@ const Budget: NextPage = () => {
                                     setOpen(false);
                                   }}
                                 >
-                                  <Check
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                     className={cn(
                                       "mr-2 h-4 w-4",
                                       categoryValue === category.label
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
-                                  />
+                                  >
+                                    <path d="M20 6 9 17l-5-5" />
+                                  </svg>
                                   {icons[category?.iconId - 1]?.icon}
                                   <span className="ml-3">{category.value}</span>
                                 </CommandItem>
@@ -548,7 +574,30 @@ const Budget: NextPage = () => {
                                 "w-full justify-start text-left font-normal"
                               )}
                             >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2 h-4 w-4"
+                              >
+                                <rect
+                                  width="18"
+                                  height="18"
+                                  x="3"
+                                  y="4"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="16" x2="16" y1="2" y2="6" />
+                                <line x1="8" x2="8" y1="2" y2="6" />
+                                <line x1="3" x2="21" y1="10" y2="10" />
+                              </svg>
                               {date ? (
                                 format(date, "PPP")
                               ) : (
@@ -590,7 +639,30 @@ const Budget: NextPage = () => {
                                 !date && "text-muted-foreground"
                               )}
                             >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2 h-4 w-4"
+                              >
+                                <rect
+                                  width="18"
+                                  height="18"
+                                  x="3"
+                                  y="4"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="16" x2="16" y1="2" y2="6" />
+                                <line x1="8" x2="8" y1="2" y2="6" />
+                                <line x1="3" x2="21" y1="10" y2="10" />
+                              </svg>
                               {deadline ? (
                                 format(deadline, "PPP")
                               ) : (
@@ -631,10 +703,20 @@ const Budget: NextPage = () => {
                     className="w-full"
                   >
                     {isCreatingBudget ? (
-                      <Loader2
-                        className="mr-2 h-4 w-4 animate-spin"
-                        color="#803FE8"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#803FE8"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 animate-spin"
+                      >
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
                     ) : (
                       <span>Create</span>
                     )}
@@ -805,7 +887,23 @@ const Budget: NextPage = () => {
                                         "flex items-center space-x-2 text-athens-gray-400"
                                       )}
                                     >
-                                      <FileStack size={20} />
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="h-4 w-4"
+                                      >
+                                        <path d="M16 2v5h5" />
+                                        <path d="M21 6v6.5c0 .8-.7 1.5-1.5 1.5h-7c-.8 0-1.5-.7-1.5-1.5v-9c0-.8.7-1.5 1.5-1.5H17l4 4z" />
+                                        <path d="M7 8v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H15" />
+                                        <path d="M3 12v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H11" />
+                                      </svg>
                                       <span>
                                         Expenses ({budget.expenses.length})
                                       </span>
@@ -858,7 +956,22 @@ const Budget: NextPage = () => {
                             variant="ghostSecondary"
                             className="h-8 w-8 rounded-md p-0"
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="h-4 w-4"
+                            >
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="12" cy="5" r="1" />
+                              <circle cx="12" cy="19" r="1" />
+                            </svg>
                             <span className="sr-only">Open popover</span>
                           </Button>
                         </PopoverTrigger>
@@ -895,7 +1008,21 @@ const Budget: NextPage = () => {
                                 }}
                                 className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                               >
-                                <Edit className="h-4 w-4" />
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="h-4 w-4"
+                                >
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                </svg>
                                 <p className="text-sm">Edit</p>
                               </button>
                             </DialogTrigger>
@@ -986,7 +1113,35 @@ const Budget: NextPage = () => {
                                         variant={"disabled"}
                                         className="w-full justify-start text-left font-normal"
                                       >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="mr-2 h-4 w-4"
+                                        >
+                                          <rect
+                                            width="18"
+                                            height="18"
+                                            x="3"
+                                            y="4"
+                                            rx="2"
+                                            ry="2"
+                                          />
+                                          <line x1="16" x2="16" y1="2" y2="6" />
+                                          <line x1="8" x2="8" y1="2" y2="6" />
+                                          <line
+                                            x1="3"
+                                            x2="21"
+                                            y1="10"
+                                            y2="10"
+                                          />
+                                        </svg>
                                         {format(budget.startDate, "PPP")}
                                       </Button>
                                     </div>
@@ -1000,8 +1155,35 @@ const Budget: NextPage = () => {
                                         variant={"disabled"}
                                         className="w-full justify-start text-left font-normal"
                                       >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="mr-2 h-4 w-4"
+                                        >
+                                          <rect
+                                            width="18"
+                                            height="18"
+                                            x="3"
+                                            y="4"
+                                            rx="2"
+                                            ry="2"
+                                          />
+                                          <line x1="16" x2="16" y1="2" y2="6" />
+                                          <line x1="8" x2="8" y1="2" y2="6" />
+                                          <line
+                                            x1="3"
+                                            x2="21"
+                                            y1="10"
+                                            y2="10"
+                                          />
+                                        </svg>
                                         {format(budget.endDate, "PPP")}
                                       </Button>
                                     </div>
@@ -1013,10 +1195,20 @@ const Budget: NextPage = () => {
                                   className="mt-6 w-full"
                                 >
                                   {isEditLoading ? (
-                                    <Loader2
-                                      className="mr-2 h-4 w-4 animate-spin"
-                                      color="#803FE8"
-                                    />
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="#803FE8"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="h-4 w-4 animate-spin"
+                                    >
+                                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                    </svg>
                                   ) : (
                                     <span>Save</span>
                                   )}
@@ -1030,7 +1222,24 @@ const Budget: NextPage = () => {
                           >
                             <DialogTrigger asChild>
                               <button className="flex w-full items-center justify-start space-x-2 rounded-md px-3 py-1 text-red-400 transition-colors hover:bg-accent hover:text-red-500">
-                                <Trash2 className="h-4 w-4" />
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="h-4 w-4"
+                                >
+                                  <path d="M3 6h18" />
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                  <line x1="10" x2="10" y1="11" y2="17" />
+                                  <line x1="14" x2="14" y1="11" y2="17" />
+                                </svg>
                                 <p className="text-sm">Delete</p>
                               </button>
                             </DialogTrigger>
@@ -1068,7 +1277,6 @@ const Budget: NextPage = () => {
                 </>
               ) : (
                 <div className="relative items-center justify-center align-middle">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/upload.png"
                     className="mx-auto my-auto flex h-56  items-center sm:h-96"
@@ -1089,7 +1297,19 @@ const Budget: NextPage = () => {
                 variant="pagination"
                 onClick={handleFetchPreviousPage}
               >
-                <ChevronLeft size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
               </Button>
               <div className="flex h-10 w-10 items-center justify-center border-x border-athens-gray-100 bg-white p-1">
                 {page + 1}
@@ -1101,7 +1321,19 @@ const Budget: NextPage = () => {
                 onClick={handleFetchNextPage}
                 disabled={!nextCursor || searchResults?.budgets !== undefined}
               >
-                <ChevronRight size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
               </Button>
             </div>
           </div>

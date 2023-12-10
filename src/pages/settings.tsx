@@ -26,14 +26,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  Check,
-  ChevronsUpDown,
-  UploadCloud,
-  Trash,
-  Trash2,
-  Loader2,
-} from "lucide-react";
 import { currencies } from "@/store/currency";
 import {
   Command,
@@ -613,10 +605,20 @@ const Settings: NextPage = () => {
                     className="w-32"
                   >
                     {isSubmitting ? (
-                      <Loader2
-                        className="mr-2 h-4 w-4 animate-spin"
-                        color="#803FE8"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#803FE8"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 animate-spin"
+                      >
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
                     ) : (
                       <span>Save Changes</span>
                     )}
@@ -688,7 +690,24 @@ const Settings: NextPage = () => {
                               : "bg-black/50 hover:bg-black/60"
                           )}
                         >
-                          <Trash2 color={"#ffffff"} size={18} />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#ffffff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5"
+                          >
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            <line x1="10" x2="10" y1="11" y2="17" />
+                            <line x1="14" x2="14" y1="11" y2="17" />
+                          </svg>
                         </button>
                       )}
                       <div
@@ -705,12 +724,25 @@ const Settings: NextPage = () => {
                           profileImage && "hidden"
                         )}
                       >
-                        <UploadCloud
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           className={cn(
                             "mb-2 text-athens-gray-900 transition duration-100 group-hover:scale-110",
                             dragActive && "scale-110"
                           )}
-                        />
+                        >
+                          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                          <path d="M12 12v9" />
+                          <path d="m16 16-4-4-4 4" />
+                        </svg>
                         <p className="font-semibold">
                           <span className="font-semibold text-athens-gray-900">
                             Click to upload
@@ -721,7 +753,6 @@ const Settings: NextPage = () => {
                         <p>Accept image files only (Max at 5MB)</p>
                       </div>
                       {profileImage && (
-                        //eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={imageName ? imageName : undefined}
                           alt="Preview"
@@ -772,7 +803,21 @@ const Settings: NextPage = () => {
                               (currency) => currency.value === currencyValue
                             )?.label
                           : "Select currency"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                        >
+                          <path d="m7 15 5 5 5-5" />
+                          <path d="m7 9 5-5 5 5" />
+                        </svg>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[200px] p-0">
@@ -788,14 +833,25 @@ const Settings: NextPage = () => {
                                 setCurrencyOpen(false);
                               }}
                             >
-                              <Check
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  currencyValue == currency.value
+                                  currencyValue === currency.value
                                     ? "opacity-100"
                                     : "opacity-0"
                                 )}
-                              />
+                              >
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
                               <div className="flex w-full space-x-3">
                                 <p className="w-1/3 text-center">
                                   {currency.symbol}
@@ -824,7 +880,22 @@ const Settings: NextPage = () => {
                     variant="destructive"
                     className="mt-2 flex items-center space-x-2 px-8"
                   >
-                    <Trash size={18} />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
                     <span>Delete</span>
                   </Button>
                 </DialogTrigger>
@@ -871,10 +942,20 @@ const Settings: NextPage = () => {
                         className="w-24"
                       >
                         {isDeleteAccountLoading ? (
-                          <Loader2
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#EF4444"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                             className="h-4 w-4 animate-spin"
-                            color="#EF4444"
-                          />
+                          >
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                          </svg>
                         ) : (
                           <span>Confirm</span>
                         )}
@@ -907,7 +988,20 @@ const Settings: NextPage = () => {
                   onClick={onNotificationSubmit}
                 >
                   {isEditNotificationLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" color="#803FE8" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#803FE8"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4 animate-spin"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
                   ) : (
                     <span>Save Changes</span>
                   )}
@@ -967,7 +1061,6 @@ const Settings: NextPage = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="lucide lucide-refresh-ccw"
                   >
                     <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                     <path d="M3 3v5h5" />
@@ -983,7 +1076,20 @@ const Settings: NextPage = () => {
                   onClick={onDashboardSubmit}
                 >
                   {isDashboardLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" color="#803FE8" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#803FE8"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4 animate-spin"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
                   ) : (
                     <span>Save Changes</span>
                   )}

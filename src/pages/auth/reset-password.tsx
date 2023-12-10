@@ -11,7 +11,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
-import { Loader2 } from "lucide-react";
 
 const resetPasswordSchema = z
   .object({
@@ -105,7 +104,6 @@ const ResetPassword: NextPage = () => {
       </Head>
       <div className="flex h-screen">
         <div className="relative hidden flex-1 md:block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/login-image.png"
             alt="Login Image"
@@ -115,7 +113,6 @@ const ResetPassword: NextPage = () => {
         <div className="flex flex-1 items-center justify-center font-satoshi">
           <div className="w-full max-w-md px-4 py-4 md:max-w-sm">
             <div className="mx-auto flex items-center justify-center font-display text-3xl font-bold tracking-widest">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" className="w-16 pr-4" alt="logo" />
               <span className="text-violet-600">Duit</span>Hive
             </div>
@@ -162,10 +159,20 @@ const ResetPassword: NextPage = () => {
               </div>
               <Button type="submit" disabled={loading} className="mt-10">
                 {loading ? (
-                  <Loader2
-                    className="mr-2 h-4 w-4 animate-spin"
-                    color="#803FE8"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#803FE8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 animate-spin"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
                 ) : (
                   <span>Reset Password</span>
                 )}

@@ -1,4 +1,3 @@
-import { LogOut } from "lucide-react";
 import { useRouter } from "next/router";
 import { clsx } from "clsx";
 import { signOut } from "next-auth/react";
@@ -284,7 +283,6 @@ function SideNav() {
     <aside className="z-9999 absolute left-0 top-0 hidden h-screen w-60 flex-col overflow-y-hidden border-r border-[#E9EBEF] bg-white pt-10 duration-300 ease-linear sm:static sm:flex sm:translate-x-0">
       <Link href="/dashboard">
         <div className="mx-auto flex items-center justify-center font-display text-lg font-bold tracking-widest">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" className="w-16 pr-4" alt="logo" />
           <span className="text-violet-600">Duit</span>Hive
         </div>
@@ -319,7 +317,22 @@ function SideNav() {
           onClick={() => void signOut()}
           className="mx-auto my-2 flex w-full items-center justify-center rounded-sm bg-white py-2 text-center font-satoshi font-medium text-[#A0A5AF] hover:bg-athens-gray-100"
         >
-          <LogOut color={"#A0A5AF"} size={20} />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#A0A5AF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-log-out"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" x2="9" y1="12" y2="12" />
+          </svg>
           <p className="ml-4">Sign Out</p>
         </button>
       </div>
