@@ -182,7 +182,7 @@ const ResetPassword: NextPage = () => {
               Have an account?
               <Link
                 className="whitespace-pre text-xs text-violet-500"
-                href="/auth/signup"
+                href="/auth/login"
               >
                 &nbsp;Login
               </Link>
