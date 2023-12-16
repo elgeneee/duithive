@@ -107,6 +107,7 @@ const ResetPassword: NextPage = () => {
           <img
             src="/login-image.png"
             alt="Login Image"
+            draggable="false"
             className="h-full w-full object-cover"
           />
         </div>

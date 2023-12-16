@@ -1270,15 +1270,13 @@ const Expense: NextPage = () => {
                                     No image available
                                   </p>
                                 </div>
-                                {
-                                  expense.imgUrl && (
-                                    <img
-                                      src={expense.imgUrl}
-                                      alt="Preview"
-                                      className="z-[200] aspect-square h-full object-contain"
-                                    />
-                                  )
-                                }
+                                {expense.imgUrl && (
+                                  <img
+                                    src={expense.imgUrl}
+                                    alt="Preview"
+                                    className="z-[200] aspect-square h-full object-contain"
+                                  />
+                                )}
                               </label>
                             </div>
                             <div>

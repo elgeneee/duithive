@@ -6,11 +6,12 @@ import { signIn, getSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 // import { api } from "@/utils/api";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const loginSchema = z.object({
   email: z.string().email().min(5),
@@ -40,6 +41,7 @@ const Login: NextPage = () => {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const onSubmit = async (data: LoginSchema) => {
     setLoading(true);
@@ -61,6 +63,18 @@ const Login: NextPage = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (toast && searchParams.get("error") === "OAuthAccountNotLinked") {
+      setTimeout(() => {
+        toast({
+          variant: "error",
+          status: "error",
+          title: "Oops! This account is already registered but not with Google",
+        });
+      }, 100);
+    }
+  }, [searchParams, toast]);
+
   return (
     <>
       <Head>
@@ -73,6 +87,7 @@ const Login: NextPage = () => {
           <img
             src="/login-image.png"
             alt="Login Image"
+            draggable="false"
             className="h-full w-full object-cover"
           />
         </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -123,6 +124,7 @@ const SignUp: NextPage = () => {
           <img
             src="/login-image.png"
             alt="Login Image"
+            draggable="false"
             className="h-full w-full object-cover"
           />
         </div>

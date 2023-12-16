@@ -7,8 +7,34 @@ import { api } from "@/utils/api";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/ui/use-toast";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 let currentOTPIndex = 0;
+const otpSchema = z
+  .object({
+    otp1: z.string().min(1, { message: "OTP must be 4 characters" }),
+    otp2: z.string().min(1, { message: "OTP must be 4 characters" }),
+    otp3: z.string().min(1, { message: "OTP must be 4 characters" }),
+    otp4: z.string().min(1, { message: "OTP must be 4 characters" }),
+  })
+  .refine(
+    (data) => {
+      const { otp1, otp2, otp3, otp4 } = data;
+      return (
+        otp1 !== undefined &&
+        otp2 !== undefined &&
+        otp3 !== undefined &&
+        otp4 !== undefined
+      );
+    },
+    {
+      message: "OTP must be 4 characters",
+    }
+  );
+
+type OTPSchema = z.infer<typeof otpSchema>;
 
 const VerifyAccount: NextPage = () => {
   const router = useRouter();
@@ -18,10 +44,25 @@ const VerifyAccount: NextPage = () => {
   const [otp, setOtp] = useState<string[]>(new Array(4).fill(""));
   const [activeOTPIndex, setActiveOTPIndex] = useState<number>(0);
 
+  const {
+    setValue,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OTPSchema>({
+    // @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    resolver: zodResolver(otpSchema),
+  });
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    verifyEmail({ email: email as string, otp: otp.join("") });
+  const onSubmit = (data: OTPSchema) => {
+    // e.preventDefault();
+    // const finalOtp = otp.join("");
+    verifyEmail({
+      email: email as string,
+      otp: data.otp1 + data.otp2 + data.otp3 + data.otp4,
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -43,7 +84,10 @@ const VerifyAccount: NextPage = () => {
 
     // Update the input value to reflect the sanitized value
     e.target.value = sanitizedValue.substring(0, 1);
-
+    setValue(
+      `otp${currentOTPIndex + 1}` as "otp1" | "otp2" | "otp3" | "otp4",
+      sanitizedValue.substring(0, 1)
+    );
     setOtp(newOTP);
   };
 
@@ -79,6 +123,10 @@ const VerifyAccount: NextPage = () => {
         const newOtp = new Array(4).fill("");
         for (let i = 0; i < otpClipboard.length; i++) {
           newOtp[i] = otpClipboard[i];
+          setValue(
+            `otp${i + 1}` as "otp1" | "otp2" | "otp3" | "otp4",
+            otpClipboard[i] as string
+          );
         }
         setActiveOTPIndex(otpClipboard.length);
         setOtp(newOtp);
@@ -96,6 +144,7 @@ const VerifyAccount: NextPage = () => {
         // setInput("");
         setActiveOTPIndex(0);
         setOtp(new Array(4).fill(""));
+        reset();
         toast({
           variant: "success",
           status: "success",
@@ -104,14 +153,27 @@ const VerifyAccount: NextPage = () => {
         await router.push("/auth/login");
       },
       onError: (e) => {
-        const errorMessage = e.data?.zodError?.fieldErrors.content;
-
-        if (errorMessage && errorMessage[0]) {
-          toast({
-            variant: "error",
-            status: "error",
-            title: errorMessage[0] || "An error occurred",
-          });
+        const errorMessage = e.data?.zodError?.fieldErrors;
+        if (errorMessage) {
+          if (errorMessage.otp) {
+            toast({
+              variant: "error",
+              status: "error",
+              title: errorMessage.otp[0] || "An error occurred",
+            });
+          } else if (errorMessage.email) {
+            toast({
+              variant: "error",
+              status: "error",
+              title: "Email not found",
+            });
+          } else {
+            toast({
+              variant: "error",
+              status: "error",
+              title: "An error occurred",
+            });
+          }
         } else {
           toast({
             variant: "error",
@@ -120,6 +182,7 @@ const VerifyAccount: NextPage = () => {
           });
         }
         setActiveOTPIndex(0);
+        reset();
         setOtp(new Array(4).fill(""));
       },
     });
@@ -136,6 +199,7 @@ const VerifyAccount: NextPage = () => {
           <img
             src="/login-image.png"
             alt="Login Image"
+            draggable="false"
             className="h-full w-full object-cover"
           />
         </div>
@@ -155,7 +219,7 @@ const VerifyAccount: NextPage = () => {
             <form
               className="mt-4 flex flex-col gap-4"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit)}
             >
               <div className="mx-auto flex space-x-6">
                 {otp.map((_, index) => {
@@ -173,6 +237,17 @@ const VerifyAccount: NextPage = () => {
                   );
                 })}
               </div>
+              <span className="text-center text-xxs text-red-500">
+                {errors.otp1?.message ||
+                errors.otp2?.message ||
+                errors.otp3?.message ||
+                errors.otp4?.message == "Required"
+                  ? "OTP must be 4 characters"
+                  : errors.otp1?.message ||
+                    errors.otp2?.message ||
+                    errors.otp3?.message ||
+                    errors.otp4?.message}
+              </span>
               <Button type="submit" disabled={loading} className="mt-6">
                 {loading ? (
                   <svg
