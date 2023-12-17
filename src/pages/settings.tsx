@@ -926,6 +926,7 @@ const Settings: NextPage = () => {
                         </p>
                         <Input
                           id="email"
+                          className="border border-input bg-white hover:bg-accent hover:text-accent-foreground"
                           {...registerDeleteAccount("email", {
                             required: true,
                           })}
