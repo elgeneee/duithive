@@ -450,7 +450,7 @@ const Budget: NextPage = () => {
                                   </TabsList>
                                   <TabsContent value="text">
                                     <Input
-                                      className="h-7 text-xs "
+                                      className="h-7 text-xs"
                                       value={dispValue}
                                       disabled
                                     />
