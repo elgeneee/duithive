@@ -61,12 +61,34 @@ import {
   items2 as items2Order,
   items3 as items3Order,
 } from "@/store/dndStore";
+import { icons, categories } from "@/store/category";
 
 const userSettingsSchema = z.object({
   username: z
     .string()
     .trim()
     .min(5, { message: "Username must be at least 5 characters" }),
+  favCat1: z
+    .object({
+      value: z.string().nullable(),
+      label: z.string().nullable(),
+      iconId: z.number().nullable(),
+    })
+    .nullable(),
+  favCat2: z
+    .object({
+      value: z.string().nullable(),
+      label: z.string().nullable(),
+      iconId: z.number().nullable(),
+    })
+    .nullable(),
+  favCat3: z
+    .object({
+      value: z.string().nullable(),
+      label: z.string().nullable(),
+      iconId: z.number().nullable(),
+    })
+    .nullable(),
 });
 
 const deleteAccountSchema = z.object({
@@ -126,6 +148,25 @@ const Settings: NextPage = () => {
   const [activeItem2, setActiveItem2] = useState<TItem>();
   const [activeItem3, setActiveItem3] = useState<TItem>();
 
+  //favoriteCategories
+  const [favCategory1, setFavCategory1] = useState<boolean>(false);
+  const [favCat1Value, setFavCat1Value] = useState<string>("");
+  const [favCat1IconId, setFavCat1IconId] = useState<number | null>(null);
+  const [favCat1DispIconId, setFavCat1DispIconId] = useState<number>(8);
+  const [favCat1DispValue, setFavCat1DispValue] = useState<string>("");
+
+  const [favCategory2, setFavCategory2] = useState<boolean>(false);
+  const [favCat2Value, setFavCat2Value] = useState<string>("");
+  const [favCat2IconId, setFavCat2IconId] = useState<number | null>(null);
+  const [favCat2DispIconId, setFavCat2DispIconId] = useState<number>(8);
+  const [favCat2DispValue, setFavCat2DispValue] = useState<string>("");
+
+  const [favCategory3, setFavCategory3] = useState<boolean>(false);
+  const [favCat3Value, setFavCat3Value] = useState<string>("");
+  const [favCat3IconId, setFavCat3IconId] = useState<number | null>(null);
+  const [favCat3DispIconId, setFavCat3DispIconId] = useState<number>(8);
+  const [favCat3DispValue, setFavCat3DispValue] = useState<string>("");
+
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-US", {
     year: "numeric",
@@ -164,6 +205,60 @@ const Settings: NextPage = () => {
       });
     },
   });
+
+  const { mutate: resetFav1Category, isLoading: isResetFav1CategoryLoading } =
+    api.user.resetFav1Category.useMutation({
+      onSuccess: () => {
+        setFavCat1Value("");
+        setFavCat1IconId(null);
+
+        void ctx.user.getUserSettings.invalidate({
+          email: session?.user?.email as string,
+        });
+
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Category 1 reseted successfully!",
+        });
+      },
+    });
+
+  const { mutate: resetFav2Category, isLoading: isResetFav2CategoryLoading } =
+    api.user.resetFav2Category.useMutation({
+      onSuccess: () => {
+        setFavCat2Value("");
+        setFavCat2IconId(null);
+
+        void ctx.user.getUserSettings.invalidate({
+          email: session?.user?.email as string,
+        });
+
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Category 2 reseted successfully!",
+        });
+      },
+    });
+
+  const { mutate: resetFav3Category, isLoading: isResetFav3CategoryLoading } =
+    api.user.resetFav3Category.useMutation({
+      onSuccess: () => {
+        setFavCat3Value("");
+        setFavCat3IconId(null);
+
+        void ctx.user.getUserSettings.invalidate({
+          email: session?.user?.email as string,
+        });
+
+        toast({
+          variant: "success",
+          status: "success",
+          title: "Category 3 reseted successfully!",
+        });
+      },
+    });
 
   const { mutate: editNotification, isLoading: isEditNotificationLoading } =
     api.user.editNotification.useMutation({
@@ -247,10 +342,41 @@ const Settings: NextPage = () => {
   useEffect(() => {
     if (userSettings) {
       setValue("username", userSettings?.name as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       setCurrencyValue(userSettings.currency?.name.toLowerCase() as string);
       setEmailValue(userSettings.email as string);
       setNotificationAlert(userSettings.notification);
       setMonthlyReport(userSettings.monthlyReport);
+      setValue(
+        "favCat1",
+        userSettings.favoriteCategory1
+          ? {
+              value: userSettings.favoriteCategory1?.name,
+              label: userSettings.favoriteCategory1?.name,
+              iconId: userSettings.favoriteCategory1?.iconId,
+            }
+          : null
+      );
+      setValue(
+        "favCat2",
+        userSettings.favoriteCategory2
+          ? {
+              value: userSettings.favoriteCategory2?.name,
+              label: userSettings.favoriteCategory2?.name,
+              iconId: userSettings.favoriteCategory2?.iconId,
+            }
+          : null
+      );
+      setValue(
+        "favCat3",
+        userSettings.favoriteCategory3
+          ? {
+              value: userSettings.favoriteCategory3?.name,
+              label: userSettings.favoriteCategory3?.name,
+              iconId: userSettings.favoriteCategory3?.iconId,
+            }
+          : null
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSettings]);
@@ -372,6 +498,9 @@ const Settings: NextPage = () => {
       email: emailValue,
       currencyId: currencyId,
       image: imageUrl,
+      favCat1: data.favCat1,
+      favCat2: data.favCat2,
+      favCat3: data.favCat3,
     });
   };
 
@@ -564,6 +693,19 @@ const Settings: NextPage = () => {
 
   const handleDragCancel3 = () => {
     setActiveItem3(undefined);
+  };
+
+  //favorite categories
+  const handleFav1InputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFavCat1DispValue(e.target.value);
+  };
+
+  const handleFav2InputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFavCat2DispValue(e.target.value);
+  };
+
+  const handleFav3InputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFavCat3DispValue(e.target.value);
   };
 
   return (
@@ -865,6 +1007,730 @@ const Settings: NextPage = () => {
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </div>
+              </div>
+              <hr />
+              <div className="my-5">
+                <p className="font-semibold">Favorite Custom Categories</p>
+                <p className="text-sm font-medium text-athens-gray-300">
+                  Set your favorite categories for quick selection in the future
+                </p>
+                <div className="mt-5 rounded-md border border-athens-gray-100 bg-white p-4">
+                  <p className="text-sm font-medium">Category 1</p>
+                  <div className="mb-5 mt-2 flex items-center justify-between rounded-md border border-athens-gray-100 p-2">
+                    <div
+                      className={cn(
+                        "cursor-pointer rounded-md",
+                        favCat1IconId || userSettings?.favoriteCategory1?.iconId
+                          ? "bg-violet-400/30 p-3 text-violet-600 hover:bg-violet-400/40"
+                          : "bg-athens-gray-200/40 p-3 text-athens-gray-600 hover:bg-athens-gray-300/40"
+                      )}
+                    >
+                      {favCat1IconId ||
+                      userSettings?.favoriteCategory1?.iconId ? (
+                        icons.find(
+                          (icon) =>
+                            icon.id ===
+                            (favCat1IconId ||
+                              userSettings?.favoriteCategory1?.iconId)
+                        )?.icon
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-5 w-5"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="m4.9 4.9 14.2 14.2" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-full sm:mt-0 sm:w-[200px]">
+                        <Popover
+                          open={favCategory1}
+                          onOpenChange={setFavCategory1}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={favCategory1}
+                              className="w-full justify-between bg-white"
+                            >
+                              {favCat1Value == ""
+                                ? userSettings?.favoriteCategory1?.name
+                                  ? categories.find(
+                                      (category) =>
+                                        category.label ===
+                                        userSettings?.favoriteCategory1?.name
+                                    )?.value ||
+                                    userSettings?.favoriteCategory1?.name
+                                  : "Select category"
+                                : favCat1Value}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                              >
+                                <path d="m7 15 5 5 5-5" />
+                                <path d="m7 9 5-5 5 5" />
+                              </svg>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Type category"
+                                onChangeCapture={handleFav1InputChange}
+                              />
+                              <CommandEmpty>
+                                <div className="flex flex-col">
+                                  <Tabs
+                                    defaultValue="text"
+                                    className="w-full text-center"
+                                  >
+                                    <TabsList>
+                                      <TabsTrigger value="text">
+                                        Text
+                                      </TabsTrigger>
+                                      <TabsTrigger value="icon">
+                                        Icon
+                                      </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="text">
+                                      <Input
+                                        className="h-7 text-xs"
+                                        value={favCat1DispValue}
+                                        disabled
+                                      />
+                                    </TabsContent>
+                                    <TabsContent value="icon">
+                                      <div className="flex justify-center">
+                                        <div className="grid grid-cols-5 gap-2">
+                                          {icons.map(
+                                            (icon, index) =>
+                                              index > 6 && (
+                                                <div
+                                                  key={icon.id}
+                                                  className={cn(
+                                                    "rounded-sm p-2 hover:cursor-pointer",
+                                                    icon.id ===
+                                                      favCat1DispIconId
+                                                      ? "bg-violet-500 text-primary-foreground"
+                                                      : "hover:bg-muted "
+                                                  )}
+                                                  onClick={() => {
+                                                    setFavCat1DispIconId(
+                                                      icon.id
+                                                    );
+                                                  }}
+                                                >
+                                                  {icon.icon}
+                                                </div>
+                                              )
+                                          )}
+                                        </div>
+                                      </div>
+                                    </TabsContent>
+                                  </Tabs>
+
+                                  <button
+                                    onClick={() => {
+                                      setValue("favCat1", {
+                                        value: favCat1DispValue,
+                                        label: favCat1DispValue,
+                                        iconId: favCat1DispIconId,
+                                      });
+                                      setFavCat1IconId(favCat1DispIconId);
+                                      setFavCat1Value(favCat1DispValue);
+                                      setFavCategory1(false);
+                                    }}
+                                    className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                  >
+                                    Create &quot;{favCat1DispValue}
+                                    &quot;
+                                  </button>
+                                </div>
+                              </CommandEmpty>
+                              {/* <CommandGroup>
+                                {categories.map((category) => (
+                                  <CommandItem
+                                    key={category.id}
+                                    onSelect={() => {
+                                      setFavCat1Value(
+                                        category.value === favCat1Value
+                                          ? ""
+                                          : category.value
+                                      );
+                                      setFavCat1IconId(
+                                        category.iconId === favCat1IconId
+                                          ? null
+                                          : category.iconId
+                                      );
+
+                                      setValue("favCat1", {
+                                        value: category.value,
+                                        label: category.value,
+                                        iconId: category.iconId,
+                                      });
+                                      setFavCategory1(false);
+                                    }}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        "fix" === category.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {icons[category?.iconId - 1]?.icon}
+                                    <span className="ml-3">
+                                      {category.value}
+                                    </span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup> */}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <Button
+                        variant={"accent"}
+                        type="button"
+                        onClick={() => {
+                          resetFav1Category({ email: emailValue });
+                          setValue("favCat1", null);
+                          setFavCat1IconId(null);
+                          setFavCat1Value("");
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={cn(
+                            isResetFav1CategoryLoading &&
+                              "rotate-180 transform animate-spin"
+                          )}
+                        >
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                          <path d="M16 16h5v5" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="mt-5 text-sm font-medium">Category 2</p>
+                  <div className="mb-5 mt-2 flex items-center justify-between rounded-md border border-athens-gray-100 p-2">
+                    <div
+                      className={cn(
+                        "cursor-pointer rounded-md",
+                        favCat2IconId || userSettings?.favoriteCategory2?.iconId
+                          ? "bg-violet-400/30 p-3 text-violet-600 hover:bg-violet-400/40"
+                          : "bg-athens-gray-200/40 p-3 text-athens-gray-600 hover:bg-athens-gray-300/40"
+                      )}
+                    >
+                      {favCat2IconId ||
+                      userSettings?.favoriteCategory2?.iconId ? (
+                        icons.find(
+                          (icon) =>
+                            icon.id ===
+                            (favCat2IconId ||
+                              userSettings?.favoriteCategory2?.iconId)
+                        )?.icon
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-5 w-5"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="m4.9 4.9 14.2 14.2" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-full sm:mt-0 sm:w-[200px]">
+                        <Popover
+                          open={favCategory2}
+                          onOpenChange={setFavCategory2}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={favCategory2}
+                              className="w-full justify-between bg-white"
+                            >
+                              {favCat2Value == ""
+                                ? userSettings?.favoriteCategory2?.name
+                                  ? categories.find(
+                                      (category) =>
+                                        category.label ===
+                                        userSettings?.favoriteCategory2?.name
+                                    )?.value ||
+                                    userSettings?.favoriteCategory2?.name
+                                  : "Select category"
+                                : favCat2Value}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                              >
+                                <path d="m7 15 5 5 5-5" />
+                                <path d="m7 9 5-5 5 5" />
+                              </svg>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Type category"
+                                onChangeCapture={handleFav2InputChange}
+                              />
+                              <CommandEmpty>
+                                <div className="flex flex-col">
+                                  <Tabs
+                                    defaultValue="text"
+                                    className="w-full text-center"
+                                  >
+                                    <TabsList>
+                                      <TabsTrigger value="text">
+                                        Text
+                                      </TabsTrigger>
+                                      <TabsTrigger value="icon">
+                                        Icon
+                                      </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="text">
+                                      <Input
+                                        className="h-7 text-xs"
+                                        value={favCat2DispValue}
+                                        disabled
+                                      />
+                                    </TabsContent>
+                                    <TabsContent value="icon">
+                                      <div className="flex justify-center">
+                                        <div className="grid grid-cols-5 gap-2">
+                                          {icons.map(
+                                            (icon, index) =>
+                                              index > 6 && (
+                                                <div
+                                                  key={icon.id}
+                                                  className={cn(
+                                                    "rounded-sm p-2 hover:cursor-pointer",
+                                                    icon.id ===
+                                                      favCat2DispIconId
+                                                      ? "bg-violet-500 text-primary-foreground"
+                                                      : "hover:bg-muted "
+                                                  )}
+                                                  onClick={() => {
+                                                    setFavCat2DispIconId(
+                                                      icon.id
+                                                    );
+                                                  }}
+                                                >
+                                                  {icon.icon}
+                                                </div>
+                                              )
+                                          )}
+                                        </div>
+                                      </div>
+                                    </TabsContent>
+                                  </Tabs>
+
+                                  <button
+                                    onClick={() => {
+                                      setValue("favCat2", {
+                                        value: favCat2DispValue,
+                                        label: favCat2DispValue,
+                                        iconId: favCat2DispIconId,
+                                      });
+                                      setFavCat2IconId(favCat2DispIconId);
+                                      setFavCat2Value(favCat2DispValue);
+                                      setFavCategory2(false);
+                                    }}
+                                    className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                  >
+                                    Create &quot;{favCat2DispValue}
+                                    &quot;
+                                  </button>
+                                </div>
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {categories.map((category) => (
+                                  <CommandItem
+                                    key={category.id}
+                                    onSelect={() => {
+                                      setFavCat2Value(
+                                        category.value === favCat1Value
+                                          ? ""
+                                          : category.value
+                                      );
+                                      setFavCat2IconId(
+                                        category.iconId === favCat1IconId
+                                          ? null
+                                          : category.iconId
+                                      );
+                                      setValue("favCat2", {
+                                        value: category.value,
+                                        label: category.value,
+                                        iconId: category.iconId,
+                                      });
+                                      setFavCategory2(false);
+                                    }}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        "fix" === category.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {icons[category?.iconId - 1]?.icon}
+                                    <span className="ml-3">
+                                      {category.value}
+                                    </span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <Button
+                        variant={"accent"}
+                        type="button"
+                        onClick={() => {
+                          resetFav2Category({ email: emailValue });
+                          setValue("favCat2", null);
+                          setFavCat2IconId(null);
+                          setFavCat2Value("");
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={cn(
+                            isResetFav2CategoryLoading &&
+                              "rotate-180 transform animate-spin"
+                          )}
+                        >
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                          <path d="M16 16h5v5" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="mt-5 text-sm font-medium">Category 3</p>
+                  <div className="mb-5 mt-2 flex items-center justify-between rounded-md border border-athens-gray-100 p-2">
+                    <div
+                      className={cn(
+                        "cursor-pointer rounded-md",
+                        favCat3IconId || userSettings?.favoriteCategory3?.iconId
+                          ? "bg-violet-400/30 p-3 text-violet-600 hover:bg-violet-400/40"
+                          : "bg-athens-gray-200/40 p-3 text-athens-gray-600 hover:bg-athens-gray-300/40"
+                      )}
+                    >
+                      {favCat3IconId ||
+                      userSettings?.favoriteCategory3?.iconId ? (
+                        icons.find(
+                          (icon) =>
+                            icon.id ===
+                            (favCat3IconId ||
+                              userSettings?.favoriteCategory3?.iconId)
+                        )?.icon
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-5 w-5"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="m4.9 4.9 14.2 14.2" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-full sm:mt-0 sm:w-[200px]">
+                        <Popover
+                          open={favCategory3}
+                          onOpenChange={setFavCategory3}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={favCategory3}
+                              className="w-full justify-between bg-white"
+                            >
+                              {favCat3Value == ""
+                                ? userSettings?.favoriteCategory3?.name
+                                  ? categories.find(
+                                      (category) =>
+                                        category.label ===
+                                        userSettings?.favoriteCategory3?.name
+                                    )?.value ||
+                                    userSettings?.favoriteCategory3?.name
+                                  : "Select category"
+                                : favCat3Value}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                              >
+                                <path d="m7 15 5 5 5-5" />
+                                <path d="m7 9 5-5 5 5" />
+                              </svg>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Type category"
+                                onChangeCapture={handleFav3InputChange}
+                              />
+                              <CommandEmpty>
+                                <div className="flex flex-col">
+                                  <Tabs
+                                    defaultValue="text"
+                                    className="w-full text-center"
+                                  >
+                                    <TabsList>
+                                      <TabsTrigger value="text">
+                                        Text
+                                      </TabsTrigger>
+                                      <TabsTrigger value="icon">
+                                        Icon
+                                      </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="text">
+                                      <Input
+                                        className="h-7 text-xs"
+                                        value={favCat3DispValue}
+                                        disabled
+                                      />
+                                    </TabsContent>
+                                    <TabsContent value="icon">
+                                      <div className="flex justify-center">
+                                        <div className="grid grid-cols-5 gap-2">
+                                          {icons.map(
+                                            (icon, index) =>
+                                              index > 6 && (
+                                                <div
+                                                  key={icon.id}
+                                                  className={cn(
+                                                    "rounded-sm p-2 hover:cursor-pointer",
+                                                    icon.id ===
+                                                      favCat3DispIconId
+                                                      ? "bg-violet-500 text-primary-foreground"
+                                                      : "hover:bg-muted "
+                                                  )}
+                                                  onClick={() => {
+                                                    setFavCat3DispIconId(
+                                                      icon.id
+                                                    );
+                                                  }}
+                                                >
+                                                  {icon.icon}
+                                                </div>
+                                              )
+                                          )}
+                                        </div>
+                                      </div>
+                                    </TabsContent>
+                                  </Tabs>
+
+                                  <button
+                                    onClick={() => {
+                                      setValue("favCat3", {
+                                        value: favCat3DispValue,
+                                        label: favCat3DispValue,
+                                        iconId: favCat3DispIconId,
+                                      });
+                                      setFavCat3IconId(favCat3DispIconId);
+                                      setFavCat3Value(favCat3DispValue);
+                                      setFavCategory3(false);
+                                    }}
+                                    className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                  >
+                                    Create &quot;{favCat3DispValue}
+                                    &quot;
+                                  </button>
+                                </div>
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {categories.map((category) => (
+                                  <CommandItem
+                                    key={category.id}
+                                    onSelect={() => {
+                                      setFavCat3Value(
+                                        category.value === favCat3Value
+                                          ? ""
+                                          : category.value
+                                      );
+                                      setFavCat3IconId(
+                                        category.iconId === favCat3IconId
+                                          ? null
+                                          : category.iconId
+                                      );
+                                      setValue("favCat3", {
+                                        value: category.value,
+                                        label: category.value,
+                                        iconId: category.iconId,
+                                      });
+                                      setFavCategory3(false);
+                                    }}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        "fix" === category.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {icons[category?.iconId - 1]?.icon}
+                                    <span className="ml-3">
+                                      {category.value}
+                                    </span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <Button
+                        variant={"accent"}
+                        className=""
+                        type="button"
+                        onClick={() => {
+                          resetFav3Category({ email: emailValue });
+                          setValue("favCat3", null);
+                          setFavCat3IconId(null);
+                          setFavCat3Value("");
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={cn(
+                            isResetFav3CategoryLoading &&
+                              "rotate-180 transform animate-spin"
+                          )}
+                        >
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                          <path d="M16 16h5v5" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>

@@ -12,7 +12,7 @@ export const expenseSchema = z.object({
     .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
-    id: z.number(),
+    id: z.number().nullable(),
     value: z.string(),
     label: z.string(),
     iconId: z.number(),
@@ -33,7 +33,7 @@ export const editExpenseSchema = z.object({
     .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
-    id: z.number(),
+    id: z.number().nullable(),
     value: z.string(),
     label: z.string(),
     iconId: z.number(),

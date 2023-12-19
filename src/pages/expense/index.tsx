@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type NextPage } from "next";
@@ -77,7 +78,7 @@ const createExpenseSchema = z.object({
     .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
-    id: z.number(),
+    id: z.number().nullable(),
     value: z.string(),
     label: z.string(),
     iconId: z.number(),
@@ -98,7 +99,7 @@ const editExpenseSchema = z.object({
     .min(0, { message: "Must be greater than 0" }),
   date: z.date(),
   category: z.object({
-    id: z.number(),
+    id: z.number().nullable(),
     value: z.string(),
     label: z.string(),
     iconId: z.number(),
@@ -177,6 +178,10 @@ const Expense: NextPage = () => {
   const [search, setSearch] = useState<string>("");
 
   const { data: userCurrency } = api.user.getUserCurrency.useQuery({
+    email: session?.user?.email as string,
+  });
+
+  const { data: favCategories } = api.user.getUserFavoriteCategories.useQuery({
     email: session?.user?.email as string,
   });
 
@@ -861,7 +866,17 @@ const Expense: NextPage = () => {
                             {categoryValue
                               ? categories.find(
                                   (category) => category.label === categoryValue
-                                )?.value || categoryValue
+                                )?.value ||
+                                (categoryValue.toLowerCase() ===
+                                favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                  ? favCategories?.favoriteCategory1?.name
+                                  : categoryValue.toLowerCase() ===
+                                    favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                  ? favCategories?.favoriteCategory2?.name
+                                  : categoryValue.toLowerCase() ===
+                                    favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                  ? favCategories?.favoriteCategory3?.name
+                                  : "Select category")
                               : "Select category"}
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -956,6 +971,195 @@ const Expense: NextPage = () => {
 
                             {/* default cats */}
                             <CommandGroup>
+                              {(favCategories?.favoriteCategory1 ||
+                                favCategories?.favoriteCategory2 ||
+                                favCategories?.favoriteCategory3) && (
+                                <p className="flex items-center text-xs font-medium">
+                                  Favorites
+                                  <span>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="#ECB33E"
+                                      stroke="#ECB33E"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="ml-1 h-3 w-3"
+                                    >
+                                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                                      <path d="M5 3v4" />
+                                      <path d="M19 17v4" />
+                                      <path d="M3 5h4" />
+                                      <path d="M17 19h4" />
+                                    </svg>
+                                  </span>
+                                </p>
+                              )}
+                              {favCategories?.favoriteCategory1 && (
+                                <CommandItem
+                                  onSelect={(selectedCategory) => {
+                                    setCategoryValue(
+                                      selectedCategory ===
+                                        favCategories?.favoriteCategory1?.name
+                                        ? ""
+                                        : selectedCategory
+                                    );
+                                    setValue("category", {
+                                      value: favCategories?.favoriteCategory1
+                                        ?.name as string,
+                                      label: favCategories?.favoriteCategory1
+                                        ?.name as string,
+                                      iconId: favCategories?.favoriteCategory1
+                                        ?.iconId as number,
+                                      id: null,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      categoryValue ===
+                                        favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  >
+                                    <path d="M20 6 9 17l-5-5" />
+                                  </svg>
+                                  {
+                                    icons[
+                                      favCategories?.favoriteCategory1.iconId -
+                                        1
+                                    ]?.icon
+                                  }
+                                  <span className="ml-3">
+                                    {favCategories?.favoriteCategory1?.name}
+                                  </span>
+                                </CommandItem>
+                              )}
+                              {favCategories?.favoriteCategory2 && (
+                                <CommandItem
+                                  onSelect={(selectedCategory) => {
+                                    setCategoryValue(
+                                      selectedCategory ===
+                                        favCategories?.favoriteCategory2?.name
+                                        ? ""
+                                        : selectedCategory
+                                    );
+                                    setValue("category", {
+                                      value: favCategories?.favoriteCategory2
+                                        ?.name as string,
+                                      label: favCategories?.favoriteCategory2
+                                        ?.name as string,
+                                      iconId: favCategories?.favoriteCategory2
+                                        ?.iconId as number,
+                                      id: null,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      categoryValue ===
+                                        favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  >
+                                    <path d="M20 6 9 17l-5-5" />
+                                  </svg>
+                                  {
+                                    icons[
+                                      favCategories?.favoriteCategory2.iconId -
+                                        1
+                                    ]?.icon
+                                  }
+                                  <span className="ml-3">
+                                    {favCategories?.favoriteCategory2?.name}
+                                  </span>
+                                </CommandItem>
+                              )}
+                              {favCategories?.favoriteCategory3 && (
+                                <CommandItem
+                                  onSelect={(selectedCategory) => {
+                                    setCategoryValue(
+                                      selectedCategory ===
+                                        favCategories?.favoriteCategory3?.name
+                                        ? ""
+                                        : selectedCategory
+                                    );
+                                    setValue("category", {
+                                      value: favCategories?.favoriteCategory3
+                                        ?.name as string,
+                                      label: favCategories?.favoriteCategory3
+                                        ?.name as string,
+                                      iconId: favCategories?.favoriteCategory3
+                                        ?.iconId as number,
+                                      id: null,
+                                    });
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      categoryValue ===
+                                        favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  >
+                                    <path d="M20 6 9 17l-5-5" />
+                                  </svg>
+                                  {
+                                    icons[
+                                      favCategories?.favoriteCategory3.iconId -
+                                        1
+                                    ]?.icon
+                                  }
+                                  <span className="ml-3">
+                                    {favCategories?.favoriteCategory3?.name}
+                                  </span>
+                                </CommandItem>
+                              )}
+
+                              {(favCategories?.favoriteCategory1 ||
+                                favCategories?.favoriteCategory2 ||
+                                favCategories?.favoriteCategory3) && (
+                                <hr className="my-2" />
+                              )}
                               {categories.map((category) => (
                                 <CommandItem
                                   key={category.id}
@@ -1198,7 +1402,7 @@ const Expense: NextPage = () => {
                           );
                           editSetValue("date", expense.transactionDate);
                           editSetValue("category", {
-                            id: categories.length + 1,
+                            id: null,
                             value: expense.category?.name ?? "",
                             label: expense.category?.name ?? "",
                             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -1343,8 +1547,21 @@ const Expense: NextPage = () => {
                                         ? categories.find(
                                             (category) =>
                                               category.label ===
-                                              editCategoryValue
-                                          )?.value || editCategoryValue
+                                              editCategoryValue.toLowerCase()
+                                          )?.value ||
+                                          (editCategoryValue.toLowerCase() ===
+                                          favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                            ? favCategories?.favoriteCategory1
+                                                ?.name
+                                            : editCategoryValue.toLowerCase() ===
+                                              favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                            ? favCategories?.favoriteCategory2
+                                                ?.name
+                                            : editCategoryValue.toLowerCase() ===
+                                              favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                            ? favCategories?.favoriteCategory3
+                                                ?.name
+                                            : editCategoryValue)
                                         : "Select category"}
                                       <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -1447,6 +1664,215 @@ const Expense: NextPage = () => {
                                         </div>
                                       </CommandEmpty>
                                       <CommandGroup>
+                                        {(favCategories?.favoriteCategory1 ||
+                                          favCategories?.favoriteCategory2 ||
+                                          favCategories?.favoriteCategory3) && (
+                                          <p className="flex items-center text-xs font-medium">
+                                            Favorites
+                                            <span>
+                                              <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="24"
+                                                height="24"
+                                                viewBox="0 0 24 24"
+                                                fill="#ECB33E"
+                                                stroke="#ECB33E"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="ml-1 h-3 w-3"
+                                              >
+                                                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                                                <path d="M5 3v4" />
+                                                <path d="M19 17v4" />
+                                                <path d="M3 5h4" />
+                                                <path d="M17 19h4" />
+                                              </svg>
+                                            </span>
+                                          </p>
+                                        )}
+                                        {favCategories?.favoriteCategory1 && (
+                                          <CommandItem
+                                            onSelect={(selectedCategory) => {
+                                              setEditCategoryValue(
+                                                selectedCategory ===
+                                                  editCategoryValue
+                                                  ? ""
+                                                  : selectedCategory
+                                              );
+                                              editSetValue("category", {
+                                                id: null,
+                                                value: favCategories
+                                                  ?.favoriteCategory1
+                                                  ?.name as string,
+                                                label: favCategories
+                                                  ?.favoriteCategory1
+                                                  ?.name as string,
+                                                iconId: favCategories
+                                                  ?.favoriteCategory1
+                                                  ?.iconId as number,
+                                              });
+                                              setOpenCategory(false);
+                                            }}
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="24"
+                                              height="24"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                editCategoryValue.toLowerCase() ===
+                                                  favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            >
+                                              <path d="M20 6 9 17l-5-5" />
+                                            </svg>
+                                            {
+                                              icons[
+                                                favCategories?.favoriteCategory1
+                                                  .iconId - 1
+                                              ]?.icon
+                                            }
+                                            <span className="ml-3">
+                                              {
+                                                favCategories?.favoriteCategory1
+                                                  ?.name
+                                              }
+                                            </span>
+                                          </CommandItem>
+                                        )}
+                                        {favCategories?.favoriteCategory2 && (
+                                          <CommandItem
+                                            onSelect={(selectedCategory) => {
+                                              setEditCategoryValue(
+                                                selectedCategory ===
+                                                  editCategoryValue
+                                                  ? ""
+                                                  : selectedCategory
+                                              );
+                                              editSetValue("category", {
+                                                id: null,
+                                                value: favCategories
+                                                  ?.favoriteCategory2
+                                                  ?.name as string,
+                                                label: favCategories
+                                                  ?.favoriteCategory2
+                                                  ?.name as string,
+                                                iconId: favCategories
+                                                  ?.favoriteCategory2
+                                                  ?.iconId as number,
+                                              });
+                                              setOpenCategory(false);
+                                            }}
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="24"
+                                              height="24"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                editCategoryValue.toLowerCase() ===
+                                                  favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            >
+                                              <path d="M20 6 9 17l-5-5" />
+                                            </svg>
+                                            {
+                                              icons[
+                                                favCategories?.favoriteCategory2
+                                                  .iconId - 1
+                                              ]?.icon
+                                            }
+                                            <span className="ml-3">
+                                              {
+                                                favCategories?.favoriteCategory2
+                                                  ?.name
+                                              }
+                                            </span>
+                                          </CommandItem>
+                                        )}
+                                        {favCategories?.favoriteCategory3 && (
+                                          <CommandItem
+                                            onSelect={(selectedCategory) => {
+                                              setEditCategoryValue(
+                                                selectedCategory ===
+                                                  editCategoryValue
+                                                  ? ""
+                                                  : selectedCategory
+                                              );
+                                              editSetValue("category", {
+                                                id: null,
+                                                value: favCategories
+                                                  ?.favoriteCategory3
+                                                  ?.name as string,
+                                                label: favCategories
+                                                  ?.favoriteCategory3
+                                                  ?.name as string,
+                                                iconId: favCategories
+                                                  ?.favoriteCategory3
+                                                  ?.iconId as number,
+                                              });
+                                              setOpenCategory(false);
+                                            }}
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="24"
+                                              height="24"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                editCategoryValue.toLowerCase() ===
+                                                  favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            >
+                                              <path d="M20 6 9 17l-5-5" />
+                                            </svg>
+                                            {
+                                              icons[
+                                                favCategories?.favoriteCategory3
+                                                  .iconId - 1
+                                              ]?.icon
+                                            }
+                                            <span className="ml-3">
+                                              {
+                                                favCategories?.favoriteCategory3
+                                                  ?.name
+                                              }
+                                            </span>
+                                          </CommandItem>
+                                        )}
+
+                                        {(favCategories?.favoriteCategory1 ||
+                                          favCategories?.favoriteCategory2 ||
+                                          favCategories?.favoriteCategory3) && (
+                                          <hr className="my-2" />
+                                        )}
+
+                                        {/* default cats */}
                                         {categories.map((category) => (
                                           <CommandItem
                                             key={category.id}
