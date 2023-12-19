@@ -11,7 +11,7 @@ export const budgetSchema = z.object({
   startDate: z.date(),
   endDate: z.date(),
   category: z.object({
-    id: z.number(),
+    id: z.number().nullable(),
     value: z.string(),
     label: z.string(),
     iconId: z.number(),
