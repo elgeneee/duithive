@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -65,6 +66,9 @@ export const userRouter = createTRPCRouter({
             image: true,
             notification: true,
             monthlyReport: true,
+            favoriteCategory1: true,
+            favoriteCategory2: true,
+            favoriteCategory3: true,
           },
         });
 
@@ -75,6 +79,114 @@ export const userRouter = createTRPCRouter({
         return userSettings;
       } catch (err) {
         throw new Error(err as string);
+      }
+    }),
+  getUserFavoriteCategories: publicProcedure
+    .input(z.object({ email: z.string().email().min(5) }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const userSettings = await ctx.prisma.user.findUnique({
+          where: {
+            email: input.email,
+          },
+          select: {
+            favoriteCategory1: true,
+            favoriteCategory2: true,
+            favoriteCategory3: true,
+          },
+        });
+
+        if (!userSettings) {
+          throw new Error("User not found");
+        }
+
+        return userSettings;
+      } catch (err) {
+        throw new Error(err as string);
+      }
+    }),
+  resetFav1Category: protectedProcedure
+    .input(z.object({ email: z.string().email().min(5) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { success } = await ratelimit.limit(input.email);
+
+        if (!success)
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests, try again later",
+          });
+
+        await ctx.prisma.user.update({
+          where: {
+            email: input.email,
+          },
+          data: {
+            favoriteCategory1Id: null,
+          },
+        });
+      } catch (err) {
+        if (typeof err === "string") {
+          throw new TRPCClientError(err);
+        } else {
+          throw new Error("An error occurred");
+        }
+      }
+    }),
+  resetFav2Category: protectedProcedure
+    .input(z.object({ email: z.string().email().min(5) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { success } = await ratelimit.limit(input.email);
+
+        if (!success)
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests, try again later",
+          });
+
+        await ctx.prisma.user.update({
+          where: {
+            email: input.email,
+          },
+          data: {
+            favoriteCategory2Id: null,
+          },
+        });
+      } catch (err) {
+        if (typeof err === "string") {
+          throw new TRPCClientError(err);
+        } else {
+          throw new Error("An error occurred");
+        }
+      }
+    }),
+  resetFav3Category: protectedProcedure
+    .input(z.object({ email: z.string().email().min(5) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { success } = await ratelimit.limit(input.email);
+
+        if (!success)
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests, try again later",
+          });
+
+        await ctx.prisma.user.update({
+          where: {
+            email: input.email,
+          },
+          data: {
+            favoriteCategory3Id: null,
+          },
+        });
+      } catch (err) {
+        if (typeof err === "string") {
+          throw new TRPCClientError(err);
+        } else {
+          throw new Error("An error occurred");
+        }
       }
     }),
   editProfile: protectedProcedure
@@ -88,6 +200,63 @@ export const userRouter = createTRPCRouter({
             code: "TOO_MANY_REQUESTS",
             message: "Too many requests, try again later",
           });
+
+        let catRes1, catRes2, catRes3;
+
+        if (input.favCat1) {
+          catRes1 = await ctx.prisma.category.findFirst({
+            where: {
+              name: input.favCat1.value,
+              iconId: input.favCat1.iconId || undefined,
+            },
+          });
+
+          if (!catRes1) {
+            catRes1 = await ctx.prisma.category.create({
+              data: {
+                name: input.favCat1.value,
+                iconId: input.favCat1?.iconId as number,
+              },
+            });
+          }
+        }
+
+        if (input.favCat2) {
+          catRes2 = await ctx.prisma.category.findFirst({
+            where: {
+              name: input.favCat2.value,
+              iconId: input.favCat2.iconId || undefined,
+            },
+          });
+
+          if (!catRes2) {
+            catRes2 = await ctx.prisma.category.create({
+              data: {
+                name: input.favCat2.value,
+                iconId: input.favCat2?.iconId as number,
+              },
+            });
+          }
+        }
+
+        if (input.favCat3) {
+          catRes3 = await ctx.prisma.category.findFirst({
+            where: {
+              name: input.favCat3.value,
+              iconId: input.favCat3.iconId || undefined,
+            },
+          });
+
+          if (!catRes3) {
+            catRes3 = await ctx.prisma.category.create({
+              data: {
+                name: input.favCat3.value,
+                iconId: input.favCat3?.iconId as number,
+              },
+            });
+          }
+        }
+
         const updateUser = await ctx.prisma.user.update({
           where: {
             email: input.email,
@@ -95,6 +264,9 @@ export const userRouter = createTRPCRouter({
           data: {
             name: input.username,
             ...(input.image && { image: input.image }),
+            ...(catRes1 && { favoriteCategory1Id: catRes1.id }),
+            ...(catRes2 && { favoriteCategory2Id: catRes2.id }),
+            ...(catRes3 && { favoriteCategory3Id: catRes3.id }),
             currencyId: input.currencyId,
           },
         });

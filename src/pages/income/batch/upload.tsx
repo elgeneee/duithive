@@ -243,7 +243,6 @@ const BatchIncome: NextPage = () => {
               success.push(row);
             }
           });
-          console.log(success);
           setSuccessRecords(success);
           setFailedRecords(failed);
         };

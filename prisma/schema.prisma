@@ -46,30 +46,39 @@ model Session {
 }
 
 model User {
-    id            String         @id @default(cuid())
-    name          String?
-    email         String?        @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    password      String?        @db.Text
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
-    otp           String?        @db.Text
-    verified      Boolean        @default(false)
-    notification  Boolean        @default(true)
-    currency      Currency?      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
-    currencyId    Int            @default(1)
-    expense       Expense[]
-    income        Income[]
-    budget        Budget[]
-    report        Report[]
-    notifications Notification[]
-    batchCreate   BatchCreate[]
-    monthlyReport Boolean        @default(false)
+    id                  String         @id @default(cuid())
+    name                String?
+    email               String?        @unique
+    emailVerified       DateTime?
+    image               String?
+    accounts            Account[]
+    sessions            Session[]
+    password            String?        @db.Text
+    createdAt           DateTime       @default(now())
+    updatedAt           DateTime       @updatedAt
+    otp                 String?        @db.Text
+    verified            Boolean        @default(false)
+    notification        Boolean        @default(true)
+    currency            Currency?      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+    currencyId          Int            @default(1)
+    expense             Expense[]
+    income              Income[]
+    budget              Budget[]
+    report              Report[]
+    notifications       Notification[]
+    batchCreate         BatchCreate[]
+    monthlyReport       Boolean        @default(false)
+    favoriteCategory1   Category?      @relation("favoriteCategory1", fields: [favoriteCategory1Id], references: [id], onDelete: Cascade)
+    favoriteCategory1Id Int?
+    favoriteCategory2   Category?      @relation("favoriteCategory2", fields: [favoriteCategory2Id], references: [id], onDelete: Cascade)
+    favoriteCategory2Id Int?
+    favoriteCategory3   Category?      @relation("favoriteCategory3", fields: [favoriteCategory3Id], references: [id], onDelete: Cascade)
+    favoriteCategory3Id Int?
 
     @@index([currencyId])
+    @@index([favoriteCategory1Id])
+    @@index([favoriteCategory2Id])
+    @@index([favoriteCategory3Id])
 }
 
 model Expense {
@@ -221,9 +230,12 @@ model BatchCreate {
 }
 
 model Category {
-    id      Int       @id @default(autoincrement())
-    name    String?
-    iconId  Int
-    expense Expense[]
-    Budget  Budget[]
+    id            Int       @id @default(autoincrement())
+    name          String?
+    iconId        Int
+    expense       Expense[]
+    Budget        Budget[]
+    userFavorite1 User[]    @relation("favoriteCategory1")
+    userFavorite2 User[]    @relation("favoriteCategory2")
+    userFavorite3 User[]    @relation("favoriteCategory3")
 }
