@@ -80,8 +80,8 @@ export const budgetRouter = createTRPCRouter({
               userId: userId.id,
               categoryId: categoryId,
               transactionDate: {
-                lte: input.endDate,
-                gte: input.startDate,
+                lte: new Date(input.endDate.setHours(23, 59, 59, 999)),
+                gte: new Date(input.startDate.setHours(0, 0, 0, 0)),
               },
             },
           });
@@ -90,8 +90,8 @@ export const budgetRouter = createTRPCRouter({
             data: {
               title: input.title,
               amount: input.amount,
-              startDate: input.startDate,
-              endDate: input.endDate,
+              startDate: new Date(input.startDate.setHours(0, 0, 0, 0)),
+              endDate: new Date(input.endDate.setHours(23, 59, 59, 999)),
               userId: userId.id,
               categoryId: categoryId,
               expenses: {

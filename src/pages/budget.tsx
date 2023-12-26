@@ -284,6 +284,7 @@ const Budget: NextPage = () => {
         status: "success",
         title: "Budget deleted successfully!",
       });
+      setDeleteDialogOpen(false);
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
@@ -332,638 +333,651 @@ const Budget: NextPage = () => {
         <h1 className="text-3xl font-bold">Budget</h1>
         <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <p className="text-left text-athens-gray-300">{formattedDate}</p>
-          <div className="flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-2 sm:space-y-0">
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <Button
-                className="mt-10 w-full sm:mt-0 sm:w-64"
-                onClick={() => {
-                  setDate(new Date());
-                  const tomorrow = new Date();
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-                  setDeadline(tomorrow);
-                  setDialogOpen(true);
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
+          <div className="sm:space-x- flex w-full flex-col items-center space-x-0 space-y-2 sm:w-auto sm:flex-row sm:space-x-3 sm:space-y-0">
+            <div className="mt-10 flex w-full items-center space-x-3 sm:mt-0">
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <Button
+                  className="w-full sm:mt-0 sm:w-20 lg:w-36"
+                  onClick={() => {
+                    setDate(new Date());
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    setDeadline(tomorrow);
+                    setDialogOpen(true);
+                  }}
                 >
-                  <path d="M5 12h14" />
-                  <path d="M12 5v14" />
-                </svg>
-                <span className="ml-3">Add Budget</span>
-              </Button>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create Budget</DialogTitle>
-                </DialogHeader>
-                <form
-                  className="mt-5 space-y-3"
-                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                  onSubmit={handleSubmit(onSubmit)}
-                >
-                  <div>
-                    <label className="text-sm">Title</label>
-                    <Input
-                      className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                      {...register("title", { required: true })}
-                    />
-                    <div className="h-3">
-                      {errors.title && (
-                        <span className="text-xxs text-red-500">
-                          {errors.title.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-1/3">
-                      <label className="text-sm">Budget</label>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
+                  <span className="ml-3 sm:hidden md:hidden lg:hidden xl:block">
+                    Add Budget
+                  </span>
+                </Button>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create Budget</DialogTitle>
+                  </DialogHeader>
+                  <form
+                    className="mt-5 space-y-3"
+                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                    onSubmit={handleSubmit(onSubmit)}
+                  >
+                    <div>
+                      <label className="text-sm">Title</label>
                       <Input
                         className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
-                        {...register("amount", {
-                          required: true,
-                          valueAsNumber: true,
-                        })}
-                        type="number"
-                        step="0.01"
+                        {...register("title", { required: true })}
                       />
                       <div className="h-3">
-                        {errors.amount && (
+                        {errors.title && (
                           <span className="text-xxs text-red-500">
-                            {errors.amount.message}
+                            {errors.title.message}
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="w-2/3">
-                      <p className="mb-2 text-sm">Category</p>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
-                          >
-                            {/* {categoryValue
+                    <div className="flex items-center space-x-3">
+                      <div className="w-1/3">
+                        <label className="text-sm">Budget</label>
+                        <Input
+                          className="mt-2 border border-input bg-white hover:bg-accent hover:text-accent-foreground"
+                          {...register("amount", {
+                            required: true,
+                            valueAsNumber: true,
+                          })}
+                          type="number"
+                          step="0.01"
+                        />
+                        <div className="h-3">
+                          {errors.amount && (
+                            <span className="text-xxs text-red-500">
+                              {errors.amount.message}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="w-2/3">
+                        <p className="mb-2 text-sm">Category</p>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={open}
+                              className="w-full justify-between focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
+                            >
+                              {/* {categoryValue
                               ? categories.find(
                                   (category) => category.label === categoryValue
                                 )?.value || categoryValue
                               : "Select category"} */}
-                            {categoryValue
-                              ? categories.find(
-                                  (category) => category.label === categoryValue
-                                )?.value ||
-                                (categoryValue.toLowerCase() ===
-                                favCategories?.favoriteCategory1?.name?.toLowerCase()
-                                  ? favCategories?.favoriteCategory1?.name
-                                  : categoryValue.toLowerCase() ===
-                                    favCategories?.favoriteCategory2?.name?.toLowerCase()
-                                  ? favCategories?.favoriteCategory2?.name
-                                  : categoryValue.toLowerCase() ===
-                                    favCategories?.favoriteCategory3?.name?.toLowerCase()
-                                  ? favCategories?.favoriteCategory3?.name
-                                  : "Select category")
-                              : "Select category"}
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="ml-2 h-4 w-4 shrink-0 opacity-50"
-                            >
-                              <path d="m7 15 5 5 5-5" />
-                              <path d="m7 9 5-5 5 5" />
-                            </svg>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Search category..."
-                              onChangeCapture={handleInputChange}
-                            />
-                            <CommandEmpty>
-                              <div className="flex flex-col">
-                                <Tabs
-                                  defaultValue="text"
-                                  className="w-full text-center"
-                                >
-                                  <TabsList>
-                                    <TabsTrigger value="text">Text</TabsTrigger>
-                                    <TabsTrigger value="icon">Icon</TabsTrigger>
-                                  </TabsList>
-                                  <TabsContent value="text">
-                                    <Input
-                                      className="h-7 text-xs"
-                                      value={dispValue}
-                                      disabled
-                                    />
-                                  </TabsContent>
-                                  <TabsContent value="icon">
-                                    <div className="flex justify-center">
-                                      <div className="grid grid-cols-5 gap-2">
-                                        {icons.map(
-                                          (icon, index) =>
-                                            index > 6 && (
-                                              <div
-                                                key={icon.id}
-                                                className={cn(
-                                                  "rounded-sm p-2 hover:cursor-pointer",
-                                                  icon.id === iconId
-                                                    ? "bg-violet-500 text-primary-foreground"
-                                                    : "hover:bg-muted "
-                                                )}
-                                                onClick={() => {
-                                                  setIconId(icon.id);
-                                                }}
-                                              >
-                                                {icon.icon}
-                                              </div>
-                                            )
-                                        )}
+                              {categoryValue
+                                ? categories.find(
+                                    (category) =>
+                                      category.label === categoryValue
+                                  )?.value ||
+                                  (categoryValue.toLowerCase() ===
+                                  favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                    ? favCategories?.favoriteCategory1?.name
+                                    : categoryValue.toLowerCase() ===
+                                      favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                    ? favCategories?.favoriteCategory2?.name
+                                    : categoryValue.toLowerCase() ===
+                                      favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                    ? favCategories?.favoriteCategory3?.name
+                                    : "Select category")
+                                : "Select category"}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                              >
+                                <path d="m7 15 5 5 5-5" />
+                                <path d="m7 9 5-5 5 5" />
+                              </svg>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search category..."
+                                onChangeCapture={handleInputChange}
+                              />
+                              <CommandEmpty>
+                                <div className="flex flex-col">
+                                  <Tabs
+                                    defaultValue="text"
+                                    className="w-full text-center"
+                                  >
+                                    <TabsList>
+                                      <TabsTrigger value="text">
+                                        Text
+                                      </TabsTrigger>
+                                      <TabsTrigger value="icon">
+                                        Icon
+                                      </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="text">
+                                      <Input
+                                        className="h-7 text-xs"
+                                        value={dispValue}
+                                        disabled
+                                      />
+                                    </TabsContent>
+                                    <TabsContent value="icon">
+                                      <div className="flex justify-center">
+                                        <div className="grid grid-cols-5 gap-2">
+                                          {icons.map(
+                                            (icon, index) =>
+                                              index > 6 && (
+                                                <div
+                                                  key={icon.id}
+                                                  className={cn(
+                                                    "rounded-sm p-2 hover:cursor-pointer",
+                                                    icon.id === iconId
+                                                      ? "bg-violet-500 text-primary-foreground"
+                                                      : "hover:bg-muted "
+                                                  )}
+                                                  onClick={() => {
+                                                    setIconId(icon.id);
+                                                  }}
+                                                >
+                                                  {icon.icon}
+                                                </div>
+                                              )
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                  </TabsContent>
-                                </Tabs>
+                                    </TabsContent>
+                                  </Tabs>
 
-                                <button
-                                  onClick={() => {
-                                    setCategoryValue(dispValue);
-                                    setValue("category", {
-                                      id: categories.length + 1,
-                                      value: dispValue,
-                                      label: dispValue,
-                                      iconId: iconId,
-                                    });
-                                    categories.push({
-                                      id: categories.length + 1,
-                                      value: dispValue,
-                                      label: dispValue,
-                                      iconId: iconId,
-                                    });
-                                    setOpen(false);
-                                  }}
-                                  className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
-                                >
-                                  Create &quot;{dispValue}&quot;
-                                </button>
-                              </div>
-                            </CommandEmpty>
+                                  <button
+                                    onClick={() => {
+                                      setCategoryValue(dispValue);
+                                      setValue("category", {
+                                        id: categories.length + 1,
+                                        value: dispValue,
+                                        label: dispValue,
+                                        iconId: iconId,
+                                      });
+                                      categories.push({
+                                        id: categories.length + 1,
+                                        value: dispValue,
+                                        label: dispValue,
+                                        iconId: iconId,
+                                      });
+                                      setOpen(false);
+                                    }}
+                                    className="mt-2 inline w-full items-center justify-center rounded-md bg-violet-500 py-2 text-xs font-medium text-white"
+                                  >
+                                    Create &quot;{dispValue}&quot;
+                                  </button>
+                                </div>
+                              </CommandEmpty>
 
-                            {/* default cats */}
-                            <CommandGroup>
-                              {(favCategories?.favoriteCategory1 ||
-                                favCategories?.favoriteCategory2 ||
-                                favCategories?.favoriteCategory3) && (
-                                <p className="flex items-center text-xs font-medium">
-                                  Favorites
-                                  <span>
+                              {/* default cats */}
+                              <CommandGroup>
+                                {(favCategories?.favoriteCategory1 ||
+                                  favCategories?.favoriteCategory2 ||
+                                  favCategories?.favoriteCategory3) && (
+                                  <p className="flex items-center text-xs font-medium">
+                                    Favorites
+                                    <span>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="#ECB33E"
+                                        stroke="#ECB33E"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="ml-1 h-3 w-3"
+                                      >
+                                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                                        <path d="M5 3v4" />
+                                        <path d="M19 17v4" />
+                                        <path d="M3 5h4" />
+                                        <path d="M17 19h4" />
+                                      </svg>
+                                    </span>
+                                  </p>
+                                )}
+                                {favCategories?.favoriteCategory1 && (
+                                  <CommandItem
+                                    onSelect={(selectedCategory) => {
+                                      setCategoryValue(
+                                        selectedCategory ===
+                                          favCategories?.favoriteCategory1?.name
+                                          ? ""
+                                          : selectedCategory
+                                      );
+                                      setValue("category", {
+                                        value: favCategories?.favoriteCategory1
+                                          ?.name as string,
+                                        label: favCategories?.favoriteCategory1
+                                          ?.name as string,
+                                        iconId: favCategories?.favoriteCategory1
+                                          ?.iconId as number,
+                                        id: null,
+                                      });
+                                      setOpen(false);
+                                    }}
+                                  >
                                     <svg
                                       xmlns="http://www.w3.org/2000/svg"
                                       width="24"
                                       height="24"
                                       viewBox="0 0 24 24"
-                                      fill="#ECB33E"
-                                      stroke="#ECB33E"
+                                      fill="none"
+                                      stroke="currentColor"
                                       strokeWidth="2"
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
-                                      className="ml-1 h-3 w-3"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        categoryValue ===
+                                          favCategories?.favoriteCategory1?.name?.toLowerCase()
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
                                     >
-                                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-                                      <path d="M5 3v4" />
-                                      <path d="M19 17v4" />
-                                      <path d="M3 5h4" />
-                                      <path d="M17 19h4" />
+                                      <path d="M20 6 9 17l-5-5" />
                                     </svg>
-                                  </span>
-                                </p>
-                              )}
-                              {favCategories?.favoriteCategory1 && (
-                                <CommandItem
-                                  onSelect={(selectedCategory) => {
-                                    setCategoryValue(
-                                      selectedCategory ===
-                                        favCategories?.favoriteCategory1?.name
-                                        ? ""
-                                        : selectedCategory
-                                    );
-                                    setValue("category", {
-                                      value: favCategories?.favoriteCategory1
-                                        ?.name as string,
-                                      label: favCategories?.favoriteCategory1
-                                        ?.name as string,
-                                      iconId: favCategories?.favoriteCategory1
-                                        ?.iconId as number,
-                                      id: null,
-                                    });
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      categoryValue ===
-                                        favCategories?.favoriteCategory1?.name?.toLowerCase()
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
+                                    {
+                                      icons[
+                                        favCategories?.favoriteCategory1
+                                          .iconId - 1
+                                      ]?.icon
+                                    }
+                                    <span className="ml-3">
+                                      {favCategories?.favoriteCategory1?.name}
+                                    </span>
+                                  </CommandItem>
+                                )}
+                                {favCategories?.favoriteCategory2 && (
+                                  <CommandItem
+                                    onSelect={(selectedCategory) => {
+                                      setCategoryValue(
+                                        selectedCategory ===
+                                          favCategories?.favoriteCategory2?.name
+                                          ? ""
+                                          : selectedCategory
+                                      );
+                                      setValue("category", {
+                                        value: favCategories?.favoriteCategory2
+                                          ?.name as string,
+                                        label: favCategories?.favoriteCategory2
+                                          ?.name as string,
+                                        iconId: favCategories?.favoriteCategory2
+                                          ?.iconId as number,
+                                        id: null,
+                                      });
+                                      setOpen(false);
+                                    }}
                                   >
-                                    <path d="M20 6 9 17l-5-5" />
-                                  </svg>
-                                  {
-                                    icons[
-                                      favCategories?.favoriteCategory1.iconId -
-                                        1
-                                    ]?.icon
-                                  }
-                                  <span className="ml-3">
-                                    {favCategories?.favoriteCategory1?.name}
-                                  </span>
-                                </CommandItem>
-                              )}
-                              {favCategories?.favoriteCategory2 && (
-                                <CommandItem
-                                  onSelect={(selectedCategory) => {
-                                    setCategoryValue(
-                                      selectedCategory ===
-                                        favCategories?.favoriteCategory2?.name
-                                        ? ""
-                                        : selectedCategory
-                                    );
-                                    setValue("category", {
-                                      value: favCategories?.favoriteCategory2
-                                        ?.name as string,
-                                      label: favCategories?.favoriteCategory2
-                                        ?.name as string,
-                                      iconId: favCategories?.favoriteCategory2
-                                        ?.iconId as number,
-                                      id: null,
-                                    });
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      categoryValue ===
-                                        favCategories?.favoriteCategory2?.name?.toLowerCase()
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        categoryValue ===
+                                          favCategories?.favoriteCategory2?.name?.toLowerCase()
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {
+                                      icons[
+                                        favCategories?.favoriteCategory2
+                                          .iconId - 1
+                                      ]?.icon
+                                    }
+                                    <span className="ml-3">
+                                      {favCategories?.favoriteCategory2?.name}
+                                    </span>
+                                  </CommandItem>
+                                )}
+                                {favCategories?.favoriteCategory3 && (
+                                  <CommandItem
+                                    onSelect={(selectedCategory) => {
+                                      setCategoryValue(
+                                        selectedCategory ===
+                                          favCategories?.favoriteCategory3?.name
+                                          ? ""
+                                          : selectedCategory
+                                      );
+                                      setValue("category", {
+                                        value: favCategories?.favoriteCategory3
+                                          ?.name as string,
+                                        label: favCategories?.favoriteCategory3
+                                          ?.name as string,
+                                        iconId: favCategories?.favoriteCategory3
+                                          ?.iconId as number,
+                                        id: null,
+                                      });
+                                      setOpen(false);
+                                    }}
                                   >
-                                    <path d="M20 6 9 17l-5-5" />
-                                  </svg>
-                                  {
-                                    icons[
-                                      favCategories?.favoriteCategory2.iconId -
-                                        1
-                                    ]?.icon
-                                  }
-                                  <span className="ml-3">
-                                    {favCategories?.favoriteCategory2?.name}
-                                  </span>
-                                </CommandItem>
-                              )}
-                              {favCategories?.favoriteCategory3 && (
-                                <CommandItem
-                                  onSelect={(selectedCategory) => {
-                                    setCategoryValue(
-                                      selectedCategory ===
-                                        favCategories?.favoriteCategory3?.name
-                                        ? ""
-                                        : selectedCategory
-                                    );
-                                    setValue("category", {
-                                      value: favCategories?.favoriteCategory3
-                                        ?.name as string,
-                                      label: favCategories?.favoriteCategory3
-                                        ?.name as string,
-                                      iconId: favCategories?.favoriteCategory3
-                                        ?.iconId as number,
-                                      id: null,
-                                    });
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      categoryValue ===
-                                        favCategories?.favoriteCategory3?.name?.toLowerCase()
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  >
-                                    <path d="M20 6 9 17l-5-5" />
-                                  </svg>
-                                  {
-                                    icons[
-                                      favCategories?.favoriteCategory3.iconId -
-                                        1
-                                    ]?.icon
-                                  }
-                                  <span className="ml-3">
-                                    {favCategories?.favoriteCategory3?.name}
-                                  </span>
-                                </CommandItem>
-                              )}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        categoryValue ===
+                                          favCategories?.favoriteCategory3?.name?.toLowerCase()
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {
+                                      icons[
+                                        favCategories?.favoriteCategory3
+                                          .iconId - 1
+                                      ]?.icon
+                                    }
+                                    <span className="ml-3">
+                                      {favCategories?.favoriteCategory3?.name}
+                                    </span>
+                                  </CommandItem>
+                                )}
 
-                              {(favCategories?.favoriteCategory1 ||
-                                favCategories?.favoriteCategory2 ||
-                                favCategories?.favoriteCategory3) && (
-                                <hr className="my-2" />
-                              )}
-                              {categories.map((category) => (
-                                <CommandItem
-                                  key={category.id}
-                                  onSelect={(selectedCategory) => {
-                                    setCategoryValue(
-                                      selectedCategory === categoryValue
-                                        ? ""
-                                        : selectedCategory
-                                    );
-                                    setValue("category", {
-                                      id: category.id,
-                                      value: category.value,
-                                      label: selectedCategory,
-                                      iconId: category.iconId,
-                                    });
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      categoryValue === category.label
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
+                                {(favCategories?.favoriteCategory1 ||
+                                  favCategories?.favoriteCategory2 ||
+                                  favCategories?.favoriteCategory3) && (
+                                  <hr className="my-2" />
+                                )}
+                                {categories.map((category) => (
+                                  <CommandItem
+                                    key={category.id}
+                                    onSelect={(selectedCategory) => {
+                                      setCategoryValue(
+                                        selectedCategory === categoryValue
+                                          ? ""
+                                          : selectedCategory
+                                      );
+                                      setValue("category", {
+                                        id: category.id,
+                                        value: category.value,
+                                        label: selectedCategory,
+                                        iconId: category.iconId,
+                                      });
+                                      setOpen(false);
+                                    }}
                                   >
-                                    <path d="M20 6 9 17l-5-5" />
-                                  </svg>
-                                  {icons[category?.iconId - 1]?.icon}
-                                  <span className="ml-3">{category.value}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <div className="h-3">
-                        {errors.category && (
-                          <span className="text-xxs text-red-500">
-                            {errors.category.message}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-1/2">
-                      <div className="flex flex-col">
-                        <p className="mb-2 text-sm">StartDate</p>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full justify-start text-left font-normal"
-                              )}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mr-2 h-4 w-4"
-                              >
-                                <rect
-                                  width="18"
-                                  height="18"
-                                  x="3"
-                                  y="4"
-                                  rx="2"
-                                  ry="2"
-                                />
-                                <line x1="16" x2="16" y1="2" y2="6" />
-                                <line x1="8" x2="8" y1="2" y2="6" />
-                                <line x1="3" x2="21" y1="10" y2="10" />
-                              </svg>
-                              {date ? (
-                                format(date, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={(data) => {
-                                setDate(data);
-                                setValue("startDate", data as Date);
-                              }}
-                              initialFocus
-                              disabled={(date) => date < new Date("1900-01-01")}
-                            />
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        categoryValue === category.label
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    {icons[category?.iconId - 1]?.icon}
+                                    <span className="ml-3">
+                                      {category.value}
+                                    </span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
                           </PopoverContent>
                         </Popover>
                         <div className="h-3">
-                          {errors.startDate && (
+                          {errors.category && (
                             <span className="text-xxs text-red-500">
-                              {errors.startDate.message}
+                              {errors.category.message}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="w-1/2">
-                      <div className="flex flex-col">
-                        <p className="mb-2 text-sm">Deadline</p>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !date && "text-muted-foreground"
-                              )}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mr-2 h-4 w-4"
+                    <div className="flex items-center space-x-3">
+                      <div className="w-1/2">
+                        <div className="flex flex-col">
+                          <p className="mb-2 text-sm">StartDate</p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal"
+                                )}
                               >
-                                <rect
-                                  width="18"
-                                  height="18"
-                                  x="3"
-                                  y="4"
-                                  rx="2"
-                                  ry="2"
-                                />
-                                <line x1="16" x2="16" y1="2" y2="6" />
-                                <line x1="8" x2="8" y1="2" y2="6" />
-                                <line x1="3" x2="21" y1="10" y2="10" />
-                              </svg>
-                              {deadline ? (
-                                format(deadline, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={deadline}
-                              onSelect={(data) => {
-                                setDeadline(data);
-                                setValue("endDate", data as Date);
-                              }}
-                              initialFocus
-                              disabled={(date) => date < new Date()}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <div className="h-3">
-                          {errors.endDate && (
-                            <span className="text-xxs text-red-500">
-                              {errors.endDate.message}
-                            </span>
-                          )}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 h-4 w-4"
+                                >
+                                  <rect
+                                    width="18"
+                                    height="18"
+                                    x="3"
+                                    y="4"
+                                    rx="2"
+                                    ry="2"
+                                  />
+                                  <line x1="16" x2="16" y1="2" y2="6" />
+                                  <line x1="8" x2="8" y1="2" y2="6" />
+                                  <line x1="3" x2="21" y1="10" y2="10" />
+                                </svg>
+                                {date ? (
+                                  format(date, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={(data) => {
+                                  setDate(data);
+                                  setValue("startDate", data as Date);
+                                }}
+                                initialFocus
+                                disabled={(date) =>
+                                  date < new Date("1900-01-01")
+                                }
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <div className="h-3">
+                            {errors.startDate && (
+                              <span className="text-xxs text-red-500">
+                                {errors.startDate.message}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-1/2">
+                        <div className="flex flex-col">
+                          <p className="mb-2 text-sm">Deadline</p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !date && "text-muted-foreground"
+                                )}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 h-4 w-4"
+                                >
+                                  <rect
+                                    width="18"
+                                    height="18"
+                                    x="3"
+                                    y="4"
+                                    rx="2"
+                                    ry="2"
+                                  />
+                                  <line x1="16" x2="16" y1="2" y2="6" />
+                                  <line x1="8" x2="8" y1="2" y2="6" />
+                                  <line x1="3" x2="21" y1="10" y2="10" />
+                                </svg>
+                                {deadline ? (
+                                  format(deadline, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={deadline}
+                                onSelect={(data) => {
+                                  setDeadline(data);
+                                  setValue("endDate", data as Date);
+                                }}
+                                initialFocus
+                                disabled={(date) => date < new Date()}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <div className="h-3">
+                            {errors.endDate && (
+                              <span className="text-xxs text-red-500">
+                                {errors.endDate.message}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+                    <p className="text-xs text-[#A0A5AF]">
+                      Note: Category, StartDate, and Deadline are not editable
+                      after creation
+                    </p>
+                    <Button
+                      type="submit"
+                      disabled={isCreatingBudget}
+                      className="w-full"
+                    >
+                      {isCreatingBudget ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#803FE8"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 animate-spin"
+                        >
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                      ) : (
+                        <span>Create</span>
+                      )}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger className="w-32">
+                  <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
+                    {selectedSize || 10} / page
                   </div>
-                  <p className="text-xs text-[#A0A5AF]">
-                    Note: Category, StartDate, and Deadline are not editable
-                    after creation
-                  </p>
-                  <Button
-                    type="submit"
-                    disabled={isCreatingBudget}
-                    className="w-full"
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <Link
+                    href={`?page_size=10`}
+                    onClick={() => setDropdownOpen(false)}
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                   >
-                    {isCreatingBudget ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#803FE8"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4 animate-spin"
-                      >
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                      </svg>
-                    ) : (
-                      <span>Create</span>
-                    )}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-              <DropdownMenuTrigger>
-                <div className="flex h-10 w-32 items-center justify-center rounded-md border border-athens-gray-200 bg-white text-muted-foreground/70">
-                  {selectedSize || 10} / page
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <Link
-                  href={`?page_size=10`}
-                  onClick={() => setDropdownOpen(false)}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                >
-                  10
-                </Link>
-                <Link
-                  href={`?page_size=20`}
-                  onClick={() => setDropdownOpen(false)}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                >
-                  20
-                </Link>
-                <Link
-                  href={`?page_size=50`}
-                  onClick={() => setDropdownOpen(false)}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                >
-                  50
-                </Link>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    10
+                  </Link>
+                  <Link
+                    href={`?page_size=20`}
+                    onClick={() => setDropdownOpen(false)}
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  >
+                    20
+                  </Link>
+                  <Link
+                    href={`?page_size=50`}
+                    onClick={() => setDropdownOpen(false)}
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  >
+                    50
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Input
-              className="items-center border border-athens-gray-200 bg-white  bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
+              className="items-center border border-athens-gray-200 bg-white bg-[url('/search.png')] bg-left bg-no-repeat pl-11"
               onChange={debouncedHandleInputChange}
               placeholder="Search..."
             />
@@ -982,15 +996,15 @@ const Budget: NextPage = () => {
                       className={cn(
                         budget.endDate < new Date() &&
                           "bg-opacity-60 text-black text-opacity-30",
-                        "flex items-center justify-between space-x-3 rounded-md bg-white p-3"
+                        "flex w-full items-center justify-between  space-x-3 overflow-hidden rounded-md bg-white p-3"
                       )}
                     >
-                      <div className="flex w-full items-center justify-between">
+                      <div className="flex w-full justify-between">
                         <div
                           className={cn(
                             budget.endDate < new Date() &&
                               "bg-opacity-10 text-opacity-30",
-                            "mr-8 flex h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600"
+                            "mr-8 hidden aspect-square h-16 w-16 items-center justify-center rounded-md bg-violet-400/30 p-3 text-violet-600 sm:flex"
                           )}
                         >
                           {
