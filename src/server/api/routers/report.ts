@@ -193,8 +193,8 @@ export const reportRouter = createTRPCRouter({
               email: users[i]?.email,
             },
             transactionDate: {
-              gte: startDate,
-              lte: endDate,
+              gte: new Date(startDate.setHours(0, 0, 0, 0)),
+              lte: new Date(endDate.setHours(23, 59, 59, 999)),
             },
           },
           select: {

@@ -1466,8 +1466,8 @@ const Budget: NextPage = () => {
                                 </DialogTitle>
                                 <DialogDescription>
                                   This action cannot be undone. This will
-                                  permanently remove your budget record from
-                                  the system.
+                                  permanently remove your budget record from the
+                                  system.
                                 </DialogDescription>
                               </DialogHeader>
                               <DialogFooter className="flex justify-center">
