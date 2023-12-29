@@ -298,8 +298,8 @@ export const expenseRouter = createTRPCRouter({
               where: {
                 userId: userId.id,
                 transactionDate: {
-                  gte: input.startDate,
-                  lte: input.endDate,
+                  gte: new Date(input.startDate.setHours(0, 0, 0, 0)),
+                  lte: new Date(input.endDate.setHours(23, 59, 59, 999)),
                 },
               },
               select: {
