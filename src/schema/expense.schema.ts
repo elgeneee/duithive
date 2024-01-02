@@ -38,6 +38,7 @@ export const editExpenseSchema = z.object({
     label: z.string(),
     iconId: z.number(),
   }),
+  imgUrl: z.string().optional().nullable(),
 });
 
 export const getPaginatedSchema = z.object({

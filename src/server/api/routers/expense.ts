@@ -412,6 +412,7 @@ export const expenseRouter = createTRPCRouter({
                   id: budget.id,
                 })),
               },
+              imgUrl: input.imgUrl,
             },
             select: {
               id: true,
@@ -424,6 +425,7 @@ export const expenseRouter = createTRPCRouter({
                   iconId: true,
                 },
               },
+              imgUrl: true,
             },
           });
 
