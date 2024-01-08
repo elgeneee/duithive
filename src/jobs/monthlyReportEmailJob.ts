@@ -62,7 +62,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     id: "monthly-activity-send-report",
     batchEvents: { maxSize: 100, timeout: "60s" },
   },
-  { cron: "0 0 5 * *" },
+  { cron: "0 0 10 * *" },
   async ({ step }) => {
     const results = [];
     const startDate = new Date();
