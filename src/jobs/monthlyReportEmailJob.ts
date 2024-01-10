@@ -62,7 +62,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     id: "monthly-activity-send-report",
     batchEvents: { maxSize: 100, timeout: "60s" },
   },
-  { cron: "0 0 10 * *" },
+  { cron: "0 1 * * *" },
   async ({ step }) => {
     const results = [];
     const startDate = new Date();
@@ -70,8 +70,12 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setDate(1);
 
     const endDate = new Date();
-    endDate.setMonth(endDate.getMonth());
-    endDate.setDate(0);
+    // endDate.setMonth(endDate.getMonth());
+    // endDate.setDate(0);
+    endDate.setMonth(endDate.getMonth() + 1);
+    endDate.setDate(1);
+    endDate.setDate(endDate.getDate() - 1);
+    
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
       return prisma.user.findMany({
@@ -169,8 +173,8 @@ export const monthlyReportEmailJob = inngest.createFunction(
 
       const content = await compile(
         "report",
-        startDate.toLocaleDateString(),
-        endDate.toLocaleDateString(),
+        startDate.toLocaleDateString("en-GB"),
+        endDate.toLocaleDateString("en-GB"),
         user?.currency?.symbol || "$",
         userExpenses
       );
@@ -194,7 +198,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
       formData.append("upload_preset", "oxd8flh9");
       formData.append(
         "public_id",
-        `duithive_monthlyreport1_${startDate
+        `duithive_monthlyreport_${startDate
           .toLocaleString("en-US", {
             month: "short",
           })
