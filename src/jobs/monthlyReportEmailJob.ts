@@ -45,7 +45,7 @@ const generateTotalExpense = (expenses: any) => {
     },
     0
   );
-  return totalAmount;
+  return parseFloat(totalAmount.toString()).toFixed(2);
 };
 
 hbs.registerHelper("dateFormat", function (value: Date) {
@@ -70,12 +70,9 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setDate(1);
 
     const endDate = new Date();
-    // endDate.setMonth(endDate.getMonth());
-    // endDate.setDate(0);
-    endDate.setMonth(endDate.getMonth() + 1);
-    endDate.setDate(1);
-    endDate.setDate(endDate.getDate() - 1);
-    
+    endDate.setMonth(endDate.getMonth());
+    endDate.setDate(0);
+
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
       return prisma.user.findMany({
