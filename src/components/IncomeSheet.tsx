@@ -169,7 +169,7 @@ export const IncomeSheet: React.FC<IncomeSheetProps> = ({
             inputAmountRef.current.defaultValue = income.amount.toString();
           }
           editSetValue("id", income.id);
-          editSetValue("title", income.title)
+          editSetValue("title", income.title);
           editSetValue("description", income.description);
           editSetValue("amount", parseFloat(income.amount.toString()));
           editSetValue("date", income.transactionDate);
