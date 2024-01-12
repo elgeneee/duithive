@@ -550,19 +550,30 @@ const Expense: NextPage = () => {
                   onSubmit={handleSubmit(onSubmit)}
                 >
                   {/* drag-and-drop */}
-                  <label className="text-sm">
+                  <div className="text-sm">
                     Receipt / Bill{" "}
                     <span className="text-xs text-athens-gray-300">
                       (optional)
                     </span>
-                  </label>
+                  </div>
 
                   <div className="z-[9999] duration-700 animate-in fade-in slide-in-from-left-8">
                     <label
                       htmlFor="image-upload"
                       className={cn(
-                        "group relative mx-auto flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition duration-100 hover:border-athens-gray-300",
-                        dragActive ? "border-[#e2e8f0]/50" : "border-[#e2e8f0]"
+                        "group relative mx-auto flex h-32 w-full flex-col items-center justify-center rounded-lg border transition duration-100 hover:border-[#D0D2D4]",
+                        {
+                          "cursor-pointer border-2 border-dashed border-input":
+                            !(
+                              //default state
+                              (dragActive || isMindeeLoading || receiptImage)
+                            ),
+                          "cursor-pointer border-2 border-violet-500 bg-violet-500 bg-opacity-30":
+                            dragActive && !isMindeeLoading,
+                          "": isMindeeLoading,
+                          "cursor-pointer border border-input":
+                            receiptImage && !isMindeeLoading, //finished analyzing
+                        }
                       )}
                     >
                       {receiptImage && (
@@ -627,9 +638,11 @@ const Expense: NextPage = () => {
                         onDrop={handleDrop}
                         className={cn(
                           "absolute aspect-video h-full w-full rounded-md object-cover",
-                          isMindeeLoading
-                            ? "z-[400] bg-black bg-opacity-70"
-                            : "z-40 bg-white"
+                          {
+                            "z-40 bg-white": !(isMindeeLoading || dragActive),
+                            "z-[400] bg-black bg-opacity-70": isMindeeLoading,
+                            "z-[400] bg-opacity-70": dragActive,
+                          }
                         )}
                       />
                       <div
@@ -681,6 +694,7 @@ const Expense: NextPage = () => {
                         id="image-upload"
                         name="image"
                         type="file"
+                        disabled={isMindeeLoading}
                         accept="image/jpeg"
                         className="sr-only"
                         // eslint-disable-next-line @typescript-eslint/no-misused-promises
