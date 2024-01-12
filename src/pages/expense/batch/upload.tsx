@@ -513,8 +513,8 @@ const BatchExpense: NextPage = () => {
                         className={cn(
                           "group relative mx-auto flex h-32 w-full flex-col items-center justify-center rounded-lg transition duration-100 hover:border-[#a9adb1]/80",
                           dragActive
-                            ? "border-2 border-violet-500 bg-violet-500 bg-opacity-30"
-                            : "border-2 border-dashed border-[#D0D2D4]"
+                            ? "border border-violet-500 bg-violet-500 bg-opacity-30"
+                            : "border border-dashed border-[#D0D2D4]"
                         )}
                       >
                         {fileSizeTooBig && (
@@ -537,7 +537,7 @@ const BatchExpense: NextPage = () => {
                             dragActive ? "z-[400] " : "z-40 bg-white"
                           )}
                         />
-                        <div className="absolute z-50 flex items-center justify-center space-x-5 text-center text-xs font-medium transition-all duration-100">
+                        <div className="absolute z-50 flex flex-col items-center justify-center space-x-5 text-center text-xs font-medium transition-all duration-100 md:flex-row">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="30"
@@ -569,14 +569,14 @@ const BatchExpense: NextPage = () => {
                               y2="15"
                             />
                           </svg>
-                          <div>
+                          <div className="pt-2 md:pt-0">
                             <p className="text-sm font-normal text-black">
                               Drag and drop your Excel file here or{" "}
                               <span className="font-medium text-violet-600 hover:cursor-pointer hover:underline">
                                 select a file
                               </span>
                             </p>
-                            <p className="text-left text-sm font-light text-[#A0A5AF]">
+                            <p className="text-center text-xs font-light text-[#A0A5AF] md:text-left">
                               Maximum Size: 5MB
                             </p>
                           </div>
