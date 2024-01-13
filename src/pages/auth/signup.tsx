@@ -122,7 +122,7 @@ const SignUp: NextPage = () => {
       <div className="flex h-screen">
         <div className="relative hidden flex-1 md:block">
           <img
-            src="/login-image.png"
+            src="/login-image.webp"
             alt="Login Image"
             draggable="false"
             className="h-full w-full object-cover"
