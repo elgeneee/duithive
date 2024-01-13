@@ -70,8 +70,9 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setDate(1);
 
     const endDate = new Date();
-    // endDate.setMonth(endDate.getMonth());
-    endDate.setDate(0);
+    endDate.setFullYear(2023);
+    endDate.setMonth(11);
+    endDate.setDate(31);
 
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
