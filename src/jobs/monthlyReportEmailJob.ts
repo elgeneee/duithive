@@ -146,8 +146,8 @@ export const monthlyReportEmailJob = inngest.createFunction(
                 email: user.email,
               },
               transactionDate: {
-                gte: startDate,
-                lte: endDate,
+                gte: new Date("2023-12-01"),
+                lte: new Date("2023-12-31"),
               },
             },
             select: {
