@@ -21,7 +21,7 @@ export const sendMonthlyReportEmailJob = inngest.createFunction(
     startDate.setMonth(startDate.getMonth() - 1);
     startDate.setDate(1);
 
-    const emailSubject = `[DuitHive] Monthly Spending Recap: ${startDate.toLocaleString(
+    const emailSubject = `[DuitHive] Monthly Spending Recap2: ${startDate.toLocaleString(
       "en-US",
       { month: "short" }
     )} ${startDate.getFullYear()}`;
