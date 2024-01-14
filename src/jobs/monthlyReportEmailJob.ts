@@ -45,7 +45,7 @@ const generateTotalExpense = (expenses: any) => {
     },
     0
   );
-  return parseFloat(totalAmount.toString()).toFixed(2);
+  return parseFloat(totalAmount.toFixed(2));
 };
 
 hbs.registerHelper("dateFormat", function (value: Date) {
@@ -62,7 +62,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     id: "monthly-activity-send-report",
     batchEvents: { maxSize: 100, timeout: "60s" },
   },
-  { cron: "0 1 * * *" },
+  { cron: "0 * * * *" },
   async ({ step }) => {
     const results = [];
     const startDate = new Date();
@@ -72,7 +72,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     const endDate = new Date();
     endDate.setFullYear(2023);
     endDate.setMonth(11);
-    endDate.setDate(31);
+    endDate.setDate(30);
 
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
