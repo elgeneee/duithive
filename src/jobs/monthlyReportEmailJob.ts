@@ -74,7 +74,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setDate(1);
 
     const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() - 1);
+    endDate.setMonth(endDate.getMonth());
     endDate.setDate(0);
 
     // Fetch all users
@@ -203,7 +203,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
           .toLocaleString("en-US", {
             month: "short",
           })
-          .toLowerCase()}__${startDate.getFullYear()}`
+          .toLowerCase()}___${startDate.getFullYear()}`
       );
       formData.append(
         "folder",
