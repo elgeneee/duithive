@@ -73,7 +73,9 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setMonth(startDate.getMonth() - 1);
     startDate.setDate(1);
 
-    const endDate = new Date(new Date().getFullYear(), 11, 31);
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() - 1);
+    endDate.setDate(0);
 
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
@@ -146,8 +148,8 @@ export const monthlyReportEmailJob = inngest.createFunction(
                 email: user.email,
               },
               transactionDate: {
-                gte: new Date("2023-12-01"),
-                lte: new Date("2023-12-31"),
+                gte: startDate,
+                lte: endDate,
               },
             },
             select: {
@@ -201,7 +203,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
           .toLocaleString("en-US", {
             month: "short",
           })
-          .toLowerCase()}_${startDate.getFullYear()}`
+          .toLowerCase()}__${startDate.getFullYear()}`
       );
       formData.append(
         "folder",
