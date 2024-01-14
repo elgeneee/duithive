@@ -33,7 +33,7 @@ const compile = async (
     endDate: endDate,
     currency: currency,
     expenses: expenses,
-    totalAmount: totalAmount.toString(),
+    totalAmount: totalAmount,
   });
   return compiledHtml;
 };
@@ -45,8 +45,12 @@ const generateTotalExpense = (expenses: any) => {
     },
     0
   );
-  return parseFloat(totalAmount.toFixed(2));
+  return totalAmount;
 };
+
+hbs.registerHelper("totalAmountFormat", function (value: number) {
+  return parseFloat(value.toString()).toFixed(2);
+});
 
 hbs.registerHelper("dateFormat", function (value: Date) {
   const dateObject = new Date(value);
@@ -69,10 +73,7 @@ export const monthlyReportEmailJob = inngest.createFunction(
     startDate.setMonth(startDate.getMonth() - 1);
     startDate.setDate(1);
 
-    const endDate = new Date();
-    endDate.setFullYear(2023);
-    endDate.setMonth(11);
-    endDate.setDate(30);
+    const endDate = new Date(new Date().getFullYear(), 11, 31);
 
     // Fetch all users
     const users = await step.run("fetch-users", async () => {
